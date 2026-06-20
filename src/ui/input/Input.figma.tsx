@@ -1,11 +1,9 @@
-// This mapping documents how the Figma Input set (node 16:64) binds to <Input>.
-// `@figma/code-connect` is installed in a later phase of the pipeline, so the
-// import is suppressed for now to keep the typecheck gate green; it resolves
-// once the dependency lands.
-// @ts-expect-error -- @figma/code-connect dependency is added in a later phase.
+// Code Connect mapping for the Figma Input set (node 16:64).
+// `@figma/code-connect` is added in a later phase; these `*.figma.tsx` files are
+// excluded from `tsc` (see tsconfig "exclude") and compile under the
+// `figma connect` CLI instead.
 import figma from "@figma/code-connect";
 import { Input } from "./Input";
-import type { InputProps } from "./Input";
 
 /**
  * Code Connect mapping — Figma "Input" component set (node 16:64).
@@ -27,12 +25,7 @@ figma.connect(
         Error: "Please enter a valid email address",
       }),
     },
-    example: ({
-      label,
-      size,
-      disabled,
-      errorMessage,
-    }: Pick<InputProps, "label" | "size" | "disabled" | "errorMessage">) => (
+    example: ({ label, size, disabled, errorMessage }) => (
       <Input
         label={label}
         size={size}
