@@ -37,12 +37,15 @@ const SIZE_STYLES: Record<ToggleSize, SizeStyle> = {
   md: {
     root: "h-[28px] w-[48px]",
     thumb: "size-[22px]",
-    translate: "data-[state=checked]:translate-x-[20px]",
+    // Absolute on-position (base is translate-x-[3px]); Tailwind translate-x is
+    // NOT additive — the checked variant REPLACES the base, so this is 23px, not +20.
+    translate: "data-[state=checked]:translate-x-[23px]",
   },
   sm: {
     root: "h-[20px] w-[36px]",
     thumb: "size-[14px]",
-    translate: "data-[state=checked]:translate-x-[16px]",
+    // Absolute on-position (base translate-x-[3px], not additive). SM on-end 19→33 in a 36 track.
+    translate: "data-[state=checked]:translate-x-[19px]",
   },
 };
 
@@ -67,7 +70,7 @@ export const Toggle = React.forwardRef<
       className={[
         // Track: pill, relative for the absolutely-positioned thumb.
         "group relative inline-flex shrink-0 cursor-pointer items-center",
-        "rounded-[var(--radius-pill)] outline-none transition-colors",
+        "rounded-[var(--radius-pill)] outline-none transition-colors duration-200 motion-reduce:transition-none",
         sizing.root,
         // Off track / On track colors (Figma: bg/subtle -> feedback/success).
         "bg-[var(--bg-subtle)] data-[state=checked]:bg-[var(--feedback-success)]",
