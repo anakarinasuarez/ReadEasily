@@ -18,6 +18,9 @@ const eslintConfig = defineConfig([
     // Build artifacts that must not be linted.
     "storybook-static/**",
     "coverage/**",
+    // Figma Code Connect mappings are consumed by the Figma CLI, not the app
+    // build, and depend on @figma/code-connect (not yet installed).
+    "**/*.figma.tsx",
   ]),
   ...storybook.configs["flat/recommended"]
 ]);
