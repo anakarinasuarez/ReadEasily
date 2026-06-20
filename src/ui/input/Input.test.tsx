@@ -102,4 +102,16 @@ describe("Input", () => {
     );
     expect(await axe(container)).toHaveNoViolations();
   });
+
+  it("stays focusable and keeps its error wiring when focused (errored + focused)", async () => {
+    const user = userEvent.setup();
+    render(<Input label="Email" errorMessage="Please enter a valid email address" />);
+    const input = screen.getByLabelText<HTMLInputElement>("Email");
+
+    await user.click(input);
+
+    expect(input).toHaveFocus();
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input.getAttribute("aria-describedby")).toBeTruthy();
+  });
 });

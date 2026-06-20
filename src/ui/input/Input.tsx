@@ -101,6 +101,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           fieldSizeClass[size],
           disabled ? "bg-[var(--bg-subtle)]" : "bg-[var(--bg-elevated)]",
           ringClass,
+          // A real outline on focus (applied regardless of error) so the focus
+          // indicator survives forced-colors/High-Contrast (where box-shadow is
+          // dropped) and the errored+focused state is still clearly perceivable.
+          // outline draws outside the box → no reflow.
+          "focus-within:[outline:2px_solid_var(--focus-ring)] focus-within:[outline-offset:2px]",
         )}
       >
         <input
