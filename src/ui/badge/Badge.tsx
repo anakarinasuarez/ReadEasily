@@ -55,7 +55,10 @@ const toneContainer: Record<BadgeTone, string> = {
   success: "bg-success-subtle text-success",
   warning: "bg-warning-subtle text-warning",
   danger: "bg-danger-subtle text-danger",
-  selected: "bg-accent text-on-accent",
+  // accent-strong (terracotta-700), not accent (600): white on 600 is only
+  // 3.45:1 (fails AA); on accent-strong it's 5.13:1 (passes) — same reason the
+  // interactive terracotta token exists.
+  selected: "bg-accent-strong text-on-accent",
 };
 
 /** Status-dot fill per feedback tone (decorative). */
@@ -124,7 +127,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
             "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring",
             isNeutral
               ? "size-[24px] bg-surface-subtle text-muted transition-colors hover:bg-accent-subtle hover:text-accent-text"
-              : "text-[15px] text-accent-text opacity-70 transition-opacity hover:opacity-100",
+              : "size-[24px] text-[15px] text-accent-text transition-colors hover:bg-accent-subtle",
           )}
         >
           <span aria-hidden="true">+</span>

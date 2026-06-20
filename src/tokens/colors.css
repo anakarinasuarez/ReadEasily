@@ -95,7 +95,9 @@
   --border-accent: var(--color-terracotta-600);/* #d66c44 */
 
   /* --- Semantic: feedback  ------------------------------------------- */
-  --feedback-success: var(--color-forest-700);   /* #5e7b3a — AA success → forest/700 [C] */
+  --feedback-success: #566f34;                   /* [D-AA] darkened from forest-700 #5e7b3a (3.99:1 on
+                                                    success-subtle — fails AA). #566f34 = 4.73:1 on #e4efd2,
+                                                    5.65:1 on white. Success TEXT (Badge) + on-track (Toggle). */
   --feedback-success-subtle: #e4efd2;            /* [C] Toggle disabled-on track + Badge Success bg */
   --feedback-info: var(--color-sky-700);          /* #3d6082 — AA info → sky/700 [C] */
   --feedback-info-subtle: var(--color-sky-50);    /* #dde9f2 [C] */
@@ -104,9 +106,10 @@
                                                     value clears ~5.0:1 on #faebc4. Use for WARNING TEXT. */
   --feedback-warning-solid: #e0a838;             /* [C] Figma raw amber — DECORATIVE status dot only */
   --feedback-warning-subtle: #faebc4;            /* [C] Badge Warning bg */
-  --feedback-danger: #bf4636;                    /* [D-AA] AA-safe. Figma raw = #cc5a4a (~4:1, borderline
-                                                    for 12px caption); this clears ~5.0:1 on canvas and
-                                                    passes for the 2px border. Use for error text+border. */
+  --feedback-danger: #a8392b;                    /* [D-AA] darkened. #bf4636 was AA only vs canvas (5.0:1)
+                                                    but Badge uses danger TEXT on danger-subtle #f8d5d0 where
+                                                    it was 3.72:1 (fails AA). #a8392b = 4.69:1 on #f8d5d0,
+                                                    6.39:1 on white. Figma raw #cc5a4a. Error text/border + Badge. */
   --feedback-danger-subtle: #f8d5d0;             /* [C] Badge Danger bg */
 
   /* --- Semantic: focus ------------------------------------------------ */
