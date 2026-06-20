@@ -58,5 +58,25 @@ tests/           # setup + MSW mocks
 - (added later) `npm run typecheck` · `npm run test` · `npm run storybook` · `npm run e2e`
 
 ## Orchestration
-Pipeline: **tokens-engineer → ui-primitive-builder (parallel) → feature-builder (parallel, via git worktrees) → test-engineer → code-reviewer (adversarial gate)**.
-Parallel agents each work on their own branch in a separate `git worktree`. Nothing merges until `code-reviewer` confirms the Definition of Done.
+
+### The team (senior roster)
+- **design-lead** — senior UX/UI: writes the build spec from Figma before a build, design-QAs after.
+- **tokens-engineer** — senior design-systems: owns `src/tokens/`, the value contract.
+- **ui-primitive-builder** — senior frontend: one accessible primitive per run.
+- **feature-builder** — senior product-frontend: one feature vertical slice per run.
+- **backend-engineer** — senior backend: Supabase schema, RLS, auth, storage, the typed contract.
+- **test-engineer** — senior QA: behavior/e2e/a11y, the safety net.
+- **code-reviewer** — adversarial merge gate.
+
+### Pipeline
+**design-lead (spec) → tokens-engineer → ui-primitive-builder (parallel) ‖ backend-engineer → feature-builder (parallel, via git worktrees) → test-engineer → design-lead (QA) + code-reviewer (adversarial gate)**.
+Parallel agents each work on their own branch in a separate `git worktree`. Nothing merges until `code-reviewer` confirms the Definition of Done and `design-lead` confirms Figma fidelity.
+
+### Leadership doctrine (how the orchestrator — the main loop — leads)
+The main loop is the senior AI engineer who runs this team. It does not do specialist work it has an agent for; it sets direction, delegates, integrates, and guards quality.
+- **Never skip a layer.** `tokens → ui → composites → features → flows → e2e`. A builder that starts without its dependency produces rework.
+- **Spec before build, QA after.** A feature gets a design-lead spec going in and a design-lead QA coming out. Ambiguity is resolved with the user or the design-lead, never guessed silently.
+- **Delegate to the right specialist; parallelize the independent.** Independent primitives/features run concurrently in worktrees. Dependent work waits.
+- **Contracts between agents, not assumptions.** Frontend and backend agree on the typed contract before either ships. The orchestrator owns that handoff.
+- **The gate is real.** `code-reviewer` defaults to REQUEST CHANGES; the orchestrator routes the punch-list back to the builder and re-reviews — it does not wave work through.
+- **Integrate and report honestly.** The orchestrator merges, keeps the build green, and tells the user what's done, what's assumed, and what failed — plainly.

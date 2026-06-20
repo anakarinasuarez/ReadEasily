@@ -1,0 +1,39 @@
+/* ============================================================================
+ * ReadEasily — Effect / shadow tokens
+ * GENERATED from Figma Foundations effect styles. DO NOT edit by hand.
+ * See ./README.md.
+ *   [C] confirmed from Figma node 1327-4655   [D] derived — reconcile w/ Figma
+ *
+ * shadow/sm is two stacked drop shadows (confirmed shape). The remaining steps
+ * extend the ramp and are derived — reconcile against Figma effect styles.
+ * ========================================================================== */
+
+:root {
+  /* [C] shadow/sm — two stacked warm drop shadows */
+  --shadow-sm:
+    0 1px 2px rgba(60, 44, 29, 0.06),
+    0 1px 3px rgba(60, 44, 29, 0.10);
+
+  /* [D] */
+  --shadow-md:
+    0 2px 4px rgba(60, 44, 29, 0.06),
+    0 4px 8px rgba(60, 44, 29, 0.10);
+
+  /* [D] */
+  --shadow-lg:
+    0 4px 8px rgba(60, 44, 29, 0.07),
+    0 10px 20px rgba(60, 44, 29, 0.12);
+}
+
+/* Dark mode: deepen shadow opacity so elevation reads on dark surfaces. [D] */
+[data-theme="dark"] {
+  --shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.30),
+    0 1px 3px rgba(0, 0, 0, 0.40);
+  --shadow-md:
+    0 2px 4px rgba(0, 0, 0, 0.30),
+    0 4px 8px rgba(0, 0, 0, 0.40);
+  --shadow-lg:
+    0 4px 8px rgba(0, 0, 0, 0.35),
+    0 10px 20px rgba(0, 0, 0, 0.45);
+}

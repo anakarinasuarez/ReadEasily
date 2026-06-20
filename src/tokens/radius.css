@@ -1,0 +1,14 @@
+/* ============================================================================
+ * ReadEasily — Border-radius tokens
+ * GENERATED from Figma Foundations. DO NOT edit by hand. See ./README.md.
+ * Scale is theme-independent (no light/dark variation).
+ *   [C] confirmed from Figma node 1327-4655   [D] derived — reconcile w/ Figma
+ * ========================================================================== */
+
+:root {
+  --radius-sm: 10px;     /* [C] */
+  --radius-md: 16px;     /* [D] — gap between confirmed sm(10) and lg(24) */
+  --radius-lg: 24px;     /* [C] */
+  --radius-xl: 32px;     /* [C] */
+  --radius-pill: 9999px; /* [C] */
+}

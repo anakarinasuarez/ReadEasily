@@ -1,0 +1,23 @@
+/* ============================================================================
+ * ReadEasily — Spacing tokens
+ * GENERATED from Figma Foundations. DO NOT edit by hand. See ./README.md.
+ * Scale is theme-independent (no light/dark variation).
+ *   [C] confirmed from Figma node 1327-4655   [D] derived — reconcile w/ Figma
+ * ========================================================================== */
+
+:root {
+  --space-xs: 4px;   /* [C] */
+  --space-sm: 8px;   /* [C] */
+  --space-md: 12px;  /* [C] */
+  --space-lg: 16px;  /* [C] */
+  --space-xl: 24px;  /* [C] */
+  --space-2xl: 32px; /* [D] — extends the confirmed ramp */
+  --space-3xl: 48px; /* [D] */
+  --space-4xl: 64px; /* [D] */
+
+  /* --- Named off-scale tokens ----------------------------------------- */
+  /* Figma Chip padding is off the 4/8/12/16/24 ramp; kept as named tokens
+     so it stays mappable rather than silently rounded to the scale. */
+  --space-chip-x: 14px; /* [C] Chip horizontal padding */
+  --space-chip-y: 7px;  /* [C] Chip vertical padding */
+}

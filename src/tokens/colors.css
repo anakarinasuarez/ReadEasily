@@ -1,0 +1,156 @@
+/* ============================================================================
+ * ReadEasily — Color tokens
+ * GENERATED from Figma Foundations (file sc9DIhX0wvFgrvmL8NVBf5, page 🎨 Foundations).
+ * DO NOT edit by hand — regenerate from Figma. See ./README.md for the pipeline.
+ *
+ * Layers:
+ *   1. Primitives  --color-<hue>-<step>   raw palette, never used directly in app code
+ *   2. Semantic    --text-* --bg-* --border-* --feedback-*   what components consume
+ *
+ * Confidence (see README "Derived — reconcile with live Figma Dev Mode"):
+ *   [C]   CONFIRMED-REAL — verified against Figma nodes (incl. live component
+ *         sets: Button 14:56, Chip 808:14, Input 16:64, Toggle 19:18, Badge 17:42)
+ *   [C-eq] value confirmed-real, primitive step-number derived
+ *   [Cb]  CONFIRMED brand value (project memory: terracotta-500 #d97757)
+ *   [D]   DERIVED ramp step — anchored on confirmed hexes, reconcile with Figma
+ *   [D-AA] AA-safe override of a confirmed-but-failing Figma raw value (documented)
+ * The whole [data-theme="dark"] block is DERIVED/UNVERIFIED — reconcile w/ Figma dark mode.
+ * ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* --- Primitives: Terracotta (brand orange) --------------------------- */
+  --color-terracotta-50: #fdebe0;  /* [C]  = bg/accent-subtle */
+  --color-terracotta-100: #fbd9c6; /* [D] */
+  --color-terracotta-200: #f6bd9f; /* [D] */
+  --color-terracotta-300: #efa078; /* [D] */
+  --color-terracotta-400: #e58a5e; /* [D] */
+  --color-terracotta-500: #d97757; /* [Cb] brand terracotta */
+  --color-terracotta-600: #d66c44; /* [C]  = bg/accent + border/accent */
+  --color-terracotta-650: #c0703f; /* [C-eq] value confirmed (Button/Chip hover); step# derived. = bg/accent-hover */
+  --color-terracotta-700: #b35029; /* [C]  = bg/accent-strong (AA interactive) */
+  --color-terracotta-800: #a0492a; /* [C]  = text/accent */
+  --color-terracotta-900: #823a22; /* [D] */
+
+  /* --- Primitives: Ink (warm sand -> cocoa: neutrals, borders, text) ---- */
+  --color-ink-50: #fffdf8;  /* [D]  near-white warm (anchor: bg/canvas) */
+  --color-ink-100: #f0e2c6; /* [C-eq] value = border/default; step # derived */
+  --color-ink-200: #e7d6b1; /* [C]  confirmed primitive (= border/strong) */
+  --color-ink-300: #d3bd93; /* [D] */
+  --color-ink-400: #a98e6a; /* [D] */
+  --color-ink-500: #876b4f; /* [C]  = text/muted (AA muted) */
+  --color-ink-600: #6d5840; /* [C]  = text/secondary */
+  --color-ink-700: #574734; /* [D] */
+  --color-ink-800: #483a29; /* [D] */
+  --color-ink-900: #3c2c1d; /* [C]  = text/primary */
+
+  /* --- Primitives: Amber (golden accent — standalone hue) --------------- */
+  --color-amber-50: #fdf6e6;  /* [D] */
+  --color-amber-100: #faedc9; /* [D] */
+  --color-amber-200: #f4dca2; /* [D] */
+  --color-amber-300: #efc97f; /* [C]  confirmed primitive */
+  --color-amber-400: #e6b257; /* [D] */
+  --color-amber-500: #d99a35; /* [D] */
+  --color-amber-600: #bd7f24; /* [D] */
+  --color-amber-700: #98641d; /* [D] */
+
+  /* --- Primitives: Forest (green — success) ---------------------------- */
+  --color-forest-50: #eef3e4;  /* [D] */
+  --color-forest-100: #e0ead0; /* [D] */
+  --color-forest-300: #a6bd78; /* [D] */
+  --color-forest-500: #7a9a4e; /* [D] */
+  --color-forest-700: #5e7b3a; /* [C]  = feedback/success (AA success) */
+
+  /* --- Primitives: Sky (blue — info) ----------------------------------- */
+  --color-sky-50: #dde9f2;  /* [C]  = feedback/info-subtle */
+  --color-sky-100: #c8dbea; /* [D] */
+  --color-sky-300: #8aaecb; /* [D] */
+  --color-sky-500: #5a82a8; /* [D] */
+  --color-sky-700: #3d6082; /* [C]  = feedback/info (AA info) */
+
+  /* --- Primitives: absolute ------------------------------------------- */
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* --- Semantic: text  (all [C]) -------------------------------------- */
+  --text-primary: var(--color-ink-900);      /* #3c2c1d */
+  --text-secondary: var(--color-ink-600);    /* #6d5840 */
+  --text-muted: var(--color-ink-500);         /* #876b4f — AA: muted → ink/500 */
+  --text-accent: var(--color-terracotta-800); /* #a0492a */
+  --text-on-accent: var(--color-white);       /* #ffffff */
+
+  /* --- Semantic: background  (all [C]) -------------------------------- */
+  --bg-canvas: #fffdf8;                          /* warm paper */
+  --bg-subtle: #fdf8ed;                          /* (no surfaced primitive) */
+  --bg-elevated: #fffffb;                        /* (no surfaced primitive) */
+  --bg-accent: var(--color-terracotta-600);      /* #d66c44 */
+  --bg-accent-hover: var(--color-terracotta-650);  /* #c0703f — [C] Button Primary + Chip Selected hover */
+  --bg-accent-strong: var(--color-terracotta-700); /* #b35029 — AA interactive terracotta */
+  --bg-accent-subtle: var(--color-terracotta-50);  /* #fdebe0 */
+
+  /* --- Semantic: border  (all [C]) ------------------------------------ */
+  --border-default: var(--color-ink-100);      /* #f0e2c6 */
+  --border-strong: var(--color-ink-200);       /* #e7d6b1 */
+  --border-accent: var(--color-terracotta-600);/* #d66c44 */
+
+  /* --- Semantic: feedback  ------------------------------------------- */
+  --feedback-success: var(--color-forest-700);   /* #5e7b3a — AA success → forest/700 [C] */
+  --feedback-success-subtle: #e4efd2;            /* [C] Toggle disabled-on track + Badge Success bg */
+  --feedback-info: var(--color-sky-700);          /* #3d6082 — AA info → sky/700 [C] */
+  --feedback-info-subtle: var(--color-sky-50);    /* #dde9f2 [C] */
+  --feedback-warning: #8a5a14;                   /* [D-AA] AA-safe darkened amber. Figma raw = #e0a838
+                                                    fails AA (~1.6:1) as text on warning-subtle; this
+                                                    value clears ~5.0:1 on #faebc4. Use for WARNING TEXT. */
+  --feedback-warning-solid: #e0a838;             /* [C] Figma raw amber — DECORATIVE status dot only */
+  --feedback-warning-subtle: #faebc4;            /* [C] Badge Warning bg */
+  --feedback-danger: #bf4636;                    /* [D-AA] AA-safe. Figma raw = #cc5a4a (~4:1, borderline
+                                                    for 12px caption); this clears ~5.0:1 on canvas and
+                                                    passes for the 2px border. Use for error text+border. */
+  --feedback-danger-subtle: #f8d5d0;             /* [C] Badge Danger bg */
+
+  /* --- Semantic: focus ------------------------------------------------ */
+  /* No focus token exists in Figma; design law requires an AA-visible 2px
+     ring across primitives. Aliased to border/accent so it tracks the brand. */
+  --focus-ring: var(--border-accent);            /* #d66c44 */
+}
+
+/* ============================================================================
+ * DARK MODE — entire block DERIVED / UNVERIFIED (no Figma dark values surfaced).
+ * Best-effort inversions: deep cocoa surfaces, warm off-white text, brighter
+ * terracotta to stay legible on dark. Reconcile EVERY value against Figma dark.
+ * Primitive hue scales are theme-independent and inherited from :root.
+ * ========================================================================== */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --text-primary: #f6ede0;   /* [D] */
+  --text-secondary: #d8c6b0; /* [D] */
+  --text-muted: #ad9579;     /* [D] */
+  --text-accent: #e58a5e;    /* [D] brighter terracotta for contrast */
+  --text-on-accent: #2a1c12; /* [D] dark ink on bright accent */
+
+  --bg-canvas: #241a12;      /* [D] */
+  --bg-subtle: #2e2218;      /* [D] */
+  --bg-elevated: #38291c;    /* [D] */
+  --bg-accent: #d97757;      /* [D] terracotta-500 */
+  --bg-accent-hover: #df8a64; /* [D] sits between accent and accent-strong (dark) */
+  --bg-accent-strong: #e58a5e; /* [D] */
+  --bg-accent-subtle: #3a261a; /* [D] */
+
+  --border-default: #3f2f20; /* [D] */
+  --border-strong: #54422f;  /* [D] */
+  --border-accent: #d97757;  /* [D] */
+
+  --feedback-success: #a6bd78;        /* [D] */
+  --feedback-success-subtle: #25301c; /* [D] */
+  --feedback-info: #8aaecb;           /* [D] */
+  --feedback-info-subtle: #25303a;    /* [D] */
+  --feedback-warning: #e6b257;        /* [D] brighter amber, legible on dark */
+  --feedback-warning-solid: #e0a838;  /* [D] decorative dot */
+  --feedback-warning-subtle: #38301c; /* [D] */
+  --feedback-danger: #e58a72;         /* [D] brighter red, legible on dark */
+  --feedback-danger-subtle: #3a211c;  /* [D] */
+
+  /* --focus-ring inherits border/accent re-point above */
+}

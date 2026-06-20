@@ -1,26 +1,156 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ----------------------------------------------------------------------------
+ * ReadEasily design tokens (generated from Figma Foundations).
+ * These define the canonical custom properties on :root / [data-theme="dark"].
+ * Source of truth lives in src/tokens/* — DO NOT hardcode values elsewhere.
+ * -------------------------------------------------------------------------- */
+@import "../tokens/colors.css";
+@import "../tokens/spacing.css";
+@import "../tokens/radius.css";
+@import "../tokens/typography.css";
+@import "../tokens/shadows.css";
 
+/* ----------------------------------------------------------------------------
+ * Tailwind v4 theme wiring.
+ * `@theme inline` maps Tailwind's namespaces onto our token custom properties
+ * via var() (not inlined values) so utilities follow runtime theme switching
+ * (light <-> [data-theme="dark"]). Token NAMES stay 1:1 with Figma in the
+ * src/tokens/* files; here we expose ergonomic utility names.
+ * -------------------------------------------------------------------------- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Fonts */
+  --font-display: var(--font-display);
+  --font-reading: var(--font-reading);
+  --font-ui: var(--font-ui);
+  --font-sans: var(--font-ui);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Primitive palette -> bg-terracotta-500, text-ink-900, border-amber-300, ... */
+  --color-terracotta-50: var(--color-terracotta-50);
+  --color-terracotta-100: var(--color-terracotta-100);
+  --color-terracotta-200: var(--color-terracotta-200);
+  --color-terracotta-300: var(--color-terracotta-300);
+  --color-terracotta-400: var(--color-terracotta-400);
+  --color-terracotta-500: var(--color-terracotta-500);
+  --color-terracotta-600: var(--color-terracotta-600);
+  --color-terracotta-650: var(--color-terracotta-650);
+  --color-terracotta-700: var(--color-terracotta-700);
+  --color-terracotta-800: var(--color-terracotta-800);
+  --color-terracotta-900: var(--color-terracotta-900);
+
+  --color-ink-50: var(--color-ink-50);
+  --color-ink-100: var(--color-ink-100);
+  --color-ink-200: var(--color-ink-200);
+  --color-ink-300: var(--color-ink-300);
+  --color-ink-400: var(--color-ink-400);
+  --color-ink-500: var(--color-ink-500);
+  --color-ink-600: var(--color-ink-600);
+  --color-ink-700: var(--color-ink-700);
+  --color-ink-800: var(--color-ink-800);
+  --color-ink-900: var(--color-ink-900);
+
+  --color-amber-50: var(--color-amber-50);
+  --color-amber-100: var(--color-amber-100);
+  --color-amber-200: var(--color-amber-200);
+  --color-amber-300: var(--color-amber-300);
+  --color-amber-400: var(--color-amber-400);
+  --color-amber-500: var(--color-amber-500);
+  --color-amber-600: var(--color-amber-600);
+  --color-amber-700: var(--color-amber-700);
+
+  --color-forest-50: var(--color-forest-50);
+  --color-forest-100: var(--color-forest-100);
+  --color-forest-300: var(--color-forest-300);
+  --color-forest-500: var(--color-forest-500);
+  --color-forest-700: var(--color-forest-700);
+
+  --color-sky-50: var(--color-sky-50);
+  --color-sky-100: var(--color-sky-100);
+  --color-sky-300: var(--color-sky-300);
+  --color-sky-500: var(--color-sky-500);
+  --color-sky-700: var(--color-sky-700);
+
+  /* Semantic colors -> bg-canvas, text-muted, bg-accent-strong, border-default... */
+  --color-canvas: var(--bg-canvas);
+  --color-surface-subtle: var(--bg-subtle);
+  --color-surface-elevated: var(--bg-elevated);
+  --color-accent: var(--bg-accent);
+  --color-accent-hover: var(--bg-accent-hover);
+  --color-accent-strong: var(--bg-accent-strong);
+  --color-accent-subtle: var(--bg-accent-subtle);
+
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-on-accent: var(--text-on-accent);
+  --color-accent-text: var(--text-accent);
+
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-border-accent: var(--border-accent);
+
+  --color-success: var(--feedback-success);
+  --color-success-subtle: var(--feedback-success-subtle);
+  --color-info: var(--feedback-info);
+  --color-info-subtle: var(--feedback-info-subtle);
+  --color-warning: var(--feedback-warning);
+  --color-warning-solid: var(--feedback-warning-solid);
+  --color-warning-subtle: var(--feedback-warning-subtle);
+  --color-danger: var(--feedback-danger);
+  --color-danger-subtle: var(--feedback-danger-subtle);
+
+  /* Focus ring */
+  --color-focus-ring: var(--focus-ring);
+
+  /* Spacing -> p-md, gap-lg, m-xl, ... */
+  --spacing-xs: var(--space-xs);
+  --spacing-sm: var(--space-sm);
+  --spacing-md: var(--space-md);
+  --spacing-lg: var(--space-lg);
+  --spacing-xl: var(--space-xl);
+  --spacing-2xl: var(--space-2xl);
+  --spacing-3xl: var(--space-3xl);
+  --spacing-4xl: var(--space-4xl);
+  --spacing-chip-x: var(--space-chip-x);
+  --spacing-chip-y: var(--space-chip-y);
+
+  /* Radius -> rounded-sm, rounded-lg, rounded-pill, ... */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
+
+  /* Shadows -> shadow-sm, shadow-md, shadow-lg */
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  /* Type-style font sizes (paired line-heights) -> text-display-l, text-reading-m... */
+  --text-display-l: var(--text-display-l-size);
+  --text-display-l--line-height: var(--text-display-l-line-height);
+  --text-heading-h3: var(--text-heading-h3-size);
+  --text-heading-h3--line-height: var(--text-heading-h3-line-height);
+  --text-heading-h4: var(--text-heading-h4-size);
+  --text-heading-h4--line-height: var(--text-heading-h4-line-height);
+  --text-title-m: var(--text-title-m-size);
+  --text-title-m--line-height: var(--text-title-m-line-height);
+  --text-body-l: var(--text-body-l-size);
+  --text-body-l--line-height: var(--text-body-l-line-height);
+  --text-reading-m: var(--text-reading-m-size);
+  --text-reading-m--line-height: var(--text-reading-m-line-height);
+  --text-ui-l: var(--text-ui-l-size);
+  --text-ui-l--line-height: var(--text-ui-l-line-height);
+  --text-ui-m: var(--text-ui-m-size);
+  --text-ui-m--line-height: var(--text-ui-m-line-height);
+  --text-label-m: var(--text-label-m-size);
+  --text-label-m--line-height: var(--text-label-m-line-height);
+  --text-caption: var(--text-caption-size);
+  --text-caption--line-height: var(--text-caption-line-height);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
 }

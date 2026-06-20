@@ -1,0 +1,120 @@
+/* ============================================================================
+ * ReadEasily — Typography tokens
+ * GENERATED from Figma Foundations (22 text styles). DO NOT edit by hand.
+ * See ./README.md for the pipeline and the known LH/LS drift caveats.
+ *
+ * Families (3): Baloo 2 (display/headings), Lora (reading/body), Nunito (UI).
+ * Each text style is exposed as a group of 5 sub-properties so a component can
+ * apply them 1:1 with Figma:
+ *   --text-<style>-family / -size / -weight / -line-height / -tracking
+ *
+ *   [C] confirmed from Figma node 1327-4655   [D] derived/placeholder — see README
+ * Typography is theme-independent.
+ * ========================================================================== */
+
+:root {
+  /* --- Font families --------------------------------------------------- */
+  /* The --font-baloo2/-lora/-nunito vars are provided by next/font in layout.tsx. */
+  --font-display: var(--font-baloo2), "Baloo 2", system-ui, sans-serif; /* [C] */
+  --font-reading: var(--font-lora), "Lora", Georgia, serif;             /* [C] */
+  --font-ui: var(--font-nunito), "Nunito", system-ui, sans-serif;       /* [C] */
+
+  /* --- Font weights (named) ------------------------------------------- */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* --- Display/L  [C] -------------------------------------------------- */
+  --text-display-l-family: var(--font-display);
+  --text-display-l-size: 44px;
+  --text-display-l-line-height: 52px;
+  --text-display-l-weight: var(--font-weight-extrabold);
+  --text-display-l-tracking: -1.5px;
+
+  /* --- Heading/H3  [C] ------------------------------------------------- */
+  --text-heading-h3-family: var(--font-display);
+  --text-heading-h3-size: 22px;
+  --text-heading-h3-line-height: 30px;
+  --text-heading-h3-weight: var(--font-weight-extrabold);
+  --text-heading-h3-tracking: 0;
+
+  /* --- Heading/H4  [C] ------------------------------------------------- */
+  --text-heading-h4-family: var(--font-display);
+  --text-heading-h4-size: 16px;
+  --text-heading-h4-line-height: 26px;
+  --text-heading-h4-weight: var(--font-weight-semibold);
+  --text-heading-h4-tracking: 0;
+
+  /* --- Title/M  [C] ---------------------------------------------------- */
+  --text-title-m-family: var(--font-display);
+  --text-title-m-size: 16px;
+  --text-title-m-line-height: 22px;
+  --text-title-m-weight: var(--font-weight-bold);
+  --text-title-m-tracking: 0;
+
+  /* --- Body/L  [C] ----------------------------------------------------- */
+  --text-body-l-family: var(--font-reading);
+  --text-body-l-size: 20px;
+  --text-body-l-line-height: 28px;
+  --text-body-l-weight: var(--font-weight-regular);
+  --text-body-l-tracking: 0;
+
+  /* --- Reading/M  [C] -------------------------------------------------- */
+  --text-reading-m-family: var(--font-reading);
+  --text-reading-m-size: 17px;
+  --text-reading-m-line-height: 28px;
+  --text-reading-m-weight: var(--font-weight-regular);
+  --text-reading-m-tracking: 0;
+
+  /* --- Reading/quote  [C] (Lora Italic) ------------------------------- */
+  --text-reading-quote-family: var(--font-reading);
+  --text-reading-quote-size: 18px;
+  --text-reading-quote-line-height: 28px;
+  --text-reading-quote-weight: var(--font-weight-regular);
+  --text-reading-quote-tracking: 0;
+  --text-reading-quote-style: italic;
+
+  /* --- UI/L  [C] (Input value + placeholder) -------------------------- */
+  --text-ui-l-family: var(--font-ui);
+  --text-ui-l-size: 16px;
+  --text-ui-l-line-height: 24px;
+  --text-ui-l-weight: var(--font-weight-regular);
+  --text-ui-l-tracking: 0;
+
+  /* --- UI/M  [C] ------------------------------------------------------- */
+  --text-ui-m-family: var(--font-ui);
+  --text-ui-m-size: 14px;
+  --text-ui-m-line-height: 20px;
+  --text-ui-m-weight: var(--font-weight-regular);
+  --text-ui-m-tracking: 0;
+
+  /* --- Label/M  [C] --------------------------------------------------- */
+  --text-label-m-family: var(--font-ui);
+  --text-label-m-size: 13px;
+  --text-label-m-line-height: 18px;
+  --text-label-m-weight: var(--font-weight-semibold);
+  --text-label-m-tracking: 1px;
+
+  /* --- Label/S  [C] --------------------------------------------------- */
+  --text-label-s-family: var(--font-ui);
+  --text-label-s-size: 12px;
+  --text-label-s-line-height: 16px;
+  --text-label-s-weight: var(--font-weight-semibold);
+  --text-label-s-tracking: 4px;
+
+  /* --- Caption  [C] --------------------------------------------------- */
+  --text-caption-family: var(--font-ui);
+  --text-caption-size: 12px;
+  --text-caption-line-height: 16px;
+  --text-caption-weight: var(--font-weight-regular);
+  --text-caption-tracking: 0;
+
+  /* --- Meta  [C] ------------------------------------------------------ */
+  --text-meta-family: var(--font-display);
+  --text-meta-size: 13px;
+  --text-meta-line-height: 18px;
+  --text-meta-weight: var(--font-weight-bold);
+  --text-meta-tracking: 0;
+}
