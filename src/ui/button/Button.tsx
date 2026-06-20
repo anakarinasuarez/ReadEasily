@@ -193,7 +193,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           "inline-flex items-center justify-center",
           contentGap[size],
-          loading && "invisible",
+          // opacity-0 (not `invisible`) so the label stays in the a11y tree —
+          // a loading button must keep its accessible name (WCAG 4.1.2) while
+          // the spinner overlay shows and width stays stable.
+          loading && "opacity-0",
         )}
       >
         {leftIcon != null && (

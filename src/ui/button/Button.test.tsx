@@ -71,6 +71,15 @@ describe("Button", () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it("keeps its accessible name while loading (WCAG 4.1.2)", () => {
+    // The label is hidden visually (opacity-0, not `visibility:hidden`) so it
+    // stays in the a11y tree — a busy button must still announce its name.
+    render(<Button loading>Saving…</Button>);
+    expect(
+      screen.getByRole("button", { name: "Saving…" }),
+    ).toBeInTheDocument();
+  });
+
   it("forwards the ref to the underlying button element", () => {
     const ref = { current: null as HTMLButtonElement | null };
     render(<Button ref={ref}>Save</Button>);
