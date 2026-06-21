@@ -168,11 +168,14 @@ const ModalRoot = forwardRef<HTMLDivElement, ModalProps>(function Modal(
         <Dialog.Content
           ref={ref}
           className={cn(contentClasses, sizeWidth[size], className)}
+          {...rest}
+          // rest spread FIRST so the dismissal guards + describedby handling
+          // below always win — a consumer can't override the non-dismissible
+          // guard by passing onEscapeKeyDown/etc through rest.
           onEscapeKeyDown={guard}
           onPointerDownOutside={guard}
           onInteractOutside={guard}
           {...describedByProps}
-          {...rest}
         >
           {/* Header */}
           <div className="flex items-start justify-between gap-[var(--space-lg)] px-[var(--space-2xl)] pb-[var(--space-xl)] pt-[var(--space-2xl)]">
