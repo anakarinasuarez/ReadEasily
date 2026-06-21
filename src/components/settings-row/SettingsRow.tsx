@@ -166,6 +166,7 @@ export const SettingsRow = React.forwardRef<HTMLElement, SettingsRowProps>(
     const labelId = `${reactId}-label`;
     const descId = `${reactId}-desc`;
     const controlId = `${reactId}-control`;
+    const valueId = `${reactId}-value`;
     const hasDesc = Boolean(description);
 
     const dividerClass = divider ? "border-b border-border-default" : "";
@@ -190,6 +191,8 @@ export const SettingsRow = React.forwardRef<HTMLElement, SettingsRowProps>(
         )}
       </>
     );
+    // gap-[2px]: the tight label↔description stack from Figma 159:235, below the
+    // --space-xs (4px) step — Figma-exact, like Toggle's geometry literals.
     const textColumn = "flex min-w-0 flex-1 flex-col gap-[2px]";
 
     // ---- toggle ------------------------------------------------------------
@@ -248,7 +251,11 @@ export const SettingsRow = React.forwardRef<HTMLElement, SettingsRowProps>(
           onClick={props.onClick}
           disabled={disabled}
           aria-labelledby={labelId}
-          aria-describedby={hasDesc ? descId : undefined}
+          // Fold the current value (e.g. "Español") into the description so SR
+          // users hear the setting's current state, like sighted users see it.
+          aria-describedby={
+            cx(hasDesc && descId, props.value && valueId) || undefined
+          }
           className={cx(
             ROW_BASE,
             dividerClass,
@@ -266,7 +273,9 @@ export const SettingsRow = React.forwardRef<HTMLElement, SettingsRowProps>(
           <span className={textColumn}>{textNodes}</span>
           <span className="ml-auto flex shrink-0 items-center gap-xs">
             {props.value && (
-              <span aria-hidden="true" className="text-ui-m text-secondary">
+              // Referenced by the button's aria-describedby (not aria-hidden) so
+              // the current value is announced; the name stays the label only.
+              <span id={valueId} className="text-ui-m text-secondary">
                 {props.value}
               </span>
             )}

@@ -101,7 +101,9 @@ describe("SettingsRow — nav variant", () => {
     const buttons = screen.getAllByRole("button");
     expect(buttons).toHaveLength(1);
     expect(buttons[0]).toHaveAccessibleName("Translation language");
-    expect(buttons[0]).toHaveAccessibleDescription("Word meanings");
+    // The current value is folded into the description so SR users hear it
+    // (the name stays the label only — the value is not part of the name).
+    expect(buttons[0]).toHaveAccessibleDescription("Word meanings Español");
 
     await user.click(buttons[0]);
     expect(onClick).toHaveBeenCalledTimes(1);
