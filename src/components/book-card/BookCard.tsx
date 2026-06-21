@@ -43,7 +43,11 @@ export interface BookCardProps
   onPlay?: () => void;
   /** Renders the skeleton placeholder (cover shimmer + title/meta bars). */
   loading?: boolean;
-  /** Override the cover alt; defaults to the book title. */
+  /**
+   * Override the cover alt. Empty by default: the card's visible title already
+   * names the link, so an alt of the title would announce it twice. Set this
+   * only when the cover art conveys something the title does not.
+   */
   coverAlt?: string;
 }
 
@@ -58,7 +62,10 @@ const COVER_WRAP = "relative w-[168px] h-[242px]";
 const PLAY_BASE = cx(
   "absolute bottom-[6px] right-[6px] inline-flex size-[52px] items-center justify-center",
   "rounded-[var(--radius-pill)] bg-[var(--bg-accent)] text-[var(--text-on-accent)] shadow-md",
+  // Reveal on hover AND keyboard focus-within (parity with the scrim) so
+  // keyboard users see the play affordance too.
   "opacity-0 transition-opacity duration-200 ease-out motion-reduce:transition-none",
+  "group-hover:opacity-100 group-focus-within:opacity-100",
 );
 
 function PlayGlyph() {
@@ -120,7 +127,9 @@ export const BookCard = forwardRef<HTMLAnchorElement, BookCardProps>(
         {...rest}
       >
         <div className={COVER_WRAP}>
-          <BookCover size="small" src={coverSrc} alt={coverAlt ?? title} />
+          {/* Decorative in-card: the visible title already names the link, so
+              alt is empty to avoid announcing the title twice (coverAlt opts in). */}
+          <BookCover size="small" src={coverSrc} alt={coverAlt ?? ""} />
 
           {/* Hover scrim — decorative dim over the cover. */}
           <div

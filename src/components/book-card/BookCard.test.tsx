@@ -25,12 +25,15 @@ describe("BookCard", () => {
     expect(screen.getByText("6 min")).toBeInTheDocument();
   });
 
-  it("uses the title as the cover alt by default and honors an override", () => {
-    const { rerender } = render(<BookCard book={BOOK} href="/read/ant" />);
-    expect(
-      screen.getByRole("img", { name: "The Ant & the Grasshopper" }),
-    ).toBeInTheDocument();
-    rerender(
+  it("makes the in-card cover decorative by default (title not announced twice)", () => {
+    render(<BookCard book={BOOK} href="/read/ant" />);
+    // Empty alt → the cover is not exposed as an image; the visible title
+    // already names the link, so it is not announced a second time.
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  });
+
+  it("honors a coverAlt override for the cover image", () => {
+    render(
       <BookCard book={BOOK} href="/read/ant" coverAlt="A painted ant and grasshopper" />,
     );
     expect(
