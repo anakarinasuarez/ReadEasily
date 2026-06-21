@@ -55,6 +55,17 @@ describe("Navbar", () => {
     );
   });
 
+  it("gives every item a stable accessible name (survives the mobile label collapse)", () => {
+    render(<Navbar items={items} user={user} activeKey="library" />);
+    // Inactive items hide their label text below `md`; aria-label keeps the
+    // accessible name regardless of viewport (jsdom can't evaluate the query).
+    for (const item of items) {
+      expect(
+        screen.getByRole("link", { name: item.label }),
+      ).toHaveAttribute("aria-label", item.label);
+    }
+  });
+
   it("renders items as buttons and fires onNavigate when onNavigate is given", async () => {
     const onNavigate = vi.fn();
     render(

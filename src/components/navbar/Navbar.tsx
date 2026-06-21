@@ -203,6 +203,10 @@ function NavItem({
     return (
       <button
         type="button"
+        // aria-label keeps the name when the label span is hidden (mobile
+        // inactive items collapse to icon-only); equals the visible text when
+        // shown, so it satisfies label-in-name. The icon span is aria-hidden.
+        aria-label={label}
         aria-current={ariaCurrent}
         onClick={() => onNavigate(key)}
         className={className}
@@ -213,7 +217,12 @@ function NavItem({
   }
 
   return (
-    <a href={href} aria-current={ariaCurrent} className={className}>
+    <a
+      href={href}
+      aria-label={label}
+      aria-current={ariaCurrent}
+      className={className}
+    >
       {content}
     </a>
   );
