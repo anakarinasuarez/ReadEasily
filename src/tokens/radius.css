@@ -9,6 +9,7 @@
   --radius-sm: 10px;     /* [C] */
   --radius-md: 16px;     /* [D] — gap between confirmed sm(10) and lg(24) */
   --radius-lg: 24px;     /* [C] */
+  --radius-2xl: 28px;    /* [D-design] Modal container (between lg 24 and xl 32) */
   --radius-xl: 32px;     /* [C] */
   --radius-pill: 9999px; /* [C] */
 }

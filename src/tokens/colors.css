@@ -112,6 +112,15 @@
                                                     6.39:1 on white. Figma raw #cc5a4a. Error text/border + Badge. */
   --feedback-danger-subtle: #f8d5d0;             /* [C] Badge Danger bg */
 
+  /* --- Semantic: overlay & glass surfaces (composites) ----------------- */
+  /* [D-design] raw values from the Figma Navbar/Modal specs — reconcile in
+     Dev Mode. Used via arbitrary-value classes (gradients, backdrop-blur). */
+  --scrim: rgba(31, 18, 10, 0.45);                 /* modal/overlay dim */
+  --surface-glass-from: rgba(255, 255, 255, 0.55); /* navbar glass gradient start */
+  --surface-glass-to: rgba(253, 247, 237, 0.40);   /* navbar glass gradient end */
+  --surface-glass-border: rgba(255, 255, 255, 0.65);
+  --surface-glass-blur: 10px;                      /* backdrop-blur radius */
+
   /* --- Semantic: focus ------------------------------------------------ */
   /* No focus token exists in Figma; design law requires an AA-visible 2px
      ring across primitives. Aliased to border/accent so it tracks the brand. */

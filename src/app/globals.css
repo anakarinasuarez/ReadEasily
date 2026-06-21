@@ -118,13 +118,16 @@
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
+  --radius-2xl: var(--radius-2xl);
   --radius-xl: var(--radius-xl);
   --radius-pill: var(--radius-pill);
 
-  /* Shadows -> shadow-sm, shadow-md, shadow-lg */
+  /* Shadows -> shadow-sm, shadow-md, shadow-lg, shadow-glass, shadow-modal */
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
+  --shadow-glass: var(--shadow-glass);
+  --shadow-modal: var(--shadow-modal);
 
   /* Type-style font sizes (paired line-heights) -> text-display-l, text-reading-m... */
   --text-display-l: var(--text-display-l-size);
