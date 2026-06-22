@@ -130,7 +130,7 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(
       <div
         data-name="SearchField"
         className={cx(
-          "flex min-h-[60px] w-full items-center gap-[var(--space-chip-x)]",
+          "flex min-h-[60px] w-full items-center gap-md-plus",
           "rounded-[var(--radius-card)] bg-[var(--bg-elevated)] shadow-[var(--shadow-field)]",
           "pl-[var(--space-sm)] pr-[var(--space-md)] py-[var(--space-sm)]",
           // AA focus: a real outline (survives forced-colors) plus an inset accent

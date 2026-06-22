@@ -135,6 +135,7 @@
   --spacing-2xl: var(--space-2xl);
   --spacing-3xl: var(--space-3xl);
   --spacing-4xl: var(--space-4xl);
+  --spacing-md-plus: var(--space-md-plus);
   --spacing-chip-x: var(--space-chip-x);
   --spacing-chip-y: var(--space-chip-y);
 

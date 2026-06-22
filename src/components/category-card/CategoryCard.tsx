@@ -201,7 +201,7 @@ export const CategoryCard = React.forwardRef<HTMLAnchorElement, CategoryCardProp
           // card: fluid width (the grid sizes it to 202/172), fixed 160 height,
           // 20px radius, vertical stack. No CSS `border` — the edge is an inset
           // ring (see *_SHADOW) so 1px→2px never reflows.
-          "group relative flex h-40 w-full flex-col gap-[14px] overflow-hidden rounded-card p-5",
+          "group relative flex h-40 w-full flex-col gap-md-plus overflow-hidden rounded-card p-5",
           "no-underline outline-none",
           // hover lift (no Figma variant — design-lead recommendation); motion-safe only.
           "transition-[box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5",
@@ -237,7 +237,7 @@ export const CategoryCard = React.forwardRef<HTMLAnchorElement, CategoryCardProp
         {/* story count — appended to the name via aria-describedby */}
         <span
           id={countId}
-          className="font-ui text-label-m font-semibold tracking-[0.13px] text-muted"
+          className="font-ui text-label-m font-semibold tracking-[var(--text-label-m-tracking)] text-muted"
         >
           {countLabel}
         </span>
@@ -247,7 +247,7 @@ export const CategoryCard = React.forwardRef<HTMLAnchorElement, CategoryCardProp
           <span
             aria-hidden="true"
             className={cx(
-              "absolute right-[14px] top-[14px] flex size-7 items-center justify-center rounded-full text-on-accent [&>svg]:size-4",
+              "absolute right-md-plus top-md-plus flex size-7 items-center justify-center rounded-full text-on-accent [&>svg]:size-4",
               config.fgBg,
             )}
           >

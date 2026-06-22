@@ -16,8 +16,13 @@
   --space-4xl: 64px; /* [D] */
 
   /* --- Named off-scale tokens ----------------------------------------- */
-  /* Figma Chip padding is off the 4/8/12/16/24 ramp; kept as named tokens
-     so it stays mappable rather than silently rounded to the scale. */
+  /* Figma values that sit deliberately off the 4/8/12/16/24 ramp; kept as
+     named tokens so they stay mappable rather than silently rounded. */
+  --space-md-plus: 14px; /* [C] neutral 14px step (between md 12 and lg 16).
+                            Search SearchField gap + CategoryCard gap/inset.
+                            Off-scale but recurring — its own neutral token so
+                            consumers stop borrowing --space-chip-x (Chip padding,
+                            wrong semantics). */
   --space-chip-x: 14px; /* [C] Chip horizontal padding */
   --space-chip-y: 7px;  /* [C] Chip vertical padding */
 }

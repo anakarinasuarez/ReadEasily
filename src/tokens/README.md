@@ -52,6 +52,7 @@ stay 1:1-mappable, never silently rounded:
 
 | Token | Value | Where (≥2 specs) |
 | --- | --- | --- |
+| `--space-md-plus` | 14px | Neutral 14px step (SearchField gap + CategoryCard gap/inset) |
 | `--space-chip-x` / `-y` | 14px / 7px | Chip padding |
 | `--radius-card` | 20px | Search field + Search/Saved word cards |
 | `--radius-icon` | 13px | Search 44px icon tile — **canonical icon-tile radius** |
@@ -163,7 +164,14 @@ so all snap to the existing ramp — no new spacing tokens:
 | 50px (column gap) | snap | `--space-3xl` (48) |
 | 33px (gap) | snap | `--space-2xl` (32) |
 | 20px (stat-pill gap) | snap | `--space-xl` (24) |
-| 14px (empty-stack gap) | **reuse** | `--space-chip-x` (14) |
+| 14px (empty-stack gap) | ~~reuse `--space-chip-x`~~ → **own token** | `--space-md-plus` (14) |
+
+**14px gets its own neutral token (supersedes the chip-x reuse above).** The
+14px gap recurs in the new Search components (SearchField gap, CategoryCard gap +
+top/right inset) where Chip-padding semantics are wrong. It now ships as
+`--space-md-plus` (Tailwind `gap-md-plus` / `p-md-plus` / inset utilities) — a
+neutral off-scale step between `md` (12) and `lg` (16). Borrowing `--space-chip-x`
+for non-Chip layout is deprecated.
 
 **Profile container radii (22px / 26px) — snap.** Both are within 2px of an
 existing step, sub-perceptual on large containers; adding two more off-scale radii

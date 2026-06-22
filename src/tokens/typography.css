@@ -95,7 +95,10 @@
   --text-label-m-size: 13px;
   --text-label-m-line-height: 18px;
   --text-label-m-weight: var(--font-weight-semibold);
-  --text-label-m-tracking: 1px;
+  /* [C] confirmed from Figma Label/M (CategoryCard nodes 1260:3510/3517/3566/3622):
+     Figma stores letterSpacing as a PERCENTAGE (1%), so 1% × 13px size = 0.13px.
+     Do NOT let a regen reintroduce `1px` — that is a px-vs-percent misread. */
+  --text-label-m-tracking: 0.13px;
 
   /* --- Label/S  [C] --------------------------------------------------- */
   --text-label-s-family: var(--font-ui);
