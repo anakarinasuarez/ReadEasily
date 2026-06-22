@@ -6,7 +6,7 @@
  * Navbar/UserCard instances live) were not reachable, so the node-id below is a
  * PLACEHOLDER to be reconciled against the live "Avatar" component set. The
  * variant → prop model mirrors the design-lead spec:
- *   size: SM | MD | LG -> "sm" | "md" | "lg"
+ *   size: SM | MD | LG | XL -> "sm" | "md" | "lg" | "xl" (XL=120px, Profile header 149:242)
  *   image fill         -> src
  *   name / initials    -> name
  *
@@ -23,7 +23,7 @@ figma.connect(
   "https://www.figma.com/design/sc9DIhX0wvFgrvmL8NVBf5/ReadEasily?node-id=0-0",
   {
     props: {
-      size: figma.enum("size", { SM: "sm", MD: "md", LG: "lg" }),
+      size: figma.enum("size", { SM: "sm", MD: "md", LG: "lg", XL: "xl" }),
       name: figma.string("name"),
     },
     example: ({ size, name }) => <Avatar size={size} name={name} />,

@@ -20,10 +20,10 @@ import type { HTMLAttributes } from "react";
  * fully token-bound.
  */
 
-export type AvatarSize = "sm" | "md" | "lg";
+export type AvatarSize = "sm" | "md" | "lg" | "xl";
 
 export type AvatarProps = Omit<HTMLAttributes<HTMLSpanElement>, "children"> & {
-  /** Diameter — sm=32px, md=40px, lg=56px. Default md. */
+  /** Diameter — sm=32px, md=40px, lg=56px, xl=120px. Default md. */
   size?: AvatarSize;
   /** Image URL. When absent or failing to load, the initials fallback renders. */
   src?: string;
@@ -36,18 +36,26 @@ function cx(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");
 }
 
-/** Diameter per size — real design values. */
+/** Diameter per size — real design values. xl=120px is the Profile header
+ *  avatar (Figma 149:242). */
 const sizeBox: Record<AvatarSize, string> = {
   sm: "size-[32px]",
   md: "size-[40px]",
   lg: "size-[56px]",
+  xl: "size-[120px]",
 };
 
-/** Initials font-size per size — derived (~45% of diameter), no token exists. */
+/**
+ * Initials font-size per size — derived, no avatar-type token exists. The
+ * font/diameter ratio holds at ~0.40 with a gentle falloff as the circle grows
+ * (sm 13/32=.41, md 16/40=.40, lg 22/56=.39); xl continues that trend at
+ * 46/120≈.38. Off-scale arbitrary px, matching the established pattern above.
+ */
 const sizeFont: Record<AvatarSize, string> = {
   sm: "text-[13px]",
   md: "text-[16px]",
   lg: "text-[22px]",
+  xl: "text-[46px]",
 };
 
 /**

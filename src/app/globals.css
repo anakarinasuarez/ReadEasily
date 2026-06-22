@@ -197,6 +197,8 @@
   --text-ui-m--line-height: var(--text-ui-m-line-height);
   --text-label-m: var(--text-label-m-size);
   --text-label-m--line-height: var(--text-label-m-line-height);
+  --text-label-s: var(--text-label-s-size);
+  --text-label-s--line-height: var(--text-label-s-line-height);
   --text-caption: var(--text-caption-size);
   --text-caption--line-height: var(--text-caption-line-height);
 }

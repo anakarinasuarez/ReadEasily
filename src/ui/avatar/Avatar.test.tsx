@@ -57,6 +57,19 @@ describe("Avatar", () => {
     expect(screen.getByRole("img")).toHaveClass("size-[40px]");
   });
 
+  it("renders the 120px xl size with proportionally scaled initials (Profile header)", () => {
+    render(<Avatar name="Ada Lovelace" size="xl" />);
+    const fallback = screen.getByRole("img", { name: "Ada Lovelace" });
+    expect(fallback).toHaveClass("size-[120px]");
+    // initials typography scales up with the larger circle
+    expect(screen.getByText("AL")).toHaveClass("text-[46px]");
+  });
+
+  it("has no a11y violations — xl initials fallback", async () => {
+    const { container } = render(<Avatar name="Ada Lovelace" size="xl" />);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
   it("forwards ref and spreads rest props onto the root span", () => {
     const ref = { current: null as HTMLSpanElement | null };
     render(<Avatar ref={ref} data-testid="avatar" name="Ada Lovelace" />);
