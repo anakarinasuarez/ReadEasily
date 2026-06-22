@@ -109,7 +109,11 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
   ) {
     const count = items.length;
     const isControlled = activeIndex !== undefined;
-    const [internal, setInternal] = useState(0);
+    // Start on the MIDDLE item so the fan opens symmetrically (covers fanning to
+    // BOTH sides), instead of everything fanned to one side from index 0.
+    const [internal, setInternal] = useState(() =>
+      Math.max(0, Math.floor(items.length / 2)),
+    );
     // Clamp so a shrunk `items` / out-of-range controlled value never NaNs.
     const rawActive = isControlled ? (activeIndex as number) : internal;
     const active = count > 0 ? ((rawActive % count) + count) % count : 0;
@@ -193,11 +197,21 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
             const opacity = hidden ? 0 : ring.opacity;
             const z = hidden ? 0 : ring.z;
 
+            // Visible side covers are clickable to bring them to centre. The
+            // dots remain the keyboard/AT control; these tiles stay aria-hidden
+            // and untabbable — a redundant pointer affordance for sighted users.
+            const interactive = !hidden && dist > 0;
             return (
-              <div
+              <button
                 key={i}
+                type="button"
                 aria-hidden="true"
-                className="pointer-events-none absolute left-1/2 top-1/2 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
+                tabIndex={-1}
+                onClick={interactive ? () => goTo(i) : undefined}
+                className={cx(
+                  "absolute left-1/2 top-1/2 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none",
+                  interactive ? "cursor-pointer" : "pointer-events-none",
+                )}
                 style={{
                   transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${scale})`,
                   opacity,
@@ -206,7 +220,7 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
               >
                 {/* Decorative tile — the real cover info lives in the hero copy. */}
                 <BookCover size="small" src={item.coverSrc} alt="" />
-              </div>
+              </button>
             );
           })}
         </div>

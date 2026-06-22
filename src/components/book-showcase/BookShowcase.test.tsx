@@ -38,10 +38,19 @@ describe("BookShowcase — structure & dot control", () => {
     expect(screen.getByRole("region", { name: "Featured stories" })).toBeTruthy();
   });
 
-  it("marks the active dot with aria-current and no others", () => {
+  it("starts centred on the middle item and marks only that dot aria-current", () => {
     render(<BookShowcase items={ITEMS} />);
+    // 7 items → middle index 3 → dot 4. The fan opens symmetrically.
+    expect(dot(4)).toHaveAttribute("aria-current", "true");
+    expect(dot(1)).not.toHaveAttribute("aria-current");
+  });
+
+  it("clicking a side cover brings it to centre", () => {
+    const { container } = render(<BookShowcase items={ITEMS} />);
+    // Cover tiles are aria-hidden buttons (redundant pointer affordance).
+    const covers = container.querySelectorAll('button[aria-hidden="true"]');
+    fireEvent.click(covers[0]); // item 0 — a visible side cover
     expect(dot(1)).toHaveAttribute("aria-current", "true");
-    expect(dot(2)).not.toHaveAttribute("aria-current");
   });
 
   it("clicking a dot moves the active state and fires onActiveChange", () => {
@@ -99,14 +108,14 @@ describe("BookShowcase — auto-cycle", () => {
     render(
       <BookShowcase items={ITEMS} autoAdvanceMs={4000} onActiveChange={onActiveChange} />,
     );
-    expect(dot(1)).toHaveAttribute("aria-current", "true");
+    expect(dot(4)).toHaveAttribute("aria-current", "true"); // centred start
 
     act(() => {
       vi.advanceTimersByTime(4000);
     });
 
-    expect(onActiveChange).toHaveBeenCalledWith(1);
-    expect(dot(2)).toHaveAttribute("aria-current", "true");
+    expect(onActiveChange).toHaveBeenCalledWith(4);
+    expect(dot(5)).toHaveAttribute("aria-current", "true");
   });
 
   it("pauses auto-advance while the carousel is hovered", () => {
@@ -122,14 +131,14 @@ describe("BookShowcase — auto-cycle", () => {
     });
 
     expect(onActiveChange).not.toHaveBeenCalled();
-    expect(dot(1)).toHaveAttribute("aria-current", "true");
+    expect(dot(4)).toHaveAttribute("aria-current", "true");
 
     // Resumes once the pointer leaves.
     fireEvent.mouseLeave(region);
     act(() => {
       vi.advanceTimersByTime(4000);
     });
-    expect(dot(2)).toHaveAttribute("aria-current", "true");
+    expect(dot(5)).toHaveAttribute("aria-current", "true");
   });
 
   it("resets the timer when the user picks a dot", () => {
@@ -171,7 +180,7 @@ describe("BookShowcase — reduced motion", () => {
     });
 
     expect(onActiveChange).not.toHaveBeenCalled();
-    expect(dot(1)).toHaveAttribute("aria-current", "true");
+    expect(dot(4)).toHaveAttribute("aria-current", "true");
   });
 
   it("still lets the user change covers via the dots", () => {
