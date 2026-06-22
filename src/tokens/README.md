@@ -66,16 +66,35 @@ as the one canonical icon-tile radius. Follow-up for the component owner: Settin
 
 Per-category icon-tile accents + their 16% tints. Decorative (the label carries
 meaning), so not gated by text contrast. `travel` introduced a new **teal** hue
-(`--color-teal-500` #2f9f93) — not on any prior ramp.
+(`--color-teal-50` #d2efe9 / `--color-teal-500` #2f9f93) — not on any prior ramp.
+
+Fables is **forest/green** everywhere (Search CategoryCard + Library rail) — the
+old "fables → terracotta" entry was a wrong assumption (no terracotta Fables
+exists in the design; that token had no live consumer) and has been reconciled.
 
 | Token | Solid | `-subtle` (16% tile fill) |
 | --- | --- | --- |
-| `--cat-fables` | terracotta-500 #d97757 | rgba(217,119,87,.16) |
+| `--cat-fables` | forest-500 #74a64a | rgba(116,166,74,.16) |
+| `--cat-fables-rail` | = `--cat-fables` (forest) | — |
 | `--cat-daily` | terracotta-600 #d66c44 | rgba(214,108,68,.16) |
 | `--cat-tech` | #5b86b0 (sky blue) | rgba(91,134,176,.16) |
 | `--cat-travel` | teal-500 #2f9f93 | rgba(47,159,147,.16) |
 
-Tailwind: `bg-cat-travel-subtle`, `text-cat-travel`, etc.
+**Selected-state pairs** (CategoryCard SELECTED variant — dedicated bg + fg,
+distinct from the unselected `-subtle` tile tint):
+
+| Token | bg | fg | Selected border |
+| --- | --- | --- | --- |
+| `--category-fables-*` | forest-100 #e4efd2 | forest-500 #74a64a | `--category-fables-fg` (green) |
+| `--category-daily-*` | #fbdfd0 (literal) | #e07a4f (literal) | `--border-accent` #d66c44 |
+| `--category-tech-*` | sky-50 #dde9f2 | #5b86b0 | `--feedback-info` #3d6082 |
+| `--category-travel-*` | teal-50 #d2efe9 | teal-500 #2f9f93 | `--feedback-info` #3d6082 |
+
+(Tech/Travel selected borders use navy `--feedback-info` as-measured, not their
+own hue — build 1:1.)
+
+Tailwind: `bg-cat-travel-subtle`, `text-cat-travel`, `bg-category-fables-bg`,
+`text-category-travel-fg`, etc.
 
 ### Warm soft-elevation shadows
 

@@ -72,8 +72,9 @@
   --color-sky-700: #3d6082; /* [C]  = feedback/info (AA info) */
 
   /* --- Primitives: Teal (Search "travel" category accent — standalone hue) */
-  /* [C] Figma travel CategoryCard tile rgba(47,159,147). Not on any prior ramp;
-     only this step surfaced, so it ships as a single confirmed primitive. */
+  /* [C] Figma travel CategoryCard tiles. Two steps surfaced (50 + 500); not on
+     any prior ramp, so they ship as confirmed primitives. */
+  --color-teal-50: #d2efe9;  /* [C] Figma CategoryCard Travel selected bg (node 1260:3678) */
   --color-teal-500: #2f9f93; /* [C] */
 
   /* --- Primitives: absolute ------------------------------------------- */
@@ -127,20 +128,42 @@
      not gated by text-contrast. The base re-uses an existing primitive where
      one exists; the -subtle tints are literal rgba (alpha can't be a hex var).
      Light-mode confirmed; dark unverified (decorative tints, reconcile later). */
-  --cat-fables: var(--color-terracotta-500);     /* #d97757 — fables → terracotta (Search) */
-  --cat-fables-subtle: rgba(217, 119, 87, 0.16);
-  --cat-fables-rail: var(--color-forest-500);    /* [C] Library Fables rail left accent bar (node 1272:4638)
-                                                    fills #74a64a = forest-500. DELIBERATE divergence: Library
-                                                    rails use green here, NOT terracotta like Search's
-                                                    --cat-fables. User-confirmed intentional — do NOT "fix"
-                                                    back to terracotta. Decorative (rail heading carries
-                                                    meaning), so not gated by text contrast. Dark unverified. */
+  --cat-fables: var(--color-forest-500);         /* [C] #74a64a — fables → FOREST/green across BOTH
+                                                    Search (CategoryCard node 1260:3510/3517) AND Library
+                                                    (rail node 1272:4638). The earlier "fables → terracotta /
+                                                    Search-divergence" note was a WRONG assumption — there is
+                                                    no terracotta Fables anywhere in the rendered design, and
+                                                    the old terracotta --cat-fables had no live consumer.
+                                                    Decorative (label/heading carries meaning), not contrast-gated. */
+  --cat-fables-subtle: rgba(116, 166, 74, 0.16); /* [C] forest-500 @16% — CategoryCard unselected icon-tile tint */
+  --cat-fables-rail: var(--cat-fables);          /* [C] Library Fables rail left accent bar (node 1272:4638) =
+                                                    forest-500, same hue as Search. Kept as a name so existing
+                                                    `bg-cat-fables-rail` usage (CategoryRail) stays valid; now
+                                                    simply aliases --cat-fables (no divergence to preserve). */
   --cat-daily: var(--color-terracotta-600);      /* #d66c44 — daily-life → terracotta */
   --cat-daily-subtle: rgba(214, 108, 68, 0.16);
   --cat-tech: #5b86b0;                            /* sky-family blue (Figma rgba 91,134,176) */
   --cat-tech-subtle: rgba(91, 134, 176, 0.16);
   --cat-travel: var(--color-teal-500);           /* #2f9f93 — travel → teal */
   --cat-travel-subtle: rgba(47, 159, 147, 0.16);
+
+  /* --- Semantic: category SELECTED state (Search CategoryCard selected variant) */
+  /* [C] Figma CategoryCard component set — the SELECTED variant fills the card
+     with a dedicated bg + fg pair (distinct from the unselected -subtle tint).
+     Aliased to an existing primitive where the measured hex coincides; literal
+     measured hex where no primitive matches (daily, travel-bg). Decorative
+     surfaces (the label carries meaning), so not text-contrast gated. Dark
+     unverified — inherits light, reconcile with Figma dark like the --cat-* group. */
+  --category-fables-bg: var(--color-forest-100); /* [C] #e4efd2 (node 1260:3510/3517) */
+  --category-fables-fg: var(--color-forest-500); /* [C] #74a64a (node 1260:3510/3517) */
+  --category-daily-bg: #fbdfd0;                  /* [C] measured (node 1260:3566); terracotta-100 range but
+                                                    differs from --color-terracotta-100 [D] #fbd9c6 — literal. */
+  --category-daily-fg: #e07a4f;                  /* [C] measured (node 1260:3566); intentionally LIGHTER than
+                                                    --cat-daily #d66c44 (tile fg vs darker selected border) — literal. */
+  --category-tech-bg: var(--color-sky-50);       /* [C] #dde9f2 (node 1260:3622) = sky-50 / feedback-info-subtle */
+  --category-tech-fg: var(--cat-tech);           /* [C] #5b86b0 (node 1260:3622) */
+  --category-travel-bg: var(--color-teal-50);    /* [C] #d2efe9 (node 1260:3678) = teal-50 */
+  --category-travel-fg: var(--color-teal-500);   /* [C] #2f9f93 (node 1260:3678) = teal-500 / --cat-travel */
 
   /* --- Semantic: overlay & glass surfaces (composites) ----------------- */
   /* [D-design] raw values from the Figma Navbar/Modal specs — reconcile in

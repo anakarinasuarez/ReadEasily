@@ -70,6 +70,7 @@
   --color-sky-500: var(--color-sky-500);
   --color-sky-700: var(--color-sky-700);
 
+  --color-teal-50: var(--color-teal-50);
   --color-teal-500: var(--color-teal-500);
 
   /* Semantic colors -> bg-canvas, text-muted, bg-accent-strong, border-default... */
@@ -111,6 +112,16 @@
   --color-cat-tech-subtle: var(--cat-tech-subtle);
   --color-cat-travel: var(--cat-travel);
   --color-cat-travel-subtle: var(--cat-travel-subtle);
+
+  /* Category SELECTED-state surfaces (Search CategoryCard) -> bg-category-*-bg, text-category-*-fg */
+  --color-category-fables-bg: var(--category-fables-bg);
+  --color-category-fables-fg: var(--category-fables-fg);
+  --color-category-daily-bg: var(--category-daily-bg);
+  --color-category-daily-fg: var(--category-daily-fg);
+  --color-category-tech-bg: var(--category-tech-bg);
+  --color-category-tech-fg: var(--category-tech-fg);
+  --color-category-travel-bg: var(--category-travel-bg);
+  --color-category-travel-fg: var(--category-travel-fg);
 
   /* Focus ring */
   --color-focus-ring: var(--focus-ring);
