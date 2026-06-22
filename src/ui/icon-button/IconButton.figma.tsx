@@ -26,9 +26,13 @@ figma.connect(
         Subtle: "subtle",
         Ghost: "ghost",
         Accent: "accent",
+        // accent-subtle tint — Saved word-card listen button (1134:2641)
+        "Accent Subtle": "accentSubtle",
       }),
       size: figma.enum("Size", {
         SM: "sm",
+        // 36px — Saved word-card action buttons (1134:2638)
+        Card: "card",
         MD: "md",
       }),
       // Hover is a CSS state; only Disabled surfaces as a prop.

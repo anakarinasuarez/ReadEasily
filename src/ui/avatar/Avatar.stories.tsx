@@ -12,7 +12,7 @@ const meta = {
   parameters: { layout: "centered" },
   args: { name: "Ada Lovelace", size: "md" },
   argTypes: {
-    size: { control: "inline-radio", options: ["sm", "md", "lg"] },
+    size: { control: "inline-radio", options: ["sm", "md", "lg", "xl"] },
     src: { control: "text" },
     name: { control: "text" },
   },
@@ -21,7 +21,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const SIZES: AvatarSize[] = ["sm", "md", "lg"];
+const SIZES: AvatarSize[] = ["sm", "md", "lg", "xl"];
 
 // A small inline SVG data URI so the "with image" stories render deterministically
 // (no network) in Storybook and visual snapshots.
@@ -68,4 +68,18 @@ export const BrokenSrcFallsBack: Story = {
 /** Single-word names yield a single initial. */
 export const SingleWordName: Story = {
   args: { name: "Cher" },
+};
+
+/**
+ * The 120px Profile-header avatar (Figma 149:242) — image and initials
+ * fallback side by side. Initials typography scales proportionally with the
+ * larger circle.
+ */
+export const ProfileHeaderXl: Story = {
+  render: () => (
+    <div className="flex items-end gap-lg">
+      <Avatar size="xl" src={PHOTO} name="Ada Lovelace" />
+      <Avatar size="xl" name="Ada Lovelace" />
+    </div>
+  ),
 };

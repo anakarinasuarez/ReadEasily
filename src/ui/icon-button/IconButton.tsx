@@ -4,8 +4,8 @@ import {
   type ReactNode,
 } from "react";
 
-export type IconButtonVariant = "subtle" | "ghost" | "accent";
-export type IconButtonSize = "sm" | "md";
+export type IconButtonVariant = "subtle" | "ghost" | "accent" | "accentSubtle";
+export type IconButtonSize = "sm" | "card" | "md";
 
 export interface IconButtonProps
   extends Omit<
@@ -13,9 +13,11 @@ export interface IconButtonProps
     "aria-label" | "children"
   > {
   /** Visual style. `subtle` (default) for toolbar utilities, `ghost` for the
-   * lightest affordance, `accent` for a solid terracotta action. */
+   * lightest affordance, `accent` for a solid terracotta action, `accentSubtle`
+   * for a soft terracotta-tinted action (the Saved card listen button). */
   variant?: IconButtonVariant;
-  /** Square footprint: `sm` = 32px, `md` (default) = 40px. */
+  /** Square footprint: `sm` = 32px, `card` = 36px (Saved word card), `md`
+   * (default) = 40px. */
   size?: IconButtonSize;
   /** The single glyph to render, centered. Required — this primitive is
    * icon-only. Rendered `aria-hidden`; the name comes from `aria-label`. */
@@ -45,16 +47,20 @@ function cn(...parts: Array<string | false | null | undefined>): string {
  * ------------------------------------------------------------------------- */
 const sizeBox: Record<IconButtonSize, string> = {
   sm: "size-[32px]",
+  card: "size-[36px]",
   md: "size-[40px]",
 };
 
-/** Icon box ~= footprint * 0.5 (sm 16, md 18). */
+/** Icon box — sm/card carry a 16px glyph (the Saved card uses 16px at 36px),
+ *  md keeps ~footprint*0.5 = 18px. */
 const iconBox: Record<IconButtonSize, string> = {
   sm: "size-[16px]",
+  card: "size-[16px]",
   md: "size-[18px]",
 };
 
-/** Default / hover / disabled per variant — Figma states are CSS states. */
+/** Default / hover / active / disabled per variant — Figma states are CSS
+ *  states. Every color resolves to a semantic token. */
 const variantColors: Record<IconButtonVariant, string> = {
   subtle: cn(
     "bg-[var(--bg-subtle)] text-[var(--text-primary)]",
@@ -69,6 +75,18 @@ const variantColors: Record<IconButtonVariant, string> = {
   accent: cn(
     "bg-[var(--bg-accent-strong)] text-[var(--text-on-accent)]",
     "hover:bg-[var(--bg-accent-hover)]",
+    "disabled:bg-[var(--bg-subtle)] disabled:text-[var(--text-muted)]",
+  ),
+  // Soft terracotta tint at rest (Saved word-card listen button, Figma
+  // 1134:2641). text-accent on bg-accent-subtle is the AA-verified pair
+  // (tokens/contrast.test.ts). On interaction the pill fills warmer and the
+  // glyph flips to on-accent: hover #c0703f (icon 3.72:1) and the deeper
+  // active #b35029 (icon 5.13:1) both clear WCAG 1.4.11 non-text contrast
+  // (≥3:1). Keyboard focus uses the shared AA focus ring in baseClasses.
+  accentSubtle: cn(
+    "bg-[var(--bg-accent-subtle)] text-[var(--text-accent)]",
+    "hover:bg-[var(--bg-accent-hover)] hover:text-[var(--text-on-accent)]",
+    "active:bg-[var(--bg-accent-strong)] active:text-[var(--text-on-accent)]",
     "disabled:bg-[var(--bg-subtle)] disabled:text-[var(--text-muted)]",
   ),
 };
