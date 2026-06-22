@@ -237,7 +237,7 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
                     className={cx(
                       "block h-[9px] rounded-[var(--radius-pill)] transition-[width,background-color] duration-200 ease-out motion-reduce:transition-none",
                       isActive
-                        ? "w-[26px] bg-[var(--bg-accent-strong)]"
+                        ? "w-[26px] bg-[var(--feedback-success)]"
                         : "w-[9px] bg-[var(--border-default)]",
                     )}
                   />

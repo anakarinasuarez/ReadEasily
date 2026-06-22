@@ -38,14 +38,10 @@ export function FeaturedHero({ featured }: { featured: FeaturedBook }) {
           <span className="font-ui font-semibold uppercase text-muted [font-size:var(--text-label-s-size)] [line-height:var(--text-label-s-line-height)] [letter-spacing:var(--text-label-s-tracking)]">
             Featured Fable
           </span>
-          {/* Badge has no icon slot, so the star + label compose inside
-              `children`; flagged for the orchestrator as the star-Badge
-              override. accent tone = terracotta-on-subtle, no status dot. */}
-          <Badge tone="accent">
-            <span className="inline-flex items-center gap-xs">
-              <StarIcon className="size-[13px]" />
-              {featured.badgeLabel}
-            </span>
+          {/* Editor's-pick override: accent tone (terracotta-on-subtle, no dot)
+              with the star in Badge's first-class `icon` slot. */}
+          <Badge tone="accent" icon={<StarIcon />}>
+            {featured.badgeLabel}
           </Badge>
         </div>
 

@@ -41,6 +41,20 @@ describe("Badge", () => {
     expect(container.querySelectorAll('[aria-hidden="true"]')).toHaveLength(0);
   });
 
+  it("renders a leading icon as decorative (aria-hidden); the label carries the meaning", async () => {
+    const { container } = render(
+      <Badge tone="accent" icon={<svg data-testid="star" />}>
+        Editor&apos;s pick
+      </Badge>,
+    );
+    expect(screen.getByText("Editor's pick")).toBeInTheDocument();
+    // the icon is wrapped in a decorative, aria-hidden span (one hidden element)
+    expect(container.querySelectorAll('[aria-hidden="true"]')).toHaveLength(1);
+    expect(screen.getByTestId("star")).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
   it("omits the + affordance when onAdd is not provided", () => {
     render(<Badge tone="neutral">Serendipity</Badge>);
     expect(screen.queryByRole("button")).not.toBeInTheDocument();

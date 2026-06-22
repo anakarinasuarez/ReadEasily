@@ -27,6 +27,9 @@ type BadgeBaseProps = Omit<HTMLAttributes<HTMLSpanElement>, "children"> & {
   tone?: BadgeTone;
   /** Size — maps 1:1 to the Figma `size` variant property. */
   size?: BadgeSize;
+  /** Optional leading glyph (decorative, `aria-hidden`) — e.g. the editor's-pick
+   *  star. The meaning still lives in `children`, never in the icon alone. */
+  icon?: ReactNode;
   /** The label. Must carry the meaning on its own (e.g. "A2 Elementary"). */
   children: ReactNode;
 };
@@ -77,7 +80,7 @@ const sizePadding: Record<BadgeSize, string> = {
 };
 
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
-  { tone = "neutral", size = "md", children, onAdd, addLabel, className, ...rest },
+  { tone = "neutral", size = "md", icon, children, onAdd, addLabel, className, ...rest },
   ref,
 ) {
   const dotClass = toneDot[tone];
@@ -113,6 +116,18 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
             dotClass,
           )}
         />
+      )}
+
+      {icon && (
+        <span
+          aria-hidden="true"
+          className={cx(
+            "inline-flex shrink-0 items-center justify-center [&>svg]:size-full",
+            size === "md" ? "size-[14px]" : "size-[12px]",
+          )}
+        >
+          {icon}
+        </span>
       )}
 
       <span>{children}</span>
