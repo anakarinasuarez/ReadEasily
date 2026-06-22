@@ -1,0 +1,44 @@
+import { describe, expect, it } from "vitest";
+import { http, HttpResponse } from "msw";
+import { server } from "../../../../tests/mocks/server";
+import { getLibrary } from "./getLibrary";
+
+/**
+ * Contract test for the Library data seam. MSW (wired in tests/setup.ts) serves
+ * the same `/api/library` handler dev and e2e use, so this asserts the real
+ * mocked payload, not a bespoke fixture.
+ */
+describe("getLibrary", () => {
+  it("returns a typed LibraryData payload from /api/library", async () => {
+    const data = await getLibrary();
+
+    // Featured hero — shape + a couple of load-bearing sample fields.
+    expect(data.featured.title).toBe("The Ant and the Grasshopper");
+    expect(data.featured.level).toBe("A2");
+    expect(data.featured.href).toBe(`/read/${data.featured.id}`);
+    expect(data.featured.showcaseCovers).toHaveLength(7);
+
+    // Categories always lead with the `all` sentinel chip.
+    expect(data.categories[0]).toEqual({ id: "all", label: "All" });
+
+    // A `continue` section, when present, sorts first.
+    expect(data.sections[0].id).toBe("continue");
+
+    // Every book routes to /read/${id} — the invariant the reader relies on.
+    const books = data.sections.flatMap((s) => s.books);
+    expect(books.length).toBeGreaterThan(0);
+    for (const book of books) {
+      expect(book.href).toBe(`/read/${book.id}`);
+    }
+  });
+
+  it("throws on a non-2xx response so the query surfaces the error", async () => {
+    server.use(
+      http.get("/api/library", () =>
+        HttpResponse.json({ error: "boom" }, { status: 500 }),
+      ),
+    );
+
+    await expect(getLibrary()).rejects.toThrow(/getLibrary failed: 500/);
+  });
+});

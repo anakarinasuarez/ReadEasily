@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 300" role="img" aria-label="market cover">
+  <rect width="210" height="300" fill="#faedc9"/>
+  <circle cx="150" cy="78" r="34" fill="#bd7f24" opacity="0.85"/>
+  <path d="M0 232 Q70 178 130 214 T210 206 V300 H0 Z" fill="#bd7f24"/>
+  <path d="M0 262 Q80 214 150 248 T210 246 V300 H0 Z" fill="#98641d"/>
+</svg>
