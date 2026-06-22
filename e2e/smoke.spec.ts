@@ -6,11 +6,10 @@ import { test, expect } from "@playwright/test";
  * the foundation the critical-journey specs (sign-up → read → save → practice)
  * build on once those screens exist.
  *
- * NOTE: we assert the heading is present (in the DOM with its accessible name)
- * rather than visually visible. The current placeholder home page collapses to
- * zero width because of a token-wiring bug — `max-w-md` resolves to the 12px
- * spacing token `--space-md` instead of a container width (see report to
- * tokens-engineer). Flip these to `toBeVisible` once that's fixed.
+ * The home route now mounts the real Library landing (the placeholder + its
+ * container-width token bug are gone), so this canary asserts the persistent
+ * ReadEasily brand frame is visible. The Library landing's own behavior is
+ * covered in depth by library.spec.ts.
  */
 test("home route renders and hydrates", async ({ page }) => {
   // Fail loudly if anything throws during hydration / the dev MSW worker start.
@@ -22,9 +21,10 @@ test("home route renders and hydrates", async ({ page }) => {
 
   await expect(page).toHaveTitle("ReadEasily");
 
+  // The brand home link in the navbar is always present once the frame mounts.
   await expect(
-    page.getByRole("heading", { level: 1, name: "ReadEasily" }),
-  ).toBeAttached();
+    page.getByRole("link", { name: "ReadEasily home" }),
+  ).toBeVisible();
 
   expect(pageErrors).toEqual([]);
 });
