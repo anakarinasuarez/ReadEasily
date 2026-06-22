@@ -33,25 +33,28 @@ export function LibrarySkeleton() {
         Loading your library
       </span>
 
-      {/* Hero placeholder. */}
+      {/* Hero placeholder — footprints mirror the loaded FeaturedHero so data
+          arriving causes no reflow: the 360px fan stage, the display-L title,
+          the body-L teaser, the lg CTA. */}
       <div className="flex w-full flex-col items-center gap-xl">
-        <Shimmer className="h-[300px] w-full max-w-3xl rounded-[var(--radius-2xl)]" />
+        <Shimmer className="h-[360px] w-full max-w-3xl rounded-[var(--radius-2xl)]" />
         <div className="flex w-full max-w-2xl flex-col items-center gap-md">
-          <Shimmer className="h-[20px] w-[180px]" />
-          <Shimmer className="h-[44px] w-[420px] max-w-full" />
-          <Shimmer className="h-[24px] w-full max-w-xl" />
+          <Shimmer className="h-[var(--text-label-s-line-height)] w-[180px]" />
+          <Shimmer className="h-[var(--text-display-l-line-height)] w-[420px] max-w-full" />
+          <Shimmer className="h-[var(--text-body-l-line-height)] w-full max-w-xl" />
           <Shimmer className="h-[56px] w-[200px] rounded-pill" />
         </div>
       </div>
 
-      {/* Two rail placeholders. */}
+      {/* Two rail placeholders — the marker bar matches the real ~50px header
+          height + radius-sm, the card row matches the BookCard footprint. */}
       {[0, 1].map((rail) => (
         <div key={rail} className="flex w-full flex-col gap-md">
-          <div className="flex items-center gap-md">
-            <Shimmer className="h-[26px] w-[5px] rounded-pill" />
-            <Shimmer className="h-[24px] w-[160px]" />
+          <div className="flex items-stretch gap-md">
+            <Shimmer className="h-[50px] w-[5px] rounded-sm" />
+            <Shimmer className="h-[24px] w-[160px] self-center" />
           </div>
-          <div className="flex gap-lg overflow-hidden">
+          <div className="flex gap-xl overflow-hidden">
             {[0, 1, 2, 3].map((card) => (
               <BookCard
                 key={card}

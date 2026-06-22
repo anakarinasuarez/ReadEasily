@@ -90,3 +90,11 @@ export const ReducedMotion: Story = {
 
 /** Single item — no dots, no auto-cycle; just the centered cover. */
 export const SingleItem: Story = { args: { items: [COVERS[3]] } };
+
+/**
+ * Decorative — for single-featured-story hosts (the Library hero). The fan
+ * still auto-cycles visually, but the region is `aria-hidden`, the tiles are
+ * non-interactive, and the dots are inert indicators — no control that does
+ * nothing. The host's copy block carries all the announced information.
+ */
+export const Decorative: Story = { args: { decorative: true } };

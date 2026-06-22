@@ -24,12 +24,12 @@ const libraryData: LibraryData = {
     level: "A2",
     levelLabel: "Elementary",
     minutes: 6,
-    words: 480,
+    words: 312,
     coverSrc: "/covers/ant-grasshopper.svg",
     category: "fables",
     href: "/read/the-ant-and-the-grasshopper",
     teaser:
-      "All summer the grasshopper sang while the ant stored grain. When winter came, only one of them was ready.",
+      "All summer long the grasshopper sings while the ants store grain. When winter comes, only one of them is ready.",
     badgeLabel: "Editor's pick",
     showcaseCovers: [
       "/covers/ant-grasshopper.svg",
@@ -78,7 +78,7 @@ const libraryData: LibraryData = {
     {
       id: "fables",
       title: "Fables",
-      subtitle: "Timeless tales with a gentle lesson",
+      subtitle: "Timeless tales, gently retold",
       books: [
         {
           id: "the-tortoise-and-the-hare",
