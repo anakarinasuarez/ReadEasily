@@ -44,6 +44,47 @@ Figma, but design law requires an AA-visible 2px ring across primitives.
 Chip padding ships as named off-scale tokens `--space-chip-x` (14px) /
 `--space-chip-y` (7px) rather than rounding onto the 4/8/12/16/24 ramp.
 
+### Named off-scale tokens (the `--space-chip-x` precedent)
+
+Some Figma values sit deliberately off the t-shirt scale and are used widely
+enough that snapping would visibly hurt. These ship as **named** tokens so they
+stay 1:1-mappable, never silently rounded:
+
+| Token | Value | Where (≥2 specs) |
+| --- | --- | --- |
+| `--space-chip-x` / `-y` | 14px / 7px | Chip padding |
+| `--radius-card` | 20px | Search field + Search/Saved word cards |
+| `--radius-icon` | 13px | Search 44px icon tile — **canonical icon-tile radius** |
+
+**Icon-tile radius reconcile.** Figma icon tiles read 12–13px, but `SettingsRow`
+`IconTile` currently renders `rounded-md` (16px) — three values in play (12–13 Figma,
+16 SettingsRow, new 13 token). Resolved by standardizing **`--radius-icon` = 13px**
+as the one canonical icon-tile radius. Follow-up for the component owner: SettingsRow
+`IconTile` should adopt `rounded-icon` (replace `rounded-md`). Documented, not silent.
+
+### Category accents (Search CategoryCard)
+
+Per-category icon-tile accents + their 16% tints. Decorative (the label carries
+meaning), so not gated by text contrast. `travel` introduced a new **teal** hue
+(`--color-teal-500` #2f9f93) — not on any prior ramp.
+
+| Token | Solid | `-subtle` (16% tile fill) |
+| --- | --- | --- |
+| `--cat-fables` | terracotta-500 #d97757 | rgba(217,119,87,.16) |
+| `--cat-daily` | terracotta-600 #d66c44 | rgba(214,108,68,.16) |
+| `--cat-tech` | #5b86b0 (sky blue) | rgba(91,134,176,.16) |
+| `--cat-travel` | teal-500 #2f9f93 | rgba(47,159,147,.16) |
+
+Tailwind: `bg-cat-travel-subtle`, `text-cat-travel`, etc.
+
+### Warm soft-elevation shadows
+
+Figma card/field/stat shadows use a warmer ink (`rgba(79,51,23,…)`) and are
+single-layer — they do **not** match the `rgba(60,44,29,…)` sm/md/lg ramp, so they
+are **additions** (the ramp stays). `--shadow-card` (0 5px 16px /.07),
+`--shadow-field` (0 2px 8px /.06), `--shadow-stat` (0 5px 14px /.10). Tailwind:
+`shadow-card`, `shadow-field`, `shadow-stat`.
+
 ### AA decisions baked in (from 📋 Handoff & Specs)
 
 | Intent | Token | Resolves to |
@@ -52,7 +93,7 @@ Chip padding ships as named off-scale tokens `--space-chip-x` (14px) /
 | interactive terracotta | `--bg-accent-strong` | `--color-terracotta-700` (#b35029) |
 | info | `--feedback-info` | `--color-sky-700` (#3d6082) |
 | success | `--feedback-success` | `--color-forest-700` (#5e7b3a) |
-| warning text | `--feedback-warning` | #8a5a14 (~5.0:1 on `warning-subtle`) |
+| warning text + numerals | `--feedback-warning` | #8a5a14 (~5.0:1 on `warning-subtle`, ~5.9:1 on `bg-elevated`) |
 | danger text/border | `--feedback-danger` | #bf4636 (~5.0:1 on canvas) |
 
 Use `--bg-accent-strong` for interactive terracotta — **never** raw `terracotta-500`.
@@ -72,6 +113,48 @@ because the raw values fail WCAG AA at the sizes the components use:
   design-lead) and fails for the 12px error caption. #bf4636 clears **~5.0:1**
   on canvas and passes for the 2px input error border. Flagged for the
   design-lead to push the AA value back into the Figma variable.
+
+### Screen-spec reconciliation (Search / Saved / Profile)
+
+A consolidated set of gaps surfaced from the three new screen specs. Each value
+below was confirmed across ≥2 specs unless noted.
+
+**Forest value drift (visible bug, fixed).** Figma resolves `forest-500 = #74a64a`
+and `forest-100 = #e4efd2`; the tokens previously held `#7a9a4e` / `#e0ead0`
+(promoted [D]→[C]). Affects the Search green "selected" CategoryCard and the
+Library green carousel dot. **Contrast impact: none** — `--feedback-success`
+(#566f34, a [D-AA] override) and `--feedback-success-subtle` (#e4efd2, [C]) do not
+derive from these primitives, so the forest/700 success pair still passes AA.
+`contrast.test.ts` re-runs green (12/12). Note: `forest-100` now equals
+`--feedback-success-subtle` exactly, confirming success-subtle = forest/100.
+
+**Amber numeral AA (Saved).** The "practice sets" numeral must use
+`--feedback-warning` (#8a5a14), **never** raw `#e0a838` (`--feedback-warning-solid`,
+decorative only). #8a5a14 clears ~5.9:1 on `bg-elevated` — guarded by a new
+`contrast.test.ts` pair ("warning numeral on elevated"). The existing token was
+already the AA-safe text value, so no new `-text` variant was needed.
+
+**Off-scale spacing — snap vs add.** Recommendation was to snap where it won't
+visibly hurt; all reported gaps are layout gutters where a few px is imperceptible,
+so all snap to the existing ramp — no new spacing tokens:
+
+| Figma gap | Decision | Maps to |
+| --- | --- | --- |
+| 54px (column gap) | snap | `--space-3xl` (48) |
+| 50px (column gap) | snap | `--space-3xl` (48) |
+| 33px (gap) | snap | `--space-2xl` (32) |
+| 20px (stat-pill gap) | snap | `--space-xl` (24) |
+| 14px (empty-stack gap) | **reuse** | `--space-chip-x` (14) |
+
+**Profile container radii (22px / 26px) — snap.** Both are within 2px of an
+existing step, sub-perceptual on large containers; adding two more off-scale radii
+for a 2px delta would bloat the contract with no visible gain. `22 → --radius-lg`
+(24), `26 → --radius-2xl` (28). (Named off-scale is reserved for `--radius-card`/
+`-icon`, which are widely used and clearly distinct from the scale.)
+
+> **TODO(pending-design):** the Profile "Reduce motion" tile uses a plum/violet
+> tone that is NOT in any current ramp. Awaiting a design decision — remap to an
+> existing tone vs. add `--feedback-violet-subtle`. **Do not add the token yet.**
 
 ## Tailwind v4 wiring
 
@@ -157,8 +240,10 @@ Replace these [D] values with exact Figma values; nothing here is confirmed.
       `200 #e7d6b1` / `500 #876b4f` / `600 #6d5840` / `900 #3c2c1d`.
 - [ ] **Amber ramp** steps `50,100,200,400,500,600,700` — anchored on confirmed `300 #efc97f`.
       (Amber is a standalone gold accent hue; borders use the **ink** ramp, not amber.)
-- [ ] **Forest ramp** steps `50,100,300,500` — anchored on confirmed `700 #5e7b3a`.
+- [ ] **Forest ramp** steps `50,300` — anchored on confirmed `100 #e4efd2` /
+      `500 #74a64a` / `700 #5e7b3a` (100+500 promoted to [C] via Search/Saved specs).
 - [ ] **Sky ramp** steps `100,300,500` — anchored on confirmed `700 #3d6082` / `50 #dde9f2`.
+- [ ] **Teal ramp** — only `500 #2f9f93` surfaced (Search travel tile). Add the rest if needed.
 - [ ] **Dark mode** — the ENTIRE `[data-theme="dark"]` block in `colors.css` and
       `shadows.css` is best-effort inversion and UNVERIFIED. Replace with Figma dark mode.
 - [ ] **Spacing** `2xl/3xl/4xl` (32/48/64) — confirm or extend the ramp.

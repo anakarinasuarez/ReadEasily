@@ -57,10 +57,12 @@
 
   /* --- Primitives: Forest (green — success) ---------------------------- */
   --color-forest-50: #eef3e4;  /* [D] */
-  --color-forest-100: #e0ead0; /* [D] */
+  --color-forest-100: #e4efd2; /* [C]  Figma-resolved (Search + Saved specs); was [D] #e0ead0.
+                                  Now equals --feedback-success-subtle (Toggle+Badge). */
   --color-forest-300: #a6bd78; /* [D] */
-  --color-forest-500: #7a9a4e; /* [D] */
-  --color-forest-700: #5e7b3a; /* [C]  = feedback/success (AA success) */
+  --color-forest-500: #74a64a; /* [C]  Figma-resolved (Search selected card + Library carousel dot);
+                                  was [D] #7a9a4e. Decorative fill — not a text pair. */
+  --color-forest-700: #5e7b3a; /* [C]  = feedback/success anchor (AA success) */
 
   /* --- Primitives: Sky (blue — info) ----------------------------------- */
   --color-sky-50: #dde9f2;  /* [C]  = feedback/info-subtle */
@@ -68,6 +70,11 @@
   --color-sky-300: #8aaecb; /* [D] */
   --color-sky-500: #5a82a8; /* [D] */
   --color-sky-700: #3d6082; /* [C]  = feedback/info (AA info) */
+
+  /* --- Primitives: Teal (Search "travel" category accent — standalone hue) */
+  /* [C] Figma travel CategoryCard tile rgba(47,159,147). Not on any prior ramp;
+     only this step surfaced, so it ships as a single confirmed primitive. */
+  --color-teal-500: #2f9f93; /* [C] */
 
   /* --- Primitives: absolute ------------------------------------------- */
   --color-white: #ffffff;
@@ -103,7 +110,9 @@
   --feedback-info-subtle: var(--color-sky-50);    /* #dde9f2 [C] */
   --feedback-warning: #8a5a14;                   /* [D-AA] AA-safe darkened amber. Figma raw = #e0a838
                                                     fails AA (~1.6:1) as text on warning-subtle; this
-                                                    value clears ~5.0:1 on #faebc4. Use for WARNING TEXT. */
+                                                    value clears ~5.0:1 on #faebc4. Use for WARNING TEXT
+                                                    AND warning NUMERALS (Saved "practice sets" count):
+                                                    ~5.9:1 on bg-elevated #fffffb. NEVER raw #e0a838 for text. */
   --feedback-warning-solid: #e0a838;             /* [C] Figma raw amber — DECORATIVE status dot only */
   --feedback-warning-subtle: #faebc4;            /* [C] Badge Warning bg */
   --feedback-danger: #a8392b;                    /* [D-AA] darkened. #bf4636 was AA only vs canvas (5.0:1)
@@ -111,6 +120,21 @@
                                                     it was 3.72:1 (fails AA). #a8392b = 4.69:1 on #f8d5d0,
                                                     6.39:1 on white. Figma raw #cc5a4a. Error text/border + Badge. */
   --feedback-danger-subtle: #f8d5d0;             /* [C] Badge Danger bg */
+
+  /* --- Semantic: category accents (Search CategoryCard icon tiles) ------ */
+  /* [C] Figma Search spec — each category has a solid accent + a 16% tint that
+     fills its icon tile. Decorative (the label carries meaning), so these are
+     not gated by text-contrast. The base re-uses an existing primitive where
+     one exists; the -subtle tints are literal rgba (alpha can't be a hex var).
+     Light-mode confirmed; dark unverified (decorative tints, reconcile later). */
+  --cat-fables: var(--color-terracotta-500);     /* #d97757 — fables → terracotta */
+  --cat-fables-subtle: rgba(217, 119, 87, 0.16);
+  --cat-daily: var(--color-terracotta-600);      /* #d66c44 — daily-life → terracotta */
+  --cat-daily-subtle: rgba(214, 108, 68, 0.16);
+  --cat-tech: #5b86b0;                            /* sky-family blue (Figma rgba 91,134,176) */
+  --cat-tech-subtle: rgba(91, 134, 176, 0.16);
+  --cat-travel: var(--color-teal-500);           /* #2f9f93 — travel → teal */
+  --cat-travel-subtle: rgba(47, 159, 147, 0.16);
 
   /* --- Semantic: overlay & glass surfaces (composites) ----------------- */
   /* [D-design] raw values from the Figma Navbar/Modal specs — reconcile in
