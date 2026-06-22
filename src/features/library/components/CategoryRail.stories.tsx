@@ -12,42 +12,43 @@ const SECTION: CatalogSection = {
   id: "fables",
   title: "Fables",
   subtitle: "Timeless tales, gently retold",
+  accent: "bg-cat-fables-rail",
   books: [
     {
-      id: "the-tortoise-and-the-hare",
-      title: "The Tortoise and the Hare",
+      id: "the-ant-and-the-grasshopper",
+      title: "The Ant and the Grasshopper",
+      level: "A2",
+      minutes: 6,
+      coverSrc: "/covers/the-ant-grasshopper.webp",
+      category: "fables",
+      href: "/read/the-ant-and-the-grasshopper",
+    },
+    {
+      id: "the-clever-crow",
+      title: "The Clever Crow",
       level: "A1",
       minutes: 4,
-      coverSrc: "/covers/tortoise-hare.svg",
+      coverSrc: "/covers/the-clever-crow.webp",
       category: "fables",
-      href: "/read/the-tortoise-and-the-hare",
-    },
-    {
-      id: "the-lion-and-the-mouse",
-      title: "The Lion and the Mouse",
-      level: "A2",
-      minutes: 5,
-      coverSrc: "/covers/lion-mouse.svg",
-      category: "fables",
-      href: "/read/the-lion-and-the-mouse",
-    },
-    {
-      id: "the-fox-and-the-grapes",
-      title: "The Fox and the Grapes",
-      level: "A1",
-      minutes: 3,
-      coverSrc: "/covers/fox-grapes.svg",
-      category: "fables",
-      href: "/read/the-fox-and-the-grapes",
+      href: "/read/the-clever-crow",
     },
     {
       id: "the-boy-who-cried-wolf",
       title: "The Boy Who Cried Wolf",
       level: "A2",
-      minutes: 6,
-      coverSrc: "/covers/crying-wolf.svg",
+      minutes: 5,
+      coverSrc: "/covers/The-boy-who-cried-wolf.webp",
       category: "fables",
       href: "/read/the-boy-who-cried-wolf",
+    },
+    {
+      id: "the-tortoise-and-the-hare",
+      title: "The Tortoise and the Hare",
+      level: "A1",
+      minutes: 5,
+      coverSrc: "/covers/The-tortoise-and-the-hare.webp",
+      category: "fables",
+      href: "/read/the-tortoise-and-the-hare",
     },
   ],
 };
@@ -72,14 +73,38 @@ type Story = StoryObj<typeof meta>;
 /** A standard four-book shelf. */
 export const Default: Story = {};
 
-/** A short "Continue listening"-style shelf (two books). */
+/** A short "Continue listening"-style shelf (two books, brand accent bar). */
 export const ShortShelf: Story = {
   args: {
     section: {
       id: "continue",
       title: "Continue listening",
       subtitle: "Pick up where you left off",
+      accent: "bg-accent",
       books: SECTION.books.slice(0, 2),
+    },
+  },
+};
+
+/** The Travel shelf — shows the per-section accent bar in a category color. */
+export const TravelAccent: Story = {
+  args: {
+    section: {
+      id: "travel",
+      title: "Travel",
+      subtitle: "Stories from the road",
+      accent: "bg-cat-travel",
+      books: [
+        {
+          id: "a-trip-to-the-mountains",
+          title: "A Trip to the Mountains",
+          level: "B1",
+          minutes: 6,
+          coverSrc: "/covers/A-trip-mountains.webp",
+          category: "travel",
+          href: "/read/a-trip-to-the-mountains",
+        },
+      ],
     },
   },
 };

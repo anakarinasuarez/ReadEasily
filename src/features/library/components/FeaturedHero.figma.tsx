@@ -7,11 +7,11 @@
  * are excluded in tsconfig.json). Add the devDependency + `figma.config.json`
  * to publish this mapping.
  *
- * The Figma hero is a static composition (cover fan + eyebrow + editor's-pick
- * badge + title + teaser + meta row + CTA). In code those collapse into one
- * data-driven component: every text/marketing value is a field on the
- * `featured` book, and the fan is the decorative BookShowcase. The mapping
- * shows the canonical wiring with a representative featured story.
+ * The Figma hero is an interactive composition (cover fan + per-story eyebrow +
+ * optional editor's-pick badge + title + teaser + meta row + CTA). In code those
+ * collapse into one data-driven component: the `featured` array drives the fan,
+ * and the centered story's fields populate the copy block + CTA. The mapping
+ * shows the canonical wiring with a representative featured fan.
  */
 import figma from "@figma/code-connect";
 import { FeaturedHero } from "./FeaturedHero";
@@ -22,29 +22,37 @@ figma.connect(
   {
     example: () => (
       <FeaturedHero
-        featured={{
-          id: "the-ant-and-the-grasshopper",
-          title: "The Ant and the Grasshopper",
-          level: "A2",
-          levelLabel: "Elementary",
-          minutes: 6,
-          words: 312,
-          coverSrc: "/covers/ant-grasshopper.svg",
-          category: "fables",
-          href: "/read/the-ant-and-the-grasshopper",
-          teaser:
-            "All summer long the grasshopper sings while the ants store grain. When winter comes, only one of them is ready.",
-          badgeLabel: "Editor's pick",
-          showcaseCovers: [
-            "/covers/ant-grasshopper.svg",
-            "/covers/tortoise-hare.svg",
-            "/covers/lion-mouse.svg",
-            "/covers/fox-grapes.svg",
-            "/covers/crying-wolf.svg",
-            "/covers/lighthouse.svg",
-            "/covers/market.svg",
-          ],
-        }}
+        featured={[
+          {
+            id: "the-tortoise-and-the-hare",
+            title: "The Tortoise and the Hare",
+            level: "A1",
+            levelLabel: "Beginner",
+            minutes: 5,
+            words: 240,
+            coverSrc: "/covers/The-tortoise-and-the-hare.webp",
+            category: "fables",
+            href: "/read/the-tortoise-and-the-hare",
+            eyebrow: "Featured Fable",
+            teaser:
+              "The hare laughs at the slow tortoise — until a steady pace turns a sure win into a famous lesson.",
+          },
+          {
+            id: "the-ant-and-the-grasshopper",
+            title: "The Ant and the Grasshopper",
+            level: "A2",
+            levelLabel: "Elementary",
+            minutes: 6,
+            words: 312,
+            coverSrc: "/covers/the-ant-grasshopper.webp",
+            category: "fables",
+            href: "/read/the-ant-and-the-grasshopper",
+            eyebrow: "Featured Fable",
+            badgeLabel: "Editor's pick",
+            teaser:
+              "All summer long the grasshopper sings while the ants store grain. When winter comes, only one of them is ready.",
+          },
+        ]}
       />
     ),
   },

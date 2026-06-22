@@ -127,8 +127,14 @@
      not gated by text-contrast. The base re-uses an existing primitive where
      one exists; the -subtle tints are literal rgba (alpha can't be a hex var).
      Light-mode confirmed; dark unverified (decorative tints, reconcile later). */
-  --cat-fables: var(--color-terracotta-500);     /* #d97757 — fables → terracotta */
+  --cat-fables: var(--color-terracotta-500);     /* #d97757 — fables → terracotta (Search) */
   --cat-fables-subtle: rgba(217, 119, 87, 0.16);
+  --cat-fables-rail: var(--color-forest-500);    /* [C] Library Fables rail left accent bar (node 1272:4638)
+                                                    fills #74a64a = forest-500. DELIBERATE divergence: Library
+                                                    rails use green here, NOT terracotta like Search's
+                                                    --cat-fables. User-confirmed intentional — do NOT "fix"
+                                                    back to terracotta. Decorative (rail heading carries
+                                                    meaning), so not gated by text contrast. Dark unverified. */
   --cat-daily: var(--color-terracotta-600);      /* #d66c44 — daily-life → terracotta */
   --cat-daily-subtle: rgba(214, 108, 68, 0.16);
   --cat-tech: #5b86b0;                            /* sky-family blue (Figma rgba 91,134,176) */
@@ -144,6 +150,12 @@
   --surface-glass-to: rgba(253, 247, 237, 0.40);   /* navbar glass gradient end */
   --surface-glass-border: rgba(255, 255, 255, 0.65);
   --surface-glass-blur: 10px;                      /* backdrop-blur radius */
+
+  /* [C] BookShowcase INACTIVE position dot (node 1272:4600) = translucent cocoa
+     rgba(79,51,23,0.16) = #4f3317 @16%. No exact primitive (distinct cocoa + alpha),
+     so a literal rgba like the -subtle tints. Decorative indicator. Consumed via
+     arbitrary-value class (bg-[var(--carousel-dot-idle)]) like scrim/glass — not @theme. */
+  --carousel-dot-idle: rgba(79, 51, 23, 0.16);
 
   /* --- Semantic: focus ------------------------------------------------ */
   /* No focus token exists in Figma; design law requires an AA-visible 2px

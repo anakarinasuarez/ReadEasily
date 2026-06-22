@@ -104,6 +104,7 @@
   /* Category accents (Search CategoryCard tiles) -> bg-cat-*-subtle, text-cat-* */
   --color-cat-fables: var(--cat-fables);
   --color-cat-fables-subtle: var(--cat-fables-subtle);
+  --color-cat-fables-rail: var(--cat-fables-rail);
   --color-cat-daily: var(--cat-daily);
   --color-cat-daily-subtle: var(--cat-daily-subtle);
   --color-cat-tech: var(--cat-tech);
@@ -177,6 +178,8 @@
   --shadow-card: var(--shadow-card);
   --shadow-field: var(--shadow-field);
   --shadow-stat: var(--shadow-stat);
+  --shadow-cover-center: var(--shadow-cover-center);
+  --shadow-cover-side: var(--shadow-cover-side);
 
   /* Type-style font sizes (paired line-heights) -> text-display-l, text-reading-m... */
   --text-display-l: var(--text-display-l-size);

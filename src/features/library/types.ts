@@ -24,7 +24,10 @@ export interface Book {
   level: Level;
   /** Estimated read/listen time in minutes, rendered as "{minutes} min". */
   minutes: number;
-  /** Cover art URL (local /covers/*.svg today; Supabase Storage later). */
+  /**
+   * Cover art URL — optimized painted WebP served via next/image from
+   * `/covers/*.webp` today; Supabase Storage later.
+   */
   coverSrc: string;
   /** Category id this book belongs to — matches a `Category.id`. */
   category: string;
@@ -33,20 +36,31 @@ export interface Book {
 }
 
 /**
- * The single hero story on the Library landing — a Book enriched with the
- * showcase/marketing fields the featured panel renders.
+ * One story in the featured fan atop the Library landing — a Book enriched with
+ * the showcase/marketing fields the hero copy block renders for it.
+ *
+ * The fan holds SEVERAL distinct featured stories (Figma node 1272:4611): the
+ * centered one is described by the copy block, and each side cover brings itself
+ * to centre on click. Because the fan mixes categories, the section label is
+ * per-story (`eyebrow`), not a fixed "Featured Fable".
  */
 export interface FeaturedBook extends Book {
+  /**
+   * Per-story section label shown above the title (e.g. "FEATURED FABLE",
+   * "FEATURED TRAVEL"). Per-story because the fan mixes categories.
+   */
+  eyebrow: string;
   /** Human label for the level, e.g. "Elementary" for A2. */
   levelLabel: string;
   /** Approximate word count, shown in the featured stats. */
   words: number;
   /** One-line hook describing the story. */
   teaser: string;
-  /** Pill copy over the hero, e.g. "Editor's pick". */
-  badgeLabel: string;
-  /** Cover URLs for the auto-cycling showcase carousel (~7 covers). */
-  showcaseCovers: string[];
+  /**
+   * Optional "Editor's pick"-style pill copy. Render the badge ONLY when this
+   * is present — not every featured story is a staff pick.
+   */
+  badgeLabel?: string;
 }
 
 /** A filter chip. Always includes the sentinel `{ id: 'all', label: 'All' }`. */
@@ -60,12 +74,20 @@ export interface CatalogSection {
   id: string;
   title: string;
   subtitle: string;
+  /**
+   * Tailwind utility for the solid left accent bar (Figma-measured, per shelf):
+   * the non-category "Continue" shelf uses `bg-accent`; category shelves use
+   * their own token utility (e.g. `bg-cat-fables-rail`, `bg-cat-travel`). An
+   * explicit token reference, never derived from the shelf's books.
+   */
+  accent: string;
   books: Book[];
 }
 
 /** The full payload the Library landing renders. */
 export interface LibraryData {
-  featured: FeaturedBook;
+  /** The featured fan, in display order; the centre starts at the middle index. */
+  featured: FeaturedBook[];
   user: { name: string; avatarSrc?: string };
   categories: Category[];
   /** Shelves in display order; a `continue` section sorts first when present. */

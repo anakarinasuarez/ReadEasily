@@ -39,6 +39,14 @@
   --shadow-card: 0 5px 16px rgba(79, 51, 23, 0.07);  /* [C] cards (Search field+card, Saved word card) */
   --shadow-field: 0 2px 8px rgba(79, 51, 23, 0.06);  /* [C] input fields */
   --shadow-stat: 0 5px 14px rgba(79, 51, 23, 0.10);  /* [C] Saved stat pill */
+
+  /* --- Library featured-carousel cover elevations ---------------------- */
+  /* [C] Measured by design-lead from Figma Book Carousel node 1272:4611.
+     center cover (`book-center`) = heavy warm lift; side covers
+     (`book-*1/2/3`) = light warm shadow. Decorative-elevation values,
+     light-mode confirmed (dark unverified — see dark block below). */
+  --shadow-cover-center: 0px 22px 42px rgba(69, 46, 20, 0.36);  /* [C] centred/active cover */
+  --shadow-cover-side: 4px 10px 20px rgba(69, 46, 20, 0.18);    /* [C] receding side covers */
 }
 
 /* Dark mode: deepen shadow opacity so elevation reads on dark surfaces. [D] */
@@ -56,4 +64,7 @@
   --shadow-card: 0 5px 16px rgba(0, 0, 0, 0.40);
   --shadow-field: 0 2px 8px rgba(0, 0, 0, 0.35);
   --shadow-stat: 0 5px 14px rgba(0, 0, 0, 0.45);
+  /* [D] deepened carousel cover elevations for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
+  --shadow-cover-center: 0px 22px 42px rgba(0, 0, 0, 0.55);
+  --shadow-cover-side: 4px 10px 20px rgba(0, 0, 0, 0.40);
 }

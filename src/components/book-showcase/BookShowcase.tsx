@@ -8,31 +8,33 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import type { HTMLAttributes, KeyboardEvent } from "react";
+import type { HTMLAttributes, KeyboardEvent, SVGProps } from "react";
 import { BookCover } from "@/components/book-card";
 
 /**
- * BookShowcase — the fanned, auto-cycling featured-cover carousel for the
+ * BookShowcase — the circular, auto-rotating "cover-flow" carousel for the
  * Library hero, 1:1 with the Figma "Book Carousel" (node 1272:4611) + its
  * position dots (node 1272:4600).
  *
- * It is a presentation composite: it fans a set of covers (the active one
- * centered/largest/raised, neighbours receding symmetrically with rotation +
- * scale + horizontal offset + depth fade), auto-cycles which cover is centered,
- * and shows a synced row of position dots. Interactive hosts read `onActiveChange`
- * to drive a copy block; single-story hosts use `decorative` (see below).
+ * It is a presentation composite that fans a set of covers around a CIRCULAR
+ * loop: the active cover is centered (largest, raised, full opacity, strongest
+ * warm shadow); neighbours recede symmetrically by ring (rotation + scale + x
+ * offset + depth fade + lighter shadow). For up to `FAN_RING.length` covers per
+ * side, EVERY cover is always on a ring slot (none vanishes at an edge); extra
+ * covers (N beyond the fan width) ride at the back, faded out. It auto-rotates
+ * STEP-AND-REST (each cover slides to centre, rests `autoAdvanceMs`, then steps)
+ * and shows a synced dot row plus a Pause/Play toggle.
  *
  * A11y: in the default (interactive) mode the region is a `carousel` whose
- * accessible control is the dots — the fanned cover images are decorative (the
- * active book's real title/level live in the hero copy block), so every cover
- * tile is `aria-hidden` and the dots are real `<button>`s with `aria-current`.
+ * accessible controls are the dots (roving tabindex, per-story names) + the
+ * Pause/Play toggle. The fanned cover images are decorative (the active book's
+ * real title/level live in the host copy block), so every tile is `aria-hidden`.
+ * `onActiveChange` is tagged `"auto"` (timer) vs `"user"` (dot/arrow/cover) so
+ * the host announces only user-initiated changes (never auto-advance) and can
+ * hard-stop rotation on interaction (WCAG 2.2.2).
  *
- * `decorative` mode is for hosts with a SINGLE featured story (the Library
- * hero): there is no choice to advertise, so the dots would be an interactive
- * control that does nothing — an AA operability failure. In decorative mode the
- * fan still auto-cycles visually, but the whole region is `aria-hidden`, the
- * tiles are non-interactive, and the dots are inert position indicators. The
- * host's copy block carries all the real, announced information.
+ * `decorative` mode hides the whole region from AT (a single-story host); the
+ * fan still auto-cycles visually and the dots become inert indicators.
  *
  * The fan transform numbers are Figma-exact geometry (no token covers cover-fan
  * placement), annotated below like the off-scale literals in Avatar/BookCover.
@@ -42,23 +44,58 @@ export interface BookShowcaseItem {
   /** Cover image URL fed to the underlying BookCover. */
   coverSrc: string;
   /**
-   * Describes the cover. NOT rendered on the decorative fan tiles (they are
-   * `aria-hidden`); kept on the item so the consumer's hero copy block can use
-   * the same source of truth as the active index.
+   * The story's accessible name. The fan tiles stay `aria-hidden`, so this is
+   * NOT painted on them; instead it (a) names the item's position dot — the
+   * accessible control — so a dot identifies its story rather than reading
+   * "Featured story N", and (b) lets the consumer's hero copy block share the
+   * same source of truth as the active index.
    */
   alt: string;
+  /**
+   * Optional reader destination. When the item is the CENTER (active) cover and
+   * has an `href`, its tile renders as a real link — a redundant pointer
+   * affordance over the host CTA (it stays `aria-hidden` + untabbable, so it
+   * adds no duplicate tab stop; the dots/CTA are the keyboard/AT path).
+   */
+  href?: string;
 }
+
+/** Why the active index changed — lets the host treat auto vs user differently. */
+export type ActiveChangeSource = "auto" | "user";
 
 export interface BookShowcaseProps
   extends Omit<HTMLAttributes<HTMLElement>, "onChange"> {
-  /** The featured covers, fanned in order. */
+  /** The featured covers, fanned in order around the loop. */
   items: BookShowcaseItem[];
   /** Controlled active index. Omit for uncontrolled (internal state). */
   activeIndex?: number;
-  /** Fires whenever the active cover changes (timer, dot click, or arrows). */
-  onActiveChange?: (index: number) => void;
-  /** Auto-cycle interval in ms. Default 4500. Ignored under reduced-motion. */
+  /**
+   * Fires whenever the active cover changes, tagged with its `source`: `"auto"`
+   * (the rest timer) or `"user"` (dot / arrow / side-cover). The host announces
+   * only `"user"` changes and hard-stops auto on any `"user"` change.
+   */
+  onActiveChange?: (index: number, source: ActiveChangeSource) => void;
+  /** Rest interval in ms between auto steps. Default 4500. Off under reduced-motion. */
   autoAdvanceMs?: number;
+  /**
+   * Whether the fan auto-rotates. Default `true`. When `false` (or
+   * `autoAdvanceMs <= 0`) no timer is started — a purely user-driven carousel.
+   */
+  autoAdvance?: boolean;
+  /**
+   * Host-controlled pause. OR'd with the component's own hover/focus pause, so
+   * the host can pause for hover/focus over a WIDER region than the fan (e.g.
+   * the whole hero, so reaching for the CTA pauses rotation).
+   */
+  paused?: boolean;
+  /**
+   * Play state for the Pause/Play toggle. When provided together with
+   * `onTogglePlay` (and not decorative / not reduced-motion / count > 1) the
+   * toggle renders to the right of the dots. The host owns this state.
+   */
+  playing?: boolean;
+  /** Toggles play state from the visible Pause/Play control. */
+  onTogglePlay?: () => void;
   /** Accessible name for the carousel region. Default "Featured stories". */
   label?: string;
   /**
@@ -91,6 +128,15 @@ const FAN_RING = [
 /** The fan shows the center cover plus this many neighbours per side. */
 const MAX_RING = FAN_RING.length - 1;
 
+/**
+ * Differential warm elevation per position — the centre is THE story. Uses the
+ * Figma-exact cover-elevation tokens (centre 0 22 42 / .36, side 4 10 20 / .18,
+ * node 1272:4611): the raised centre gets the heavy warm lift, the receding
+ * sides the light one.
+ */
+const CENTER_SHADOW = "var(--shadow-cover-center)";
+const SIDE_SHADOW = "var(--shadow-cover-side)";
+
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 /** Reads `prefers-reduced-motion: reduce`, SSR/jsdom-safe (no setState-in-effect). */
@@ -107,6 +153,37 @@ function usePrefersReducedMotion(): boolean {
   );
 }
 
+/**
+ * Shortest signed circular distance from the active index to item `i`, folded to
+ * the range (−count/2 … +count/2]. For N ≤ 2·MAX_RING+1 this keeps EVERY item on
+ * a ring slot for any `active` (the fan never empties); for larger N the surplus
+ * folds to the back rings.
+ */
+function circularOffset(i: number, active: number, count: number): number {
+  let off = (((i - active) % count) + count) % count; // 0 … count-1
+  if (off > count / 2) off -= count; // fold to −…+
+  return off;
+}
+
+/** Two-bar pause glyph (shown while playing — the action is "Pause"). */
+function PauseGlyph(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" {...props}>
+      <rect x="7" y="5" width="3.5" height="14" rx="1.2" />
+      <rect x="13.5" y="5" width="3.5" height="14" rx="1.2" />
+    </svg>
+  );
+}
+
+/** Triangle play glyph (shown while paused — the action is "Play"). */
+function PlayGlyph(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" {...props}>
+      <path d="M8 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 8 5.5Z" />
+    </svg>
+  );
+}
+
 export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
   function BookShowcase(
     {
@@ -114,6 +191,10 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
       activeIndex,
       onActiveChange,
       autoAdvanceMs = 4500,
+      autoAdvance = true,
+      paused: pausedByHost = false,
+      playing,
+      onTogglePlay,
       label = "Featured stories",
       decorative = false,
       className,
@@ -135,29 +216,57 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
     const reducedMotion = usePrefersReducedMotion();
     const [hovered, setHovered] = useState(false);
     const [focused, setFocused] = useState(false);
-    const paused = hovered || focused;
+    const paused = hovered || focused || pausedByHost;
 
     const dotRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
+    // Seam-teleport bookkeeping. When `active` changes, compute — DURING render,
+    // via React's blessed "adjust state when a prop/state changes" pattern (not
+    // an effect, and not a ref read; both are disallowed by the compiler rules)
+    // — which items wrapped the loop this step. Those teleport (transition
+    // suppressed) at the faint far ring instead of flying across the front. The
+    // flag set is recomputed fresh on every step, so it is always correct at the
+    // moment a transform changes (a stale flag on an unrelated re-render is
+    // harmless — there is no transform change to animate).
+    const [prevActive, setPrevActive] = useState(active);
+    const [wrappedFlags, setWrappedFlags] = useState<readonly boolean[]>(
+      () => [],
+    );
+    if (active !== prevActive) {
+      setWrappedFlags(
+        items.map(
+          (_, i) =>
+            Math.abs(
+              circularOffset(i, active, count) -
+                circularOffset(i, prevActive, count),
+            ) > MAX_RING,
+        ),
+      );
+      setPrevActive(active);
+    }
+
     const goTo = useCallback(
-      (next: number) => {
+      (next: number, source: ActiveChangeSource) => {
         if (count === 0) return;
         const idx = ((next % count) + count) % count;
         if (!isControlled) setInternal(idx);
-        onActiveChange?.(idx);
+        onActiveChange?.(idx, source);
       },
       [count, isControlled, onActiveChange],
     );
 
-    // Auto-cycle. Kicks off on mount and — because `active` is a dependency —
-    // RESETS every time the active cover changes (e.g. a dot click), matching
-    // the book-showcase-autocycle memory (it must actually start, not just be
-    // defined). Paused on hover/focus-within; disabled under reduced-motion.
+    // Auto-rotate is OFF entirely when `autoAdvance` is false or the interval is
+    // non-positive (no timer started, nothing to pause).
+    const autoCycles = autoAdvance && autoAdvanceMs > 0;
+
+    // Step-and-rest auto-rotation: a single timer per rest, re-armed whenever
+    // `active` changes (manual or auto). Paused on hover/focus (own + host);
+    // disabled under reduced-motion; never started when `autoCycles` is false.
     useEffect(() => {
-      if (reducedMotion || paused || count <= 1) return;
-      const id = window.setTimeout(() => goTo(active + 1), autoAdvanceMs);
+      if (!autoCycles || reducedMotion || paused || count <= 1) return;
+      const id = window.setTimeout(() => goTo(active + 1, "auto"), autoAdvanceMs);
       return () => window.clearTimeout(id);
-    }, [reducedMotion, paused, count, autoAdvanceMs, active, goTo]);
+    }, [autoCycles, reducedMotion, paused, count, autoAdvanceMs, active, goTo]);
 
     // Blur bubbles; only drop the pause once focus actually left the region.
     const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
@@ -175,9 +284,16 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
       else if (e.key === "End") next = count - 1;
       if (next === null) return;
       e.preventDefault();
-      goTo(next);
+      goTo(next, "user");
       dotRefs.current[next]?.focus();
     };
+
+    const showToggle =
+      onTogglePlay !== undefined &&
+      playing !== undefined &&
+      !decorative &&
+      !reducedMotion &&
+      count > 1;
 
     return (
       <section
@@ -197,14 +313,16 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
         {/* Fan stage — covers are absolutely centered then transformed per ring. */}
         <div className="relative h-[360px] w-full overflow-hidden">
           {items.map((item, i) => {
-            const offset = i - active;
+            // Circular: every item lands on a ring slot for any `active`, so no
+            // cover vanishes at an edge (the prior linear `i - active` bug).
+            const offset = circularOffset(i, active, count);
             const dist = Math.abs(offset);
             const side = Math.sign(offset); // -1 left, +1 right, 0 center
             const ring = FAN_RING[Math.min(dist, MAX_RING)];
-            const hidden = dist > MAX_RING;
+            const hidden = dist > MAX_RING; // only when N exceeds the fan width
 
-            // Beyond the fan: keep sliding out (so transitions read as motion),
-            // fully transparent and behind everything.
+            // Beyond the fan (large N): ride at the BACK, faded out — not flying
+            // across the front. The circular fold keeps it on the short side.
             const x = hidden
               ? side * (FAN_RING[MAX_RING].x + (dist - MAX_RING) * 60)
               : side * ring.x;
@@ -214,35 +332,63 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
             const opacity = hidden ? 0 : ring.opacity;
             const z = hidden ? 0 : ring.z;
 
-            // Interactive mode: visible side covers are clickable to bring
-            // them to centre (the dots remain the keyboard/AT control; tiles
-            // stay aria-hidden + untabbable, a redundant pointer affordance).
-            // Decorative mode: tiles are inert — no click target on a hidden
-            // node, no focus trap (resolves the aria-hidden-button concern).
+            // Seam teleport: an item that wrapped the loop this step (computed
+            // above) suppresses its transition for THIS render so it re-appears
+            // at the far ring instead of tweening across the front. Covers
+            // multi-step manual dot jumps too.
+            const wrapped = wrappedFlags[i] ?? false;
+
+            // Interactive mode: visible SIDE covers are clickable to bring them
+            // to centre. The CENTER cover, when its item has an `href`, is a real
+            // link into the reader — still aria-hidden + tabIndex -1, no dup tab
+            // stop. Decorative mode: tiles are inert.
             const interactive = !decorative && !hidden && dist > 0;
+            const isCenterLink = !decorative && dist === 0 && Boolean(item.href);
             const tileClass = cx(
-              "absolute left-1/2 top-1/2 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none",
-              interactive ? "cursor-pointer" : "pointer-events-none",
+              "absolute left-1/2 top-1/2 rounded-[var(--radius-xl)] ease-out motion-reduce:transition-none",
+              wrapped
+                ? "transition-none"
+                : "transition-[transform,opacity,box-shadow] duration-300",
+              interactive || isCenterLink ? "cursor-pointer" : "pointer-events-none",
             );
             const tileStyle = {
               transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${scale})`,
               opacity,
               zIndex: z,
+              // Differential elevation — centre raised hardest (see token note).
+              boxShadow: dist === 0 ? CENTER_SHADOW : SIDE_SHADOW,
             };
             // Decorative tile — the real cover info lives in the host copy.
             const tile = <BookCover size="small" src={item.coverSrc} alt="" />;
 
-            return decorative ? (
-              <div key={i} aria-hidden="true" className={tileClass} style={tileStyle}>
-                {tile}
-              </div>
-            ) : (
+            if (decorative) {
+              return (
+                <div key={i} aria-hidden="true" className={tileClass} style={tileStyle}>
+                  {tile}
+                </div>
+              );
+            }
+            if (isCenterLink) {
+              return (
+                <a
+                  key={i}
+                  href={item.href}
+                  aria-hidden="true"
+                  tabIndex={-1}
+                  className={cx(tileClass, "block")}
+                  style={tileStyle}
+                >
+                  {tile}
+                </a>
+              );
+            }
+            return (
               <button
                 key={i}
                 type="button"
                 aria-hidden="true"
                 tabIndex={-1}
-                onClick={interactive ? () => goTo(i) : undefined}
+                onClick={interactive ? () => goTo(i, "user") : undefined}
                 className={tileClass}
                 style={tileStyle}
               >
@@ -263,46 +409,76 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
                   "block h-[9px] rounded-[var(--radius-pill)] transition-[width,background-color] duration-200 ease-out motion-reduce:transition-none",
                   i === active
                     ? "w-[26px] bg-[var(--feedback-success)]"
-                    : "w-[9px] bg-[var(--border-default)]",
+                    : "w-[9px] bg-[var(--carousel-dot-idle)]",
                 )}
               />
             ))}
           </div>
         )}
 
-        {/* Interactive mode: position dots are the accessible control. */}
+        {/* Interactive mode: position dots (+ optional Pause/Play toggle) are the
+            accessible controls. */}
         {count > 1 && !decorative && (
-          <div role="group" aria-label="Choose a featured story" className="flex items-center gap-sm">
-            {items.map((_, i) => {
-              const isActive = i === active;
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  ref={(el) => {
-                    dotRefs.current[i] = el;
-                  }}
-                  aria-label={`Featured story ${i + 1}`}
-                  aria-current={isActive ? "true" : undefined}
-                  onClick={() => goTo(i)}
-                  onKeyDown={(e) => onDotKeyDown(e, i)}
-                  className={cx(
-                    "inline-flex h-6 items-center justify-center rounded-[var(--radius-pill)] px-1",
-                    "focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]",
-                  )}
-                >
-                  {/* Visible pill: active elongates to ~26px (Figma-exact). */}
-                  <span
+          <div className="flex items-center gap-md">
+            <div
+              role="group"
+              aria-label="Choose a featured story"
+              className="flex items-center gap-sm"
+            >
+              {items.map((_, i) => {
+                const isActive = i === active;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    ref={(el) => {
+                      dotRefs.current[i] = el;
+                    }}
+                    aria-label={items[i].alt}
+                    aria-current={isActive ? "true" : undefined}
+                    // True roving tabindex: only the active dot is in the tab
+                    // order (one tab stop); ←/→/Home/End move within it.
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => goTo(i, "user")}
+                    onKeyDown={(e) => onDotKeyDown(e, i)}
                     className={cx(
-                      "block h-[9px] rounded-[var(--radius-pill)] transition-[width,background-color] duration-200 ease-out motion-reduce:transition-none",
-                      isActive
-                        ? "w-[26px] bg-[var(--feedback-success)]"
-                        : "w-[9px] bg-[var(--border-default)]",
+                      "inline-flex h-6 items-center justify-center rounded-[var(--radius-pill)] px-1",
+                      "focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]",
                     )}
-                  />
-                </button>
-              );
-            })}
+                  >
+                    {/* Visible pill: active elongates to ~26px (Figma-exact). */}
+                    <span
+                      className={cx(
+                        "block h-[9px] rounded-[var(--radius-pill)] transition-[width,background-color] duration-200 ease-out motion-reduce:transition-none",
+                        isActive
+                          ? "w-[26px] bg-[var(--feedback-success)]"
+                          : "w-[9px] bg-[var(--carousel-dot-idle)]",
+                      )}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Pause/Play — the touch-operable control 2.2.2 requires (hover/
+                focus pause alone fails touch). Label reflects the ACTION; hidden
+                under reduced-motion (nothing to pause). Carries an icon. */}
+            {showToggle && (
+              <button
+                type="button"
+                onClick={onTogglePlay}
+                aria-label={playing ? "Pause featured stories" : "Play featured stories"}
+                className={cx(
+                  "inline-flex size-6 shrink-0 items-center justify-center rounded-[var(--radius-pill)] text-muted",
+                  "transition-colors duration-200 ease-out hover:text-primary",
+                  "focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]",
+                )}
+              >
+                <span className="inline-flex size-[16px] items-center justify-center [&>svg]:size-full">
+                  {playing ? <PauseGlyph /> : <PlayGlyph />}
+                </span>
+              </button>
+            )}
           </div>
         )}
       </section>

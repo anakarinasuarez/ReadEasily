@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { BookCover } from "./BookCover";
 
-const SRC = "/covers/ant.png";
+const SRC = "/covers/the-ant-grasshopper.webp";
 const ALT = "The Ant & the Grasshopper cover";
 
 describe("BookCover", () => {

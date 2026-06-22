@@ -8,7 +8,7 @@ const BOOK = {
   title: "The Ant & the Grasshopper",
   level: "A2",
   minutes: 6,
-  coverSrc: "/covers/ant.png",
+  coverSrc: "/covers/the-ant-grasshopper.webp",
 };
 
 describe("BookCard", () => {

@@ -12,11 +12,19 @@ describe("getLibrary", () => {
   it("returns a typed LibraryData payload from /api/library", async () => {
     const data = await getLibrary();
 
-    // Featured hero — shape + a couple of load-bearing sample fields.
-    expect(data.featured.title).toBe("The Ant and the Grasshopper");
-    expect(data.featured.level).toBe("A2");
-    expect(data.featured.href).toBe(`/read/${data.featured.id}`);
-    expect(data.featured.showcaseCovers).toHaveLength(7);
+    // Featured fan — an ordered array of distinct stories; the centre (middle
+    // index, where BookShowcase opens) is "The Ant and the Grasshopper".
+    expect(data.featured).toHaveLength(7);
+    const centre = data.featured[Math.floor(data.featured.length / 2)];
+    expect(centre.title).toBe("The Ant and the Grasshopper");
+    expect(centre.level).toBe("A2");
+    // Every featured story routes to /read/${id} and carries a per-story eyebrow.
+    for (const story of data.featured) {
+      expect(story.href).toBe(`/read/${story.id}`);
+      expect(story.eyebrow).toBeTruthy();
+    }
+    // Only the centre is an editor's pick (badge is optional).
+    expect(centre.badgeLabel).toBeTruthy();
 
     // Categories always lead with the `all` sentinel chip.
     expect(data.categories[0]).toEqual({ id: "all", label: "All" });
@@ -24,7 +32,10 @@ describe("getLibrary", () => {
     // A `continue` section, when present, sorts first.
     expect(data.sections[0].id).toBe("continue");
 
-    // Every book routes to /read/${id} — the invariant the reader relies on.
+    // Every section names a solid accent utility; every book routes to /read/${id}.
+    for (const section of data.sections) {
+      expect(section.accent).toBeTruthy();
+    }
     const books = data.sections.flatMap((s) => s.books);
     expect(books.length).toBeGreaterThan(0);
     for (const book of books) {

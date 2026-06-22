@@ -18,12 +18,14 @@ export function CategoryRail({ section }: { section: CatalogSection }) {
   return (
     <section aria-labelledby={headingId} className="flex w-full flex-col gap-md">
       <header className="flex items-stretch gap-md">
-        {/* Accent marker — 5px terracotta bar spanning the full two-line header
-            height (radius-sm), decorative. `items-stretch` lets it match the
-            title+subtitle block rather than a fixed stub. */}
+        {/* Accent marker — 5px solid bar spanning the full two-line header
+            height (radius-sm), decorative. Its color is the section's own accent
+            (Figma-measured per shelf: Continue → brand, Fables → green, etc.).
+            `items-stretch` lets it match the title+subtitle block rather than a
+            fixed stub. */}
         <span
           aria-hidden="true"
-          className="w-[5px] shrink-0 self-stretch rounded-sm bg-accent"
+          className={`w-[5px] shrink-0 self-stretch rounded-sm ${section.accent}`}
         />
         <div className="flex flex-col gap-[2px]">
           <h2

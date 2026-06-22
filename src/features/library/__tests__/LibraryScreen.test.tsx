@@ -72,85 +72,90 @@ describe("LibraryScreen", () => {
       screen.getByRole("heading", { level: 2, name: "Travel" }),
     ).toBeInTheDocument();
 
-    // Single-select chips render as a radio group; pick "Fables".
-    await user.click(screen.getByRole("radio", { name: "Fables" }));
+    // Single-select chips render as a radio group; pick "Travel".
+    await user.click(screen.getByRole("radio", { name: "Travel" }));
 
-    // Only the Fables rail remains; Travel + the continue shelf are gone.
+    // Only the Travel rail remains; Fables + the (all-fables) continue shelf go.
     await waitFor(() => {
       expect(
-        screen.queryByRole("heading", { level: 2, name: "Travel" }),
+        screen.queryByRole("heading", { level: 2, name: "Fables" }),
       ).not.toBeInTheDocument();
     });
     expect(
-      screen.getByRole("heading", { level: 2, name: "Fables" }),
+      screen.getByRole("heading", { level: 2, name: "Travel" }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { level: 2, name: "Continue listening" }),
     ).not.toBeInTheDocument();
 
     // The result is announced politely.
-    expect(screen.getByText("Showing Fables")).toBeInTheDocument();
+    expect(screen.getByText("Showing Travel")).toBeInTheDocument();
   });
 
-  it("filters by each book's category, keeping a travel book on the Continue shelf (B6)", async () => {
+  it("filters by each book's category, not the shelf id — Continue survives a Fables filter (B6)", async () => {
     const user = userEvent.setup();
     renderWithQuery(<LibraryScreen />);
     await waitForLoaded();
 
-    // The in-progress travel story lives on the "Continue listening" shelf,
-    // alongside a daily-life story.
+    // The "Continue listening" shelf holds in-progress fables.
     expect(
-      screen.getByRole("link", { name: /The Lighthouse Keeper/ }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /A Cup of Coffee/ }),
+      screen.getByRole("heading", { level: 2, name: "Continue listening" }),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole("radio", { name: "Travel" }));
+    await user.click(screen.getByRole("radio", { name: "Fables" }));
 
-    // Travel keeps the Continue shelf BECAUSE it holds a travel book — the
-    // shelf id ("continue") is irrelevant; the book's category is what matters.
+    // Fables keeps the Continue shelf BECAUSE it holds fables books — the shelf
+    // id ("continue") is irrelevant; each book's category is what matters.
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { level: 2, name: "Continue listening" }),
-      ).toBeInTheDocument();
+        screen.queryByRole("heading", { level: 2, name: "Travel" }),
+      ).not.toBeInTheDocument();
     });
     expect(
-      screen.getByRole("link", { name: /The Lighthouse Keeper/ }),
-    ).toBeInTheDocument();
-
-    // The non-travel story on that same shelf is filtered out.
-    expect(
-      screen.queryByRole("link", { name: /A Cup of Coffee/ }),
-    ).not.toBeInTheDocument();
-
-    // The dedicated Travel shelf is present; the Fables shelf is gone.
-    expect(
-      screen.getByRole("heading", { level: 2, name: "Travel" }),
+      screen.getByRole("heading", { level: 2, name: "Continue listening" }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("heading", { level: 2, name: "Fables" }),
+      screen.getByRole("heading", { level: 2, name: "Fables" }),
+    ).toBeInTheDocument();
+
+    // Non-fables shelves are gone.
+    expect(
+      screen.queryByRole("heading", { level: 2, name: "Daily Life" }),
     ).not.toBeInTheDocument();
+    expect(screen.getByText("Showing Fables")).toBeInTheDocument();
   });
 
-  it("renders the featured fan as decorative — no carousel control that does nothing (B5)", async () => {
+  it("renders the featured fan as an interactive carousel — selecting a story updates the hero copy + CTA", async () => {
+    const user = userEvent.setup();
     renderWithQuery(<LibraryScreen />);
     await waitForLoaded();
 
-    // The single-featured hero must NOT advertise a choice: no "Choose a
-    // featured story" dot group, and no per-cover/dot buttons promising a swap.
-    expect(
-      screen.queryByRole("group", { name: "Choose a featured story" }),
-    ).not.toBeInTheDocument();
+    // The fan IS an exposed carousel whose dots are the accessible control,
+    // each named after its story (not "Featured story N").
+    const carousel = screen.getByRole("region", { name: "Featured stories" });
+    expect(carousel).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /Featured story/ }),
     ).not.toBeInTheDocument();
 
-    // The fan region is hidden from AT (the copy block carries the real info),
-    // so the carousel region is not exposed.
+    // The centre story drives the hero; its CTA links into its reader.
     expect(
-      screen.queryByRole("region", { name: "Featured stories" }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("heading", { level: 1, name: "The Ant and the Grasshopper" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Read & Listen/ }),
+    ).toHaveAttribute("href", "/read/the-ant-and-the-grasshopper");
+
+    // Select a different story by its named dot: the h1 + CTA href update together.
+    await user.click(
+      within(carousel).getByRole("button", { name: "A Trip to the Mountains" }),
+    );
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "A Trip to the Mountains" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Read & Listen/ }),
+    ).toHaveAttribute("href", "/read/a-trip-to-the-mountains");
   });
 
   it("shows the empty state when a filter yields no rails, and resets via Show all", async () => {

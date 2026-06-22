@@ -33,7 +33,7 @@ figma.connect(
           level,
           // `duration` arrives as e.g. "6 min"; the primitive takes minutes.
           minutes: Number.parseInt(duration, 10),
-          coverSrc: "/covers/placeholder.png",
+          coverSrc: "/covers/the-ant-grasshopper.webp",
         }}
       />
     ),
