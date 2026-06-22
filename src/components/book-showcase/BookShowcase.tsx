@@ -166,7 +166,7 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
         ref={ref}
         aria-roledescription="carousel"
         aria-label={label}
-        className={cx("flex w-full flex-col items-center gap-6", className)}
+        className={cx("flex w-full flex-col items-center gap-xl", className)}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onFocus={() => setFocused(true)}
@@ -213,7 +213,7 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
 
         {/* Position dots — the accessible control. */}
         {count > 1 && (
-          <div role="group" aria-label="Choose a featured story" className="flex items-center gap-2">
+          <div role="group" aria-label="Choose a featured story" className="flex items-center gap-sm">
             {items.map((_, i) => {
               const isActive = i === active;
               return (
