@@ -31,6 +31,14 @@
 
   /* [D-design] Modal container lift (from Figma modal spec) */
   --shadow-modal: 0 24px 60px -10px rgba(102, 64, 38, 0.30);
+
+  /* --- Warm soft-elevation (Search/Saved/Profile cards & fields) ------- */
+  /* [C] Figma card/field/stat shadows use a WARMER ink — rgba(79,51,23,…) —
+     than the sm/md/lg ramp's rgba(60,44,29,…), and are single-layer. They are
+     additions, NOT replacements; confirmed across the Search + Saved specs. */
+  --shadow-card: 0 5px 16px rgba(79, 51, 23, 0.07);  /* [C] cards (Search field+card, Saved word card) */
+  --shadow-field: 0 2px 8px rgba(79, 51, 23, 0.06);  /* [C] input fields */
+  --shadow-stat: 0 5px 14px rgba(79, 51, 23, 0.10);  /* [C] Saved stat pill */
 }
 
 /* Dark mode: deepen shadow opacity so elevation reads on dark surfaces. [D] */
@@ -44,4 +52,8 @@
   --shadow-lg:
     0 4px 8px rgba(0, 0, 0, 0.35),
     0 10px 20px rgba(0, 0, 0, 0.45);
+  /* [D] deepened warm-elevation for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
+  --shadow-card: 0 5px 16px rgba(0, 0, 0, 0.40);
+  --shadow-field: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-stat: 0 5px 14px rgba(0, 0, 0, 0.45);
 }

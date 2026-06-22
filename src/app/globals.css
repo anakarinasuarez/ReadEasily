@@ -70,6 +70,8 @@
   --color-sky-500: var(--color-sky-500);
   --color-sky-700: var(--color-sky-700);
 
+  --color-teal-500: var(--color-teal-500);
+
   /* Semantic colors -> bg-canvas, text-muted, bg-accent-strong, border-default... */
   --color-canvas: var(--bg-canvas);
   --color-surface-subtle: var(--bg-subtle);
@@ -98,6 +100,16 @@
   --color-warning-subtle: var(--feedback-warning-subtle);
   --color-danger: var(--feedback-danger);
   --color-danger-subtle: var(--feedback-danger-subtle);
+
+  /* Category accents (Search CategoryCard tiles) -> bg-cat-*-subtle, text-cat-* */
+  --color-cat-fables: var(--cat-fables);
+  --color-cat-fables-subtle: var(--cat-fables-subtle);
+  --color-cat-daily: var(--cat-daily);
+  --color-cat-daily-subtle: var(--cat-daily-subtle);
+  --color-cat-tech: var(--cat-tech);
+  --color-cat-tech-subtle: var(--cat-tech-subtle);
+  --color-cat-travel: var(--cat-travel);
+  --color-cat-travel-subtle: var(--cat-travel-subtle);
 
   /* Focus ring */
   --color-focus-ring: var(--focus-ring);
@@ -146,20 +158,25 @@
   --max-width-6xl: 72rem;  --width-6xl: 72rem;  --min-width-6xl: 72rem;
   --max-width-7xl: 80rem;  --width-7xl: 80rem;  --min-width-7xl: 80rem;
 
-  /* Radius -> rounded-sm, rounded-lg, rounded-pill, ... */
+  /* Radius -> rounded-sm, rounded-lg, rounded-pill, rounded-card, rounded-icon ... */
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-2xl: var(--radius-2xl);
   --radius-xl: var(--radius-xl);
   --radius-pill: var(--radius-pill);
+  --radius-card: var(--radius-card);
+  --radius-icon: var(--radius-icon);
 
-  /* Shadows -> shadow-sm, shadow-md, shadow-lg, shadow-glass, shadow-modal */
+  /* Shadows -> shadow-sm/md/lg/glass/modal/card/field/stat */
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
   --shadow-glass: var(--shadow-glass);
   --shadow-modal: var(--shadow-modal);
+  --shadow-card: var(--shadow-card);
+  --shadow-field: var(--shadow-field);
+  --shadow-stat: var(--shadow-stat);
 
   /* Type-style font sizes (paired line-heights) -> text-display-l, text-reading-m... */
   --text-display-l: var(--text-display-l-size);

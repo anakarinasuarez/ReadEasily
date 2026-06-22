@@ -75,6 +75,9 @@ const generalPairs: Array<[string, string, string]> = [
   ["secondary text on canvas", "--text-secondary", "--bg-canvas"],
   ["muted text on canvas", "--text-muted", "--bg-canvas"],
   ["primary button label", "--text-on-accent", "--bg-accent-strong"],
+  // Saved "practice sets" numeral renders on the elevated card surface, NOT on
+  // warning-subtle — guard the AA-safe warning token there (raw #e0a838 fails).
+  ["warning numeral on elevated", "--feedback-warning", "--bg-elevated"],
 ];
 
 describe("token contrast (WCAG AA, light mode)", () => {
