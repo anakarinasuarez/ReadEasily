@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Baloo_2, Lora, Nunito } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./providers";
 
 // ReadEasily brand families (Figma Foundations). Exposed as CSS variables that
 // the typography tokens (src/tokens/typography.css) reference.
@@ -37,7 +38,9 @@ export default function RootLayout({
       lang="en"
       className={`${baloo2.variable} ${lora.variable} ${nunito.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

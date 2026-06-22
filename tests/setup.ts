@@ -1,12 +1,21 @@
 import "@testing-library/jest-dom/vitest";
-import { afterEach, expect } from "vitest";
+import { afterAll, afterEach, beforeAll, expect } from "vitest";
 import { cleanup } from "@testing-library/react";
 import { toHaveNoViolations } from "jest-axe";
+import { server } from "./mocks/server";
 
 // jest-axe's matcher works under Vitest once registered with its expect.
 expect.extend(toHaveNoViolations);
 
-// Unmount React trees between tests so queries don't leak across cases.
+// MSW intercepts network for the whole unit run so tests never touch the real
+// network. `error` surfaces any unmocked request as a failure instead of a
+// silent leak — add a handler rather than loosening this.
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+
+// Unmount React trees and drop any per-test handler overrides between cases.
 afterEach(() => {
   cleanup();
+  server.resetHandlers();
 });
+
+afterAll(() => server.close());
