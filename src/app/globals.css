@@ -114,6 +114,38 @@
   --spacing-chip-x: var(--space-chip-x);
   --spacing-chip-y: var(--space-chip-y);
 
+  /* Container widths -> max-w-sm/md/lg/xl/2xl, w-*, min-w-* (rem-based).
+   *
+   * ROOT CAUSE of the prior container collapse: Tailwind v4 resolves the named
+   * width utilities through an ORDERED namespace list and takes the first hit:
+   *   max-w -> [--max-width, --spacing, --container]
+   *   w     -> [--width,     --spacing, --container]
+   *   min-w -> [--min-width, --spacing, --container]
+   * Because this system defines t-shirt-named --spacing-* keys (--spacing-md, …),
+   * `max-w-md` matched --spacing-md (12px) BEFORE reaching --container-md,
+   * collapsing every container. A plain --container-* scale can never win that
+   * race (it is last) and gets tree-shaken.
+   *
+   * Fix: populate the DEDICATED --max-width / --width / --min-width namespaces,
+   * which sit FIRST in each list and therefore beat --spacing — while the
+   * spacing utilities (p-*, gap-*, m-*) keep resolving to --spacing-* untouched.
+   * Values mirror Tailwind's standard container scale. (@theme inline omits
+   * unused custom props, so each namespace carries literal rem values rather
+   * than var()-referencing a shared scale, which inline would not emit.) */
+  --max-width-3xs: 16rem;  --width-3xs: 16rem;  --min-width-3xs: 16rem;
+  --max-width-2xs: 18rem;  --width-2xs: 18rem;  --min-width-2xs: 18rem;
+  --max-width-xs:  20rem;  --width-xs:  20rem;  --min-width-xs:  20rem;
+  --max-width-sm:  24rem;  --width-sm:  24rem;  --min-width-sm:  24rem;
+  --max-width-md:  28rem;  --width-md:  28rem;  --min-width-md:  28rem;
+  --max-width-lg:  32rem;  --width-lg:  32rem;  --min-width-lg:  32rem;
+  --max-width-xl:  36rem;  --width-xl:  36rem;  --min-width-xl:  36rem;
+  --max-width-2xl: 42rem;  --width-2xl: 42rem;  --min-width-2xl: 42rem;
+  --max-width-3xl: 48rem;  --width-3xl: 48rem;  --min-width-3xl: 48rem;
+  --max-width-4xl: 56rem;  --width-4xl: 56rem;  --min-width-4xl: 56rem;
+  --max-width-5xl: 64rem;  --width-5xl: 64rem;  --min-width-5xl: 64rem;
+  --max-width-6xl: 72rem;  --width-6xl: 72rem;  --min-width-6xl: 72rem;
+  --max-width-7xl: 80rem;  --width-7xl: 80rem;  --min-width-7xl: 80rem;
+
   /* Radius -> rounded-sm, rounded-lg, rounded-pill, ... */
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
