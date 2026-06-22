@@ -63,6 +63,28 @@ export function HeadphonesIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Speaker with sound waves — precedes the listen-time in the hero meta row. */
+export function VolumeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Glyph {...props}>
+      <path d="M5 9.5h2.5L11 6.5v11L7.5 14.5H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z" />
+      <path d="M14.5 9.5a3.5 3.5 0 0 1 0 5" />
+      <path d="M17 7a7 7 0 0 1 0 10" />
+    </Glyph>
+  );
+}
+
+/** Stacked text lines — precedes the word count in the hero meta row. */
+export function WordsIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Glyph {...props}>
+      <path d="M5 7h14" />
+      <path d="M5 12h14" />
+      <path d="M5 17h9" />
+    </Glyph>
+  );
+}
+
 /** Filled star — the editor's-pick badge mark. */
 export function StarIcon(props: SVGProps<SVGSVGElement>) {
   return (

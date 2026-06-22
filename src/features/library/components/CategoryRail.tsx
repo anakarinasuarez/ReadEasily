@@ -17,11 +17,13 @@ export function CategoryRail({ section }: { section: CatalogSection }) {
 
   return (
     <section aria-labelledby={headingId} className="flex w-full flex-col gap-md">
-      <header className="flex items-center gap-md">
-        {/* Accent marker — 5px rounded terracotta bar (decorative). */}
+      <header className="flex items-stretch gap-md">
+        {/* Accent marker — 5px terracotta bar spanning the full two-line header
+            height (radius-sm), decorative. `items-stretch` lets it match the
+            title+subtitle block rather than a fixed stub. */}
         <span
           aria-hidden="true"
-          className="h-[26px] w-[5px] shrink-0 rounded-pill bg-accent"
+          className="w-[5px] shrink-0 self-stretch rounded-sm bg-accent"
         />
         <div className="flex flex-col gap-[2px]">
           <h2
@@ -36,7 +38,7 @@ export function CategoryRail({ section }: { section: CatalogSection }) {
         </div>
       </header>
 
-      <div className="flex gap-lg overflow-x-auto pb-sm">
+      <div className="flex gap-xl overflow-x-auto pb-sm">
         {section.books.map((book) => (
           <div key={book.id} className="shrink-0">
             <BookCard
@@ -63,9 +65,9 @@ export function CategoryRail({ section }: { section: CatalogSection }) {
 export function RailDivider() {
   return (
     <div aria-hidden="true" className="flex items-center gap-md py-sm">
-      <span className="h-px flex-1 bg-[var(--border-default)]" />
-      <span className="size-[8px] rounded-pill bg-[var(--border-default)]" />
-      <span className="h-px flex-1 bg-[var(--border-default)]" />
+      <span className="h-[2px] flex-1 bg-border-default" />
+      <span className="size-[8px] rounded-pill bg-border-default" />
+      <span className="h-[2px] flex-1 bg-border-default" />
     </div>
   );
 }

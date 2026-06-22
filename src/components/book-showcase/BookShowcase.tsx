@@ -19,13 +19,20 @@ import { BookCover } from "@/components/book-card";
  * It is a presentation composite: it fans a set of covers (the active one
  * centered/largest/raised, neighbours receding symmetrically with rotation +
  * scale + horizontal offset + depth fade), auto-cycles which cover is centered,
- * and shows a synced row of position dots. The Library feature feeds it the
- * featured set and reads `onActiveChange` to drive the hero copy block.
+ * and shows a synced row of position dots. Interactive hosts read `onActiveChange`
+ * to drive a copy block; single-story hosts use `decorative` (see below).
  *
- * A11y: the region is a `carousel` whose accessible control is the dots — the
- * fanned cover images are decorative here (the active book's real title/level
- * live in the hero copy block), so every cover tile is `aria-hidden` to avoid
- * double-announcing. The dots are real `<button>`s with `aria-current`.
+ * A11y: in the default (interactive) mode the region is a `carousel` whose
+ * accessible control is the dots — the fanned cover images are decorative (the
+ * active book's real title/level live in the hero copy block), so every cover
+ * tile is `aria-hidden` and the dots are real `<button>`s with `aria-current`.
+ *
+ * `decorative` mode is for hosts with a SINGLE featured story (the Library
+ * hero): there is no choice to advertise, so the dots would be an interactive
+ * control that does nothing — an AA operability failure. In decorative mode the
+ * fan still auto-cycles visually, but the whole region is `aria-hidden`, the
+ * tiles are non-interactive, and the dots are inert position indicators. The
+ * host's copy block carries all the real, announced information.
  *
  * The fan transform numbers are Figma-exact geometry (no token covers cover-fan
  * placement), annotated below like the off-scale literals in Avatar/BookCover.
@@ -54,6 +61,12 @@ export interface BookShowcaseProps
   autoAdvanceMs?: number;
   /** Accessible name for the carousel region. Default "Featured stories". */
   label?: string;
+  /**
+   * Purely-visual mode for single-featured-story hosts: the fan still
+   * auto-cycles, but the region is `aria-hidden`, tiles are non-interactive,
+   * and the dots become inert indicators (no buttons, no choice advertised).
+   */
+  decorative?: boolean;
   className?: string;
 }
 
@@ -102,6 +115,7 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
       onActiveChange,
       autoAdvanceMs = 4500,
       label = "Featured stories",
+      decorative = false,
       className,
       ...rest
     },
@@ -168,8 +182,11 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
     return (
       <section
         ref={ref}
-        aria-roledescription="carousel"
-        aria-label={label}
+        // Decorative hosts (single featured story) hide the whole fan from AT —
+        // the host's copy block carries the real, announced information.
+        aria-hidden={decorative ? true : undefined}
+        aria-roledescription={decorative ? undefined : "carousel"}
+        aria-label={decorative ? undefined : label}
         className={cx("flex w-full flex-col items-center gap-xl", className)}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -197,36 +214,64 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
             const opacity = hidden ? 0 : ring.opacity;
             const z = hidden ? 0 : ring.z;
 
-            // Visible side covers are clickable to bring them to centre. The
-            // dots remain the keyboard/AT control; these tiles stay aria-hidden
-            // and untabbable — a redundant pointer affordance for sighted users.
-            const interactive = !hidden && dist > 0;
-            return (
+            // Interactive mode: visible side covers are clickable to bring
+            // them to centre (the dots remain the keyboard/AT control; tiles
+            // stay aria-hidden + untabbable, a redundant pointer affordance).
+            // Decorative mode: tiles are inert — no click target on a hidden
+            // node, no focus trap (resolves the aria-hidden-button concern).
+            const interactive = !decorative && !hidden && dist > 0;
+            const tileClass = cx(
+              "absolute left-1/2 top-1/2 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none",
+              interactive ? "cursor-pointer" : "pointer-events-none",
+            );
+            const tileStyle = {
+              transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${scale})`,
+              opacity,
+              zIndex: z,
+            };
+            // Decorative tile — the real cover info lives in the host copy.
+            const tile = <BookCover size="small" src={item.coverSrc} alt="" />;
+
+            return decorative ? (
+              <div key={i} aria-hidden="true" className={tileClass} style={tileStyle}>
+                {tile}
+              </div>
+            ) : (
               <button
                 key={i}
                 type="button"
                 aria-hidden="true"
                 tabIndex={-1}
                 onClick={interactive ? () => goTo(i) : undefined}
-                className={cx(
-                  "absolute left-1/2 top-1/2 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none",
-                  interactive ? "cursor-pointer" : "pointer-events-none",
-                )}
-                style={{
-                  transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${scale})`,
-                  opacity,
-                  zIndex: z,
-                }}
+                className={tileClass}
+                style={tileStyle}
               >
-                {/* Decorative tile — the real cover info lives in the hero copy. */}
-                <BookCover size="small" src={item.coverSrc} alt="" />
+                {tile}
               </button>
             );
           })}
         </div>
 
-        {/* Position dots — the accessible control. */}
-        {count > 1 && (
+        {/* Decorative mode: inert position indicators (no buttons, no choice
+            advertised) — purely visual, hidden from AT. */}
+        {count > 1 && decorative && (
+          <div aria-hidden="true" className="flex items-center gap-sm">
+            {items.map((_, i) => (
+              <span
+                key={i}
+                className={cx(
+                  "block h-[9px] rounded-[var(--radius-pill)] transition-[width,background-color] duration-200 ease-out motion-reduce:transition-none",
+                  i === active
+                    ? "w-[26px] bg-[var(--feedback-success)]"
+                    : "w-[9px] bg-[var(--border-default)]",
+                )}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Interactive mode: position dots are the accessible control. */}
+        {count > 1 && !decorative && (
           <div role="group" aria-label="Choose a featured story" className="flex items-center gap-sm">
             {items.map((_, i) => {
               const isActive = i === active;

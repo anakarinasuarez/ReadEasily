@@ -190,6 +190,59 @@ describe("BookShowcase — reduced motion", () => {
   });
 });
 
+describe("BookShowcase — decorative mode (single featured story)", () => {
+  beforeEach(() => mockMatchMedia(false));
+
+  it("exposes NO interactive control — no dot buttons, no Choose-a-story group", () => {
+    render(<BookShowcase items={ITEMS} decorative />);
+    // No buttons at all (tiles are inert, dots are indicators).
+    expect(screen.queryByRole("button")).toBeNull();
+    expect(
+      screen.queryByRole("group", { name: "Choose a featured story" }),
+    ).toBeNull();
+  });
+
+  it("hides the whole region from AT (the host copy carries the real info)", () => {
+    render(<BookShowcase items={ITEMS} decorative />);
+    expect(
+      screen.queryByRole("region", { name: "Featured stories" }),
+    ).toBeNull();
+  });
+
+  it("still auto-cycles visually (the decorative active indicator advances)", () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(
+        <BookShowcase items={ITEMS} decorative autoAdvanceMs={4000} />,
+      );
+      // The active indicator is the lone elongated (w-[26px]) pill among the
+      // h-[9px] indicators. 7 items → middle index 3 is active at mount.
+      const activeIndex = () => {
+        const dots = Array.from(
+          container.querySelectorAll<HTMLElement>('span[class*="h-[9px]"]'),
+        );
+        return dots.findIndex((d) => d.className.includes("w-[26px]"));
+      };
+      expect(activeIndex()).toBe(3);
+
+      act(() => {
+        vi.advanceTimersByTime(4000);
+      });
+
+      // Auto-cycle advanced the active indicator — with no AT-facing control.
+      expect(activeIndex()).toBe(4);
+      expect(screen.queryByRole("button")).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("has no axe violations in decorative mode", async () => {
+    const { container } = render(<BookShowcase items={ITEMS} decorative />);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
 describe("BookShowcase — a11y", () => {
   beforeEach(() => mockMatchMedia(false));
 

@@ -43,7 +43,9 @@ export function CategoryFilter({
         if (next) onValueChange(next);
       }}
       aria-label="Filter stories by category"
-      className="flex w-full items-center gap-sm overflow-x-auto py-xs"
+      // Mobile: horizontal scroll (chips keep their footprint). Desktop: the
+      // row fits the 1200 column, so centre it (Figma centres the chip row).
+      className="flex w-full items-center gap-sm overflow-x-auto py-xs md:justify-center"
     >
       {categories.map((category) => (
         <ToggleGroup.Item key={category.id} value={category.id} asChild>

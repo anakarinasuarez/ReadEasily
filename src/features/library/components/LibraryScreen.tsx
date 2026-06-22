@@ -44,13 +44,21 @@ export function LibraryScreen() {
   // sentinel so the unfiltered catalog shows first.
   const [activeCategory, setActiveCategory] = useState("all");
 
-  // Sections visible under the current filter. "all" shows everything; a
-  // specific id shows only the section(s) whose id matches (the `continue`
-  // shelf has no category, so it only appears under "all" — by design).
+  // Sections visible under the current filter. "all" shows every shelf intact;
+  // a specific category filters by each BOOK's `category` (not the shelf id),
+  // keeping only the matching books and dropping shelves left empty. This is
+  // why "Travel" still surfaces the in-progress travel story that lives on the
+  // "Continue listening" shelf — the shelf id ("continue") is irrelevant; the
+  // book's category is what matters.
   const visibleSections = useMemo(() => {
     if (!data) return [];
     if (activeCategory === "all") return data.sections;
-    return data.sections.filter((section) => section.id === activeCategory);
+    return data.sections
+      .map((section) => ({
+        ...section,
+        books: section.books.filter((book) => book.category === activeCategory),
+      }))
+      .filter((section) => section.books.length > 0);
   }, [data, activeCategory]);
 
   // Polite announcement for the filter result (same-screen change).

@@ -92,6 +92,67 @@ describe("LibraryScreen", () => {
     expect(screen.getByText("Showing Fables")).toBeInTheDocument();
   });
 
+  it("filters by each book's category, keeping a travel book on the Continue shelf (B6)", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<LibraryScreen />);
+    await waitForLoaded();
+
+    // The in-progress travel story lives on the "Continue listening" shelf,
+    // alongside a daily-life story.
+    expect(
+      screen.getByRole("link", { name: /The Lighthouse Keeper/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /A Cup of Coffee/ }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("radio", { name: "Travel" }));
+
+    // Travel keeps the Continue shelf BECAUSE it holds a travel book — the
+    // shelf id ("continue") is irrelevant; the book's category is what matters.
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { level: 2, name: "Continue listening" }),
+      ).toBeInTheDocument();
+    });
+    expect(
+      screen.getByRole("link", { name: /The Lighthouse Keeper/ }),
+    ).toBeInTheDocument();
+
+    // The non-travel story on that same shelf is filtered out.
+    expect(
+      screen.queryByRole("link", { name: /A Cup of Coffee/ }),
+    ).not.toBeInTheDocument();
+
+    // The dedicated Travel shelf is present; the Fables shelf is gone.
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Travel" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { level: 2, name: "Fables" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the featured fan as decorative — no carousel control that does nothing (B5)", async () => {
+    renderWithQuery(<LibraryScreen />);
+    await waitForLoaded();
+
+    // The single-featured hero must NOT advertise a choice: no "Choose a
+    // featured story" dot group, and no per-cover/dot buttons promising a swap.
+    expect(
+      screen.queryByRole("group", { name: "Choose a featured story" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Featured story/ }),
+    ).not.toBeInTheDocument();
+
+    // The fan region is hidden from AT (the copy block carries the real info),
+    // so the carousel region is not exposed.
+    expect(
+      screen.queryByRole("region", { name: "Featured stories" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("shows the empty state when a filter yields no rails, and resets via Show all", async () => {
     // A category with no matching section drives the empty branch.
     const base = await (await fetch("/api/library")).json() as LibraryData;
