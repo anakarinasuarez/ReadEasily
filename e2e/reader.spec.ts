@@ -33,11 +33,24 @@ test("reader opens a story, shows a word meaning, and saves it", async ({ page }
   });
   await expect(group).toBeVisible();
 
-  // The PlayerBar is present but disabled (audio deferred this pass).
+  // The PlayerBar is present. Audio is Web Speech (client TTS): when the test
+  // browser exposes speechSynthesis the play control is live; where it doesn't
+  // (some headless builds) the bar keeps its inert "Audio is unavailable" state.
+  // Assert support-aware so the journey never flakes on engine availability —
+  // the transport/highlight logic is covered by the useReaderAudio hook tests.
   await expect(page.getByRole("region", { name: "Audio player" })).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Play", exact: true }),
-  ).toBeDisabled();
+  const speechSupported = await page.evaluate(
+    () =>
+      typeof window !== "undefined" &&
+      "speechSynthesis" in window &&
+      typeof window.SpeechSynthesisUtterance !== "undefined",
+  );
+  const play = page.getByRole("button", { name: "Play", exact: true });
+  if (speechSupported) {
+    await expect(play).toBeEnabled();
+  } else {
+    await expect(play).toBeDisabled();
+  }
 
   // Tap "sun" → its meaning popover opens with the Spanish translation.
   await group.getByRole("button", { name: "sun" }).click();

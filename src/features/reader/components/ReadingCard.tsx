@@ -31,6 +31,8 @@ export interface ReadingCardProps {
   /** The open word's id, and the voiced word's id (highlight states). */
   selectedWordId?: string | null;
   speakingWordId?: string | null;
+  /** Inclusive word-index range of the sentence currently being voiced (TTS). */
+  speakingWordRange?: { start: number; end: number } | null;
   /** Word tapped → open the popover. */
   onActivateWord: (info: { id: string; surface: string }) => void;
   /** Page navigation. */
@@ -57,6 +59,7 @@ export function ReadingCard({
   translationVisible,
   selectedWordId = null,
   speakingWordId = null,
+  speakingWordRange = null,
   onActivateWord,
   onPrevPage,
   onNextPage,
@@ -77,6 +80,7 @@ export function ReadingCard({
           pageIndex={page.index}
           selectedWordId={selectedWordId}
           speakingWordId={speakingWordId}
+          speakingWordRange={speakingWordRange}
           onActivateWord={onActivateWord}
         />
 

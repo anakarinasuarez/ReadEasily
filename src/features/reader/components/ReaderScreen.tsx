@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/ui/button";
@@ -10,6 +10,8 @@ import { BgDecorations } from "@/components/bg-decorations";
 import { useSaved } from "@/features/saved/hooks/useSaved";
 import { useStory } from "../hooks/useStory";
 import { useSaveWord } from "../hooks/useSaveWord";
+import { useReaderAudio } from "../hooks/useReaderAudio";
+import { buildSentences } from "../audio/sentences";
 import { lookupWord } from "../content/lemma";
 import { ReadingCard } from "./ReadingCard";
 import { ReaderToggles } from "./ReaderToggles";
@@ -24,15 +26,18 @@ import { ChevronLeftIcon } from "./icons";
  * translation toggle), and the focus/announce choreography around them. Loading,
  * error and the no-translation degrade are part of the slice.
  *
- * AUDIO IS DEFERRED to a later phase: the PlayerBar renders in its `disabled`
- * state (visible, clearly inert) and the popover's Pronounce / the US voice pill
- * are no-op seams. Practice is likewise a seam this pass.
+ * AUDIO is Web Speech (client TTS) via `useReaderAudio`: play/pause reads the
+ * story one sentence at a time, the spoken sentence highlights in the passage,
+ * and the popover's Pronounce voices a tapped word. Where the browser has no
+ * `speechSynthesis` the hook reports `status="disabled"` and the PlayerBar keeps
+ * its inert "Audio is unavailable" state — the feature degrades, never crashes.
+ * Practice remains a seam this pass.
  *
  * Layout (responsive variants, not a rebuild): a full-bleed warm backdrop (the
  * faint story cover under a wash, else the atmospheric BgDecorations); an in-flow
  * (non-sticky) header with a `‹ Library` breadcrumb-back and the ES/US pills; a
  * centered Display/L title; a centered ~745px reading column → ReadingCard; a tap
- * hint that dismisses after the first tap; and the fixed-bottom disabled PlayerBar.
+ * hint that dismisses after the first tap; and the fixed-bottom PlayerBar.
  */
 export interface ReaderScreenProps {
   /** The story id from the route param. */
@@ -127,6 +132,15 @@ export function ReaderScreen({ storyId }: ReaderScreenProps) {
     story && story.pages.length > 0
       ? story.pages[Math.min(pageIndex, story.pages.length - 1)]
       : null;
+
+  // Audio (Web Speech). Derive the current page's sentences (same tokenizer the
+  // passage uses, so word indices align), then drive playback via the hook. It
+  // resets + cancels on page turn (resetKey) and on unmount — no audio bleed.
+  const sentences = useMemo(
+    () => (currentPage ? buildSentences(currentPage) : []),
+    [currentPage],
+  );
+  const audio = useReaderAudio({ sentences, resetKey: pageIndex });
 
   const handleActivateWord = useCallback(
     (info: { id: string; surface: string }) => {
@@ -244,6 +258,7 @@ export function ReaderScreen({ storyId }: ReaderScreenProps) {
                 pageCount={pageCount}
                 translationVisible={translationVisible}
                 selectedWordId={selectedWord?.id ?? null}
+                speakingWordRange={audio.currentWordRange}
                 onActivateWord={handleActivateWord}
                 onPrevPage={() => goToPage(pageIndex - 1)}
                 onNextPage={() => goToPage(pageIndex + 1)}
@@ -259,9 +274,35 @@ export function ReaderScreen({ storyId }: ReaderScreenProps) {
         </div>
       </div>
 
-      {/* Fixed-bottom PlayerBar — disabled this pass (audio deferred). */}
+      {/* Fixed-bottom PlayerBar — live when Web Speech is supported, else it
+          keeps its inert "Audio is unavailable" state (hook reports status). */}
       <div className="fixed inset-x-0 bottom-0 z-40">
-        <PlayerBar status="disabled" level={story?.level} />
+        <PlayerBar
+          // Don't show an enabled-looking "ready" bar before content exists:
+          // while the story is loading/errored (no current page) the supported
+          // bar reads "loading" rather than an inert-but-active Play button.
+          status={
+            audio.status === "disabled"
+              ? "disabled"
+              : currentPage
+                ? audio.status
+                : "loading"
+          }
+          playing={audio.playing}
+          progress={audio.progress}
+          elapsedLabel={audio.elapsedLabel}
+          totalLabel={audio.totalLabel}
+          sentenceCount={audio.totalSentences}
+          speed={audio.speed}
+          level={story?.level}
+          onTogglePlay={audio.toggle}
+          onSeek={audio.seek}
+          onPrevSentence={audio.prev}
+          onNextSentence={audio.next}
+          onRestart={audio.restart}
+          onSkipEnd={audio.skipEnd}
+          onCycleSpeed={audio.cycleSpeed}
+        />
       </div>
 
       {/* Tap-a-word meaning popover. Desktop: anchored to the word (auto-flip).
@@ -296,8 +337,16 @@ export function ReaderScreen({ storyId }: ReaderScreenProps) {
               // Only dictionary hits are savable — a miss shows the placeholder
               // translation (fine for reading) but the Save button stays disabled.
               canSave={meaning.found}
-              // TODO(audio): pass `onPronounce` once an audio backend exists; while
-              // omitted, WordPopover renders the pronounce chip inert (no dead focus).
+              // Pronounce the word via Web Speech. Passing the handler flips the
+              // popover's pronounce chip from inert to live. When audio is
+              // unsupported the handler is omitted so the chip stays disabled and
+              // focus skips it (no dead control). Pronouncing pauses story
+              // playback (the hook stops it); it stays paused (user-initiated).
+              onPronounce={
+                audio.supported
+                  ? () => audio.pronounceWord(wordLabel)
+                  : undefined
+              }
               onToggleSave={handleToggleSave}
               onPractice={() => {
                 // TODO(practice): open the practice flow once it exists.

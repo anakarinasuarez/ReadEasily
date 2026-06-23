@@ -8,6 +8,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { WordToken } from "@/ui/word-token";
+import { tokenizePage } from "../content/tokenize";
 
 /**
  * ReadingParagraph (a.k.a. SelectableText) — the page's English passage rendered
@@ -44,53 +45,18 @@ export interface ReadingParagraphProps {
   pageIndex: number;
   /** The id of the word whose popover is open (terracotta underline + tint). */
   selectedWordId?: string | null;
-  /** The id of the word currently being voiced (stronger highlight). */
+  /** The id of a single word currently being voiced (stronger highlight). */
   speakingWordId?: string | null;
+  /**
+   * Inclusive page-global word-index range of the sentence currently being
+   * voiced by TTS (audio karaoke highlight). Every word whose `wordIndex` falls
+   * in `[start, end]` renders in the `speaking` state. `null` clears it (paused
+   * / stopped). This is the audio model's granularity — a sentence at a time —
+   * since Web Speech word boundaries are unreliable cross-browser.
+   */
+  speakingWordRange?: { start: number; end: number } | null;
   /** Fired on tap / Enter / Space with the word's id + surface text. */
   onActivateWord: (info: { id: string; surface: string }) => void;
-}
-
-interface Token {
-  /** The literal text (a word, or a run of separators). */
-  text: string;
-  /** True for a tappable word; false for punctuation/whitespace. */
-  isWord: boolean;
-  /** Global word index across the page (only set for words). */
-  wordIndex: number;
-  /** `${pageIndex}:${wordIndex}` (only set for words). */
-  id: string;
-}
-
-/** Words = letter/number runs (keeping internal apostrophes/hyphens); anything
- *  else is a separator run. The two alternatives tile the whole string. */
-const TOKEN_RE = /[\p{L}\p{N}][\p{L}\p{N}'’-]*|[^\p{L}\p{N}]+/gu;
-
-/** Tokenize the page's paragraphs, assigning a page-global word index. */
-function tokenizePage(
-  paragraphs: string[],
-  pageIndex: number,
-): { paraTokens: Token[][]; wordCount: number } {
-  let wordIndex = 0;
-  const paraTokens = paragraphs.map((paragraph) => {
-    const tokens: Token[] = [];
-    for (const match of paragraph.matchAll(TOKEN_RE)) {
-      const text = match[0];
-      const isWord = /[\p{L}\p{N}]/u.test(text[0]);
-      if (isWord) {
-        tokens.push({
-          text,
-          isWord: true,
-          wordIndex,
-          id: `${pageIndex}:${wordIndex}`,
-        });
-        wordIndex += 1;
-      } else {
-        tokens.push({ text, isWord: false, wordIndex: -1, id: "" });
-      }
-    }
-    return tokens;
-  });
-  return { paraTokens, wordCount: wordIndex };
 }
 
 const paragraphClasses =
@@ -104,6 +70,7 @@ export function ReadingParagraph({
   pageIndex,
   selectedWordId = null,
   speakingWordId = null,
+  speakingWordRange = null,
   onActivateWord,
 }: ReadingParagraphProps) {
   const { paraTokens, wordCount } = useMemo(
@@ -176,7 +143,12 @@ export function ReadingParagraph({
                 data-word-id={token.id}
                 word={token.text}
                 selected={token.id === selectedWordId}
-                speaking={token.id === speakingWordId}
+                speaking={
+                  token.id === speakingWordId ||
+                  (speakingWordRange != null &&
+                    token.wordIndex >= speakingWordRange.start &&
+                    token.wordIndex <= speakingWordRange.end)
+                }
                 tabIndex={token.wordIndex === activeIndex ? 0 : -1}
                 onActivate={() => {
                   setActiveIndex(token.wordIndex);
