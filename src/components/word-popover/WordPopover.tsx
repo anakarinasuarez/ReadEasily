@@ -180,9 +180,9 @@ function getFocusable(root: HTMLElement): HTMLElement[] {
 
 /* ---------------------------------------------------------------------------
  * Token-bound class fragments. Every color / radius / shadow / space resolves
- * to a CSS custom property. The single allowed literal is the header pronounce
- * chip's rgba(255,255,255,0.22) — a translucent white wash over the accent
- * header (the same pattern as the --scrim token), commented at its use site.
+ * to a CSS custom property. The only literals are the header's translucent
+ * white-wash alphas (rgba(255,255,255,.18–.32) on the pronounce chip + close
+ * button) — the same pattern as the --scrim token, commented at each use site.
  * ------------------------------------------------------------------------- */
 
 /** Header controls sit on --bg-accent-strong, where the terracotta --focus-ring
@@ -313,6 +313,9 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        // Tell AT the panel is fetching its meaning so an SR user who opens
+        // during load hears "busy" rather than the word followed by silence.
+        aria-busy={status === "loading" || undefined}
         onKeyDown={handleKeyDown}
         className={cn(
           "flex w-[320px] max-w-full flex-col overflow-clip",

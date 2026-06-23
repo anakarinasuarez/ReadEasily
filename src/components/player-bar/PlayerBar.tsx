@@ -540,6 +540,9 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
               className={cn(
                 chipBaseClasses,
                 "px-[14px] py-[8px] text-[var(--text-secondary)]", // 14/8 = Figma chip padding
+                // Dim with the rest of the bar when there's no audio, so the
+                // disabled state doesn't read as half-active.
+                isDisabled && "opacity-50",
               )}
             >
               <span className="sr-only">Story level </span>
