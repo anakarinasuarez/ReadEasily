@@ -121,12 +121,12 @@ function NavbarLogo({ homeHref }: { homeHref: string }) {
       )}
     >
       <span className="inline-flex rotate-[13deg]">
-        <BookMark className="block h-[26px] w-[33px] md:h-[32px] md:w-[40px]" />
+        <BookMark className="block h-[29px] w-[33px] md:h-[32px] md:w-[40px]" />
       </span>
       {/* Decorative as a whole; the link's accessible name comes from aria-label. */}
       <span
         aria-hidden="true"
-        className="font-display text-[16px] font-extrabold leading-[1.4] whitespace-nowrap md:text-[19px]"
+        className="font-display text-[14px] font-extrabold leading-[1.4] whitespace-nowrap md:text-[19px]"
       >
         <span className="text-primary">Read</span>
         <span className="text-[var(--text-accent)]">Easily</span>
@@ -148,8 +148,10 @@ const itemBase = cx(
  * the missing-token flag in the report re: the Figma terracotta-tinted glow.
  */
 const itemActive = cx(
-  "bg-accent-strong text-on-accent shadow-md",
-  "pl-[18px] pr-[20px] py-[8px]",
+  "bg-accent-strong text-on-accent shadow-accent-glow",
+  // Mobile: icon-only 44×38 pill (label dropped). md: expands to the labeled pill.
+  "h-[38px] w-[44px] justify-center",
+  "md:h-auto md:w-auto md:justify-start md:pl-[18px] md:pr-[20px] md:py-[8px]",
 );
 
 /**
@@ -184,13 +186,13 @@ function NavItem({
       >
         {icon}
       </span>
-      <span className={isActive ? "inline" : "hidden md:inline"}>{label}</span>
+      <span className="hidden md:inline">{label}</span>
       {badge != null && (
         <span
           className={cx(
             "items-center justify-center rounded-pill bg-[var(--bg-subtle)] px-[7px] py-[2px]",
             "font-display text-[11px] font-bold leading-none text-primary",
-            isActive ? "inline-flex" : "hidden md:inline-flex",
+            "hidden md:inline-flex",
           )}
         >
           {badge}
@@ -259,7 +261,7 @@ export const Navbar = forwardRef<HTMLElement, NavbarProps>(function Navbar(
     >
       <NavbarLogo homeHref={homeHref} />
 
-      <ul className="flex items-center gap-[var(--space-xl)] list-none p-0 m-0">
+      <ul className="flex items-center gap-[var(--space-md)] md:gap-[var(--space-xl)] list-none p-0 m-0">
         {items.map((item) => (
           <li key={item.key} className="flex">
             <NavItem

@@ -47,6 +47,11 @@
      light-mode confirmed (dark unverified — see dark block below). */
   --shadow-cover-center: 0px 22px 42px rgba(69, 46, 20, 0.36);  /* [C] centred/active cover */
   --shadow-cover-side: 4px 10px 20px rgba(69, 46, 20, 0.18);    /* [C] receding side covers */
+
+  /* [C] Active Navbar pill terracotta glow — Figma node 132:131 / 861:929
+     active item uses an ACCENT-tinted lift rgba(214,107,69,.3), not the neutral
+     warm shadow ramp. Both breakpoints. */
+  --shadow-accent-glow: 0 4px 12px rgba(214, 107, 69, 0.3);
 }
 
 /* Dark mode: deepen shadow opacity so elevation reads on dark surfaces. [D] */

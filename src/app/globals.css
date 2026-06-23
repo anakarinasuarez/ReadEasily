@@ -192,6 +192,7 @@
   --shadow-stat: var(--shadow-stat);
   --shadow-cover-center: var(--shadow-cover-center);
   --shadow-cover-side: var(--shadow-cover-side);
+  --shadow-accent-glow: var(--shadow-accent-glow);
 
   /* Type-style font sizes (paired line-heights) -> text-display-l, text-reading-m... */
   --text-display-l: var(--text-display-l-size);
