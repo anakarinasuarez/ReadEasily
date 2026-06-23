@@ -17,7 +17,10 @@
   /* Off the 10/16/24/28/32 ramp; kept as named tokens (the --space-chip-x
      precedent) so they stay mappable rather than silently snapped. Both
      confirmed across the Search + Saved screen specs (≥2 each). */
-  --radius-card: 20px;   /* [C] Search field + Search/Saved word cards (used widely) */
+  --radius-card: 20px;   /* [C] Search field + Search/Saved word cards (used widely).
+                            Also covers the Word Popover container (node 1158:4019,
+                            measured 22px): 2px delta, sub-perceptual — reused per the
+                            elevation/radius reuse rule, no separate --radius-popover. */
   --radius-icon: 13px;   /* [C] Search 44px icon tile. CANONICAL icon-tile radius —
                             SettingsRow IconTile (rounded-md=16) should adopt rounded-icon. */
 }

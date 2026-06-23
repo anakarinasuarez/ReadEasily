@@ -195,6 +195,41 @@ for a 2px delta would bloat the contract with no visible gain. `22 → --radius-
 > tone that is NOT in any current ramp. Awaiting a design decision — remap to an
 > existing tone vs. add `--feedback-violet-subtle`. **Do not add the token yet.**
 
+### Reader screen reconciliation (Phase 1)
+
+Token gaps measured by the design-lead for the Reader build. Tokens only — no
+component edits. Tailwind utilities follow the existing `@theme` passthrough.
+
+**Typography (3 new styles, `[C]`).** Brings confirmed text styles to **16 of 22**.
+
+| Token | Style | Tailwind | Figma node |
+| --- | --- | --- | --- |
+| `--text-reading-xl-*` | Lora Regular 28/44/0 — English passage | `text-reading-xl` | 1157:3132 |
+| `--text-reading-l-*` | Lora **Italic** 20/32/0 — Spanish translation (italic via `-style`, mirrors `reading/quote`) | `text-reading-l` | 1157:3132 |
+| `--text-title-l-*` | Baloo 2 SemiBold 24/29(~1.2)/0 — Word Popover title | `text-title-l` | 1158:4019 |
+
+`--text-title-l` is a **new dedicated token**, not heading/h3 (22 ExtraBold) or
+heading/h4 (16 SemiBold): both size AND weight differ, so snapping would be
+visibly off. Named `title-l` (Title family, Baloo 2 display) — a size step up from
+`title-m` (16). Line-height 29px ≈ 1.2× per Figma "normal".
+
+**Shadows (2 new, 1 reuse).**
+
+| Token | Value (light) | Tailwind | Figma node |
+| --- | --- | --- | --- |
+| `--shadow-reading-card` | `0px 20px 50px 0px rgba(69,46,20,.16)` | `shadow-reading-card` | 1157:3132 |
+| `--shadow-popover` | `0px 18px 40px -8px rgba(153,89,51,.28)` (warmer ink #995933, negative spread) | `shadow-popover` | 1158:4019 |
+
+Both deepened `[D]` in dark mode (UNVERIFIED — reconcile w/ Figma dark). The
+**player play-button glow** (node 1128:2573, measured `0 6px 14px rgba(214,107,69,.35)`)
+**reuses `--shadow-accent-glow`** (`0 4px 12px /.30`) — sub-perceptual delta, same
+reuse rule as the Saved card shadow; no new token.
+
+**Radius — reuse, no new token.** Word Popover container measures **22px** →
+**reuses `--radius-card` (20px)** (2px delta, sub-perceptual, consistent with the
+elevation reuse rule). No `--radius-popover` added. Reading card 28 = `--radius-2xl`
+and player top corners 32 = `--radius-xl` already exist (no action).
+
 ## Tailwind v4 wiring
 
 `src/app/globals.css` `@import`s the token files, then `@theme inline` maps Tailwind

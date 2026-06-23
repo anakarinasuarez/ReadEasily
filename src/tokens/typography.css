@@ -76,6 +76,35 @@
   --text-reading-quote-tracking: 0;
   --text-reading-quote-style: italic;
 
+  /* --- Reading/XL  [C] (Reader English passage) ----------------------- */
+  /* Primary reading style — Lora Regular, larger & airier than reading/m
+     (17/28) and body/l (20/28). Confirmed from Figma Reading Card node 1157:3132. */
+  --text-reading-xl-family: var(--font-reading);
+  --text-reading-xl-size: 28px;
+  --text-reading-xl-line-height: 44px;
+  --text-reading-xl-weight: var(--font-weight-regular);
+  --text-reading-xl-tracking: 0;
+
+  /* --- Reading/L  [C] (Reader Spanish translation block, Lora Italic) -- */
+  /* Italic encoded via -style, mirroring reading/quote above.
+     Confirmed from Figma Reading Card node 1157:3132. */
+  --text-reading-l-family: var(--font-reading);
+  --text-reading-l-size: 20px;
+  --text-reading-l-line-height: 32px;
+  --text-reading-l-weight: var(--font-weight-regular);
+  --text-reading-l-tracking: 0;
+  --text-reading-l-style: italic;
+
+  /* --- Title/L  [C] (Word Popover title) ------------------------------ */
+  /* Baloo 2 SemiBold 24 — NOT heading/h3 (22 ExtraBold) nor heading/h4
+     (16 SemiBold): size AND weight differ, so a dedicated token. Display
+     family, line-height ~1.2 (normal) per Figma. Node 1158:4019. */
+  --text-title-l-family: var(--font-display);
+  --text-title-l-size: 24px;
+  --text-title-l-line-height: 29px;
+  --text-title-l-weight: var(--font-weight-semibold);
+  --text-title-l-tracking: 0;
+
   /* --- UI/L  [C] (Input value + placeholder) -------------------------- */
   --text-ui-l-family: var(--font-ui);
   --text-ui-l-size: 16px;

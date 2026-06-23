@@ -195,6 +195,8 @@
   --shadow-cover-center: var(--shadow-cover-center);
   --shadow-cover-side: var(--shadow-cover-side);
   --shadow-accent-glow: var(--shadow-accent-glow);
+  --shadow-reading-card: var(--shadow-reading-card);
+  --shadow-popover: var(--shadow-popover);
 
   /* Type-style font sizes (paired line-heights) -> text-display-l, text-reading-m... */
   --text-display-l: var(--text-display-l-size);
@@ -209,6 +211,12 @@
   --text-body-l--line-height: var(--text-body-l-line-height);
   --text-reading-m: var(--text-reading-m-size);
   --text-reading-m--line-height: var(--text-reading-m-line-height);
+  --text-reading-xl: var(--text-reading-xl-size);
+  --text-reading-xl--line-height: var(--text-reading-xl-line-height);
+  --text-reading-l: var(--text-reading-l-size);
+  --text-reading-l--line-height: var(--text-reading-l-line-height);
+  --text-title-l: var(--text-title-l-size);
+  --text-title-l--line-height: var(--text-title-l-line-height);
   --text-ui-l: var(--text-ui-l-size);
   --text-ui-l--line-height: var(--text-ui-l-line-height);
   --text-ui-m: var(--text-ui-m-size);

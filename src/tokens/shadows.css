@@ -59,8 +59,18 @@
 
   /* [C] Active Navbar pill terracotta glow — Figma node 132:131 / 861:929
      active item uses an ACCENT-tinted lift rgba(214,107,69,.3), not the neutral
-     warm shadow ramp. Both breakpoints. */
+     warm shadow ramp. Both breakpoints. ALSO covers the Reader player play
+     button (node 1128:2573, measured 0 6px 14px rgba(214,107,69,.35)): same
+     accent hue, only a 2px offset / 2px blur / .05 opacity delta — sub-perceptual,
+     reused rather than a new token (same rule as the Saved card shadow). */
   --shadow-accent-glow: 0 4px 12px rgba(214, 107, 69, 0.3);
+
+  /* --- Reader screen elevations --------------------------------------- */
+  /* [C] Reader reading card — heavy warm lift. Figma node 1157:3132. */
+  --shadow-reading-card: 0px 20px 50px 0px rgba(69, 46, 20, 0.16);
+  /* [C] Word Popover — warmer ink (#995933) + NEGATIVE spread (-8px) pulls the
+     edges in for a tighter, floating overlay. Figma node 1158:4019. */
+  --shadow-popover: 0px 18px 40px -8px rgba(153, 89, 51, 0.28);
 }
 
 /* Dark mode: deepen shadow opacity so elevation reads on dark surfaces. [D] */
@@ -83,4 +93,7 @@
   /* [D] deepened carousel cover elevations for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
   --shadow-cover-center: 0px 22px 42px rgba(0, 0, 0, 0.55);
   --shadow-cover-side: 4px 10px 20px rgba(0, 0, 0, 0.40);
+  /* [D] deepened Reader elevations for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
+  --shadow-reading-card: 0px 20px 50px 0px rgba(0, 0, 0, 0.50);
+  --shadow-popover: 0px 18px 40px -8px rgba(0, 0, 0, 0.55);
 }
