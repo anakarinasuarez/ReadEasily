@@ -29,7 +29,18 @@ export interface WordPopoverProps {
   status?: WordPopoverStatus;
   /** Whether the word is already saved. Drives the Save↔Saved button. */
   saved?: boolean;
-  /** Fired by the header pronounce chip. */
+  /**
+   * Whether the word CAN be saved. Defaults to `true`. When `false` (e.g. a
+   * function word with no dictionary entry), the Save button renders disabled so
+   * the consumer never persists a meaningless / placeholder vocabulary entry.
+   * An already-saved word (`saved`) stays actionable regardless.
+   */
+  canSave?: boolean;
+  /**
+   * Fired by the header pronounce chip. When omitted (e.g. audio not yet wired),
+   * the chip renders disabled and initial focus skips it to the first enabled
+   * control — so a keyboard user never lands on a dead button.
+   */
   onPronounce?: () => void;
   /** Fired by the Save / Saved button (consumer flips `saved`). */
   onToggleSave?: () => void;
@@ -247,6 +258,7 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
       translation,
       status = "ready",
       saved = false,
+      canSave = true,
       onPronounce,
       onToggleSave,
       onPractice,
@@ -261,12 +273,21 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
 
     const titleId = useId();
 
-    // On mount: move focus to the first actionable control inside the panel.
+    // On mount: move focus to the first ENABLED action inside the panel —
+    // pronounce, else Save, else Practice — skipping the header Close button (a
+    // reader opens this to act on the word, not to dismiss it). Disabled controls
+    // (e.g. an inert pronounce chip while audio is deferred, or Save on a
+    // non-dictionary word) are filtered out by `getFocusable`, so focus always
+    // lands on a live control. Close remains the fallback if nothing else exists.
     useEffect(() => {
       const root = rootRef.current;
       if (!root) return;
       const focusables = getFocusable(root);
-      focusables[0]?.focus();
+      const initial =
+        focusables.find(
+          (el) => el.getAttribute("data-popover-control") !== "close",
+        ) ?? focusables[0];
+      initial?.focus();
     }, []);
 
     // Esc → onClose; Tab/Shift+Tab cycle within the panel (focus trap).
@@ -336,6 +357,7 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
             <button
               type="button"
               onClick={onPronounce}
+              disabled={!onPronounce}
               aria-label={`Pronounce ${word}`}
               className={cn(
                 "inline-flex size-[30px] shrink-0 items-center justify-center rounded-[var(--radius-pill)]",
@@ -343,6 +365,8 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
                 // same pattern as the --scrim token. Not a themable surface.
                 "bg-[rgba(255,255,255,0.22)] hover:bg-[rgba(255,255,255,0.32)] transition-colors",
                 "text-[color:var(--text-on-accent)]",
+                // Audio not wired → inert chip (focus skips it; see mount effect).
+                "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[rgba(255,255,255,0.22)]",
                 headerFocus,
               )}
             >
@@ -358,6 +382,7 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
             type="button"
             onClick={onClose}
             aria-label="Close"
+            data-popover-control="close"
             // -m-1 p-1 grows the hit target past the 20px glyph (AA 2.5.8)
             // while keeping the glyph visually 20px and right-aligned.
             className={cn(
@@ -433,6 +458,9 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
               size="md"
               leftIcon={saved ? <BookmarkFilledIcon /> : <BookmarkIcon />}
               aria-pressed={saved}
+              // Not in the dictionary → not savable (never persist a placeholder
+              // meaning). An already-saved word stays actionable.
+              disabled={!saved && !canSave}
               onClick={onToggleSave}
             >
               {saved ? "Saved" : "Save word"}

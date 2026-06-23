@@ -10,6 +10,8 @@ import {
   type SavedData,
   type SavedWord,
 } from "@/features/saved/types";
+import { loadStory } from "@/features/reader/content/loader";
+import type { NewSavedWord } from "@/features/reader/types";
 
 /**
  * Mock-first API surface. ReadEasily runs against these handlers everywhere —
@@ -595,5 +597,48 @@ export const handlers = [
       return new HttpResponse(null, { status: 404 });
     }
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  // Save a word — the write seam behind the Reader popover's Save button.
+  // Assigns a deterministic id (slug of the word), prepends to the live list
+  // (newest first), and echoes the created `SavedWord`. Saving a word that's
+  // already present is idempotent: it returns the existing row (200) and does
+  // not duplicate it. 201 Created for a brand-new word.
+  http.post("/api/saved", async ({ request }) => {
+    const body = (await request.json()) as NewSavedWord;
+    const id = body.word.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+    const existing = savedWords.find(
+      (w) => w.word.toLowerCase() === body.word.toLowerCase(),
+    );
+    if (existing) {
+      return HttpResponse.json(existing, { status: 200 });
+    }
+
+    const created: SavedWord = {
+      id,
+      word: body.word,
+      phonetic: body.phonetic,
+      translation: body.translation,
+      sourceStoryId: body.sourceStoryId,
+      sourceStoryTitle: body.sourceStoryTitle,
+      sentencesReady: body.sentencesReady,
+      savedAt: body.savedAt,
+    };
+    savedWords = [created, ...savedWords];
+    return HttpResponse.json(created, { status: 201 });
+  }),
+
+  // One story — the payload `getStory(id)` consumes. Parses the Markdown +
+  // merges the Spanish sidecar (via the content loader, the same code the app
+  // would call), then attaches the catalog cover. 404 for an unknown id.
+  http.get("/api/story/:id", ({ params }) => {
+    const { id } = params as { id: string };
+    const story = loadStory(id);
+    if (!story) {
+      return new HttpResponse(null, { status: 404 });
+    }
+    const coverSrc = searchStories.find((s) => s.id === id)?.coverSrc;
+    return HttpResponse.json({ ...story, coverSrc });
   }),
 ];
