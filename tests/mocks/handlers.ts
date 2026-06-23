@@ -5,6 +5,11 @@ import type {
   SearchData,
   SearchStory,
 } from "@/features/search/types";
+import {
+  deriveSavedStats,
+  type SavedData,
+  type SavedWord,
+} from "@/features/saved/types";
 
 /**
  * Mock-first API surface. ReadEasily runs against these handlers everywhere —
@@ -441,6 +446,117 @@ const searchData: SearchData = {
   stories: searchStories,
 };
 
+/**
+ * Saved-words collection — the payload `getSaved()` consumes. Read 1:1 from the
+ * Figma "Screen / Saved" (137:154): eight words a reader kept while reading "The
+ * Ant and the Grasshopper", newest first. Two carry ready practice sentences
+ * (the badge + "Review"); the rest read "Practice". Three carry a phonetic line.
+ *
+ * `sourceStoryId` points at the real catalog story, so the card's word link
+ * resolves to `/read/the-ant-and-the-grasshopper` (origin-aware navigation). The
+ * displayed title uses the Figma "&" wordmark. Stats are DERIVED via
+ * `deriveSavedStats` so they can never drift from the words.
+ *
+ * This list is MUTABLE so the DELETE handler (unsave) actually removes a word —
+ * a later GET reflects it, which keeps dev/e2e honest. It is reset between test
+ * files by `resetSavedWords()` (called from tests/setup.ts).
+ */
+const ANT_STORY = {
+  id: "the-ant-and-the-grasshopper",
+  title: "The Ant & the Grasshopper",
+} as const;
+
+const savedWordsSeed: SavedWord[] = [
+  {
+    id: "path",
+    word: "Path",
+    translation: "sendero, camino",
+    sourceStoryId: ANT_STORY.id,
+    sourceStoryTitle: ANT_STORY.title,
+    sentencesReady: 10,
+    savedAt: "2026-06-22T10:08:00.000Z",
+  },
+  {
+    id: "taught",
+    word: "Taught",
+    translation: "enseñó",
+    sourceStoryId: ANT_STORY.id,
+    sourceStoryTitle: ANT_STORY.title,
+    sentencesReady: 10,
+    savedAt: "2026-06-22T10:07:00.000Z",
+  },
+  {
+    id: "gentle",
+    word: "Gentle",
+    translation: "amable",
+    sourceStoryId: ANT_STORY.id,
+    sourceStoryTitle: ANT_STORY.title,
+    sentencesReady: 0,
+    savedAt: "2026-06-22T10:06:00.000Z",
+  },
+  {
+    id: "warm",
+    word: "Warm",
+    translation: "cálido",
+    sourceStoryId: ANT_STORY.id,
+    sourceStoryTitle: ANT_STORY.title,
+    sentencesReady: 0,
+    savedAt: "2026-06-22T10:05:00.000Z",
+  },
+  {
+    id: "shivering",
+    word: "Shivering",
+    translation: "tiritando",
+    sourceStoryId: ANT_STORY.id,
+    sourceStoryTitle: ANT_STORY.title,
+    sentencesReady: 0,
+    savedAt: "2026-06-22T10:04:00.000Z",
+  },
+  {
+    id: "grew",
+    word: "Grew",
+    phonetic: "/kreˈsjo/",
+    translation: "creció",
+    sourceStoryId: ANT_STORY.id,
+    sourceStoryTitle: ANT_STORY.title,
+    sentencesReady: 0,
+    savedAt: "2026-06-22T10:03:00.000Z",
+  },
+  {
+    id: "covered",
+    word: "Covered",
+    phonetic: "/kuˈβjerto/",
+    translation: "cubierto",
+    sourceStoryId: ANT_STORY.id,
+    sourceStoryTitle: ANT_STORY.title,
+    sentencesReady: 0,
+    savedAt: "2026-06-22T10:02:00.000Z",
+  },
+  {
+    id: "bright",
+    word: "Bright",
+    phonetic: "/brɪt/",
+    translation: "brillante",
+    sourceStoryId: ANT_STORY.id,
+    sourceStoryTitle: ANT_STORY.title,
+    sentencesReady: 0,
+    savedAt: "2026-06-22T10:01:00.000Z",
+  },
+];
+
+/** Live, mutable working copy the handlers read/mutate. */
+let savedWords: SavedWord[] = [...savedWordsSeed];
+
+/** Restore the seed list — call between test files so removals don't leak. */
+export function resetSavedWords(): void {
+  savedWords = [...savedWordsSeed];
+}
+
+/** Shape the current words into the `SavedData` contract (stats derived). */
+function currentSavedData(): SavedData {
+  return { words: savedWords, stats: deriveSavedStats(savedWords) };
+}
+
 export const handlers = [
   // Health/echo — the canary that proves mocking is live in any environment.
   http.get("/api/health", () => {
@@ -461,5 +577,23 @@ export const handlers = [
   // Search browse-by-category — the payload `getSearch()` consumes.
   http.get("/api/search", () => {
     return HttpResponse.json(searchData);
+  }),
+
+  // Saved words — the collection `getSaved()` consumes (stats derived).
+  http.get("/api/saved", () => {
+    return HttpResponse.json(currentSavedData());
+  }),
+
+  // Unsave a word — the write seam behind the card's remove button. Removes the
+  // word from the live list so a later GET reflects it; 204 No Content on
+  // success, 404 when the id is unknown.
+  http.delete("/api/saved/:id", ({ params }) => {
+    const { id } = params as { id: string };
+    const before = savedWords.length;
+    savedWords = savedWords.filter((w) => w.id !== id);
+    if (savedWords.length === before) {
+      return new HttpResponse(null, { status: 404 });
+    }
+    return new HttpResponse(null, { status: 204 });
   }),
 ];

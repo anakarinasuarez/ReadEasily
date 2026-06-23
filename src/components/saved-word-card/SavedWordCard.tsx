@@ -234,7 +234,10 @@ export const SavedWordCard = forwardRef<HTMLElement, SavedWordCardProps>(
       <article
         ref={ref}
         className={cx(
-          "flex flex-col overflow-clip rounded-card bg-[var(--bg-elevated)] shadow-card",
+          // Fixed 232px height (Figma 1135:2637 / 1136:3177) so every card is the
+          // SAME size regardless of optional phonetic/badge content — the body is
+          // flex-1 so it absorbs the slack and the footer stays pinned to the base.
+          "flex h-[232px] flex-col overflow-clip rounded-card bg-[var(--bg-elevated)] shadow-card",
           className,
         )}
         {...rest}

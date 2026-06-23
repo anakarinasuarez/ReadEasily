@@ -3,6 +3,7 @@ import { afterAll, afterEach, beforeAll, expect } from "vitest";
 import { cleanup } from "@testing-library/react";
 import { toHaveNoViolations } from "jest-axe";
 import { server } from "./mocks/server";
+import { resetSavedWords } from "./mocks/handlers";
 
 // jest-axe's matcher works under Vitest once registered with its expect.
 expect.extend(toHaveNoViolations);
@@ -16,6 +17,8 @@ beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => {
   cleanup();
   server.resetHandlers();
+  // Restore the mutable saved-words list so a DELETE in one test never leaks.
+  resetSavedWords();
 });
 
 afterAll(() => server.close());
