@@ -53,6 +53,7 @@ stay 1:1-mappable, never silently rounded:
 | Token | Value | Where (≥2 specs) |
 | --- | --- | --- |
 | `--space-md-plus` | 14px | Neutral 14px step (SearchField gap + CategoryCard gap/inset) |
+| `--space-3xl-plus` | 60px | Generous card inset between 3xl (48) and 4xl (64) — Saved empty-state card padding (node 144:213). Tailwind `p-3xl-plus`. |
 | `--space-chip-x` / `-y` | 14px / 7px | Chip padding |
 | `--radius-card` | 20px | Search field + Search/Saved word cards |
 | `--radius-icon` | 13px | Search 44px icon tile — **canonical icon-tile radius** |
@@ -102,8 +103,19 @@ Tailwind: `bg-cat-travel-subtle`, `text-cat-travel`, `bg-category-fables-bg`,
 Figma card/field/stat shadows use a warmer ink (`rgba(79,51,23,…)`) and are
 single-layer — they do **not** match the `rgba(60,44,29,…)` sm/md/lg ramp, so they
 are **additions** (the ramp stays). `--shadow-card` (0 5px 16px /.07),
-`--shadow-field` (0 2px 8px /.06), `--shadow-stat` (0 5px 14px /.10). Tailwind:
-`shadow-card`, `shadow-field`, `shadow-stat`.
+`--shadow-field` (0 2px 8px /.06), `--shadow-stat` (0 5px 14px /.10),
+`--shadow-empty` (0 5px 18px /.06). Tailwind: `shadow-card`, `shadow-field`,
+`shadow-stat`, `shadow-empty`.
+
+**Reuse vs. add — the rule (Saved screen gaps).** Shadow opacity is the
+perceptual weight of an elevation; ≤2px geometry deltas are sub-perceptual.
+- **SavedWordCard** (node 1135:2637, measured `0 4px 14px /.07`) **reuses
+  `shadow-card`** (`0 5px 16px /.07`): identical opacity, only a 1px offset / 2px
+  blur delta — accepted approximation, no new token.
+- **Empty-state card** (node 144:213, `0 5px 18px /.06`) gets its **own
+  `--shadow-empty`**: it differs in opacity (.06 vs .07 = lighter) *and* spread
+  (18 vs 16px blur), a genuinely softer/diffuse lift, so it is a distinct
+  elevation rather than an approximation. EmptyState should consume `shadow-empty`.
 
 ### AA decisions baked in (from 📋 Handoff & Specs)
 

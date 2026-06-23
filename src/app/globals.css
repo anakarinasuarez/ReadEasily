@@ -136,6 +136,7 @@
   --spacing-3xl: var(--space-3xl);
   --spacing-4xl: var(--space-4xl);
   --spacing-md-plus: var(--space-md-plus);
+  --spacing-3xl-plus: var(--space-3xl-plus);
   --spacing-chip-x: var(--space-chip-x);
   --spacing-chip-y: var(--space-chip-y);
 
@@ -188,6 +189,7 @@
   --shadow-glass: var(--shadow-glass);
   --shadow-modal: var(--shadow-modal);
   --shadow-card: var(--shadow-card);
+  --shadow-empty: var(--shadow-empty);
   --shadow-field: var(--shadow-field);
   --shadow-stat: var(--shadow-stat);
   --shadow-cover-center: var(--shadow-cover-center);

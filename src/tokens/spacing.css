@@ -25,4 +25,8 @@
                             wrong semantics). */
   --space-chip-x: 14px; /* [C] Chip horizontal padding */
   --space-chip-y: 7px;  /* [C] Chip vertical padding */
+  --space-3xl-plus: 60px; /* [C] generous card inset between 3xl (48) and 4xl (64).
+                             Saved empty-state card padding (node 144:213). Off-scale
+                             but a deliberate roomy inset — its own named token rather
+                             than snapping to 48/64 (8–12% off would visibly hurt). */
 }

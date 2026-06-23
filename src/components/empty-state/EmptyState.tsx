@@ -85,7 +85,7 @@ export const EmptyState = forwardRef<HTMLElement, EmptyStateProps>(
           // exists, so we bind the two warm surface tokens per the spec).
           "flex flex-col items-center justify-center gap-xl",
           "bg-[linear-gradient(to_bottom,var(--bg-canvas),var(--bg-subtle))]",
-          "rounded-2xl p-3xl text-center shadow-card",
+          "rounded-2xl p-3xl-plus text-center shadow-empty",
           className,
         )}
         {...rest}

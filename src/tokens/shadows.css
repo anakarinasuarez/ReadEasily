@@ -36,9 +36,18 @@
   /* [C] Figma card/field/stat shadows use a WARMER ink — rgba(79,51,23,…) —
      than the sm/md/lg ramp's rgba(60,44,29,…), and are single-layer. They are
      additions, NOT replacements; confirmed across the Search + Saved specs. */
-  --shadow-card: 0 5px 16px rgba(79, 51, 23, 0.07);  /* [C] cards (Search field+card, Saved word card) */
+  --shadow-card: 0 5px 16px rgba(79, 51, 23, 0.07);  /* [C] cards. Also covers the Saved
+                          word card (node 1135:2637, measured 0 4px 14px /.07): identical
+                          opacity, only 1px offset / 2px blur delta — accepted as
+                          sub-perceptual approximation, no separate token. (Search field+card too.) */
   --shadow-field: 0 2px 8px rgba(79, 51, 23, 0.06);  /* [C] input fields */
   --shadow-stat: 0 5px 14px rgba(79, 51, 23, 0.10);  /* [C] Saved stat pill */
+
+  /* [C] Saved empty-state card — softer, more diffuse lift than --shadow-card.
+     Measured by design-lead from Figma node 144:213. Distinct from --shadow-card:
+     LOWER opacity (.06 vs .07 = lighter perceptual weight) AND larger 18px blur
+     (more spread) — a genuinely softer elevation, so it gets its own token. */
+  --shadow-empty: 0 5px 18px rgba(79, 51, 23, 0.06);
 
   /* --- Library featured-carousel cover elevations ---------------------- */
   /* [C] Measured by design-lead from Figma Book Carousel node 1272:4611.
@@ -69,6 +78,8 @@
   --shadow-card: 0 5px 16px rgba(0, 0, 0, 0.40);
   --shadow-field: 0 2px 8px rgba(0, 0, 0, 0.35);
   --shadow-stat: 0 5px 14px rgba(0, 0, 0, 0.45);
+  /* [D] empty-state lift, deepened for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
+  --shadow-empty: 0 5px 18px rgba(0, 0, 0, 0.38);
   /* [D] deepened carousel cover elevations for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
   --shadow-cover-center: 0px 22px 42px rgba(0, 0, 0, 0.55);
   --shadow-cover-side: 4px 10px 20px rgba(0, 0, 0, 0.40);
