@@ -1,5 +1,10 @@
 import { http, HttpResponse } from "msw";
 import type { LibraryData } from "@/features/library/types";
+import type {
+  SearchCategory,
+  SearchData,
+  SearchStory,
+} from "@/features/search/types";
 
 /**
  * Mock-first API surface. ReadEasily runs against these handlers everywhere —
@@ -13,9 +18,9 @@ import type { LibraryData } from "@/features/library/types";
 
 /**
  * Real painted cover art (added to `public/covers/`), keyed by story. Every
- * `coverSrc` below references one of these PNGs — there are no placeholder SVGs
- * left. File names are reproduced verbatim (mixed case is intentional, it must
- * match the bytes on disk).
+ * `coverSrc` below references one of these optimized WebP files — there are no
+ * placeholder SVGs left. File names are reproduced verbatim (mixed case is
+ * intentional, it must match the bytes on disk).
  */
 const COVERS = {
   antGrasshopper: "/covers/the-ant-grasshopper.webp",
@@ -306,6 +311,136 @@ const libraryData: LibraryData = {
   ],
 };
 
+/**
+ * Search browse catalog. The Search screen BROWSES BY CATEGORY (per the Figma
+ * prototype) — it never does live text search — so this payload carries the four
+ * browse categories plus the flat catalog of stories, each tagged with its
+ * `category`. The screen filters client-side ("All" shows them all; selecting a
+ * card filters by `category`).
+ *
+ * Typed as `SearchData` so the mock can never drift from
+ * `src/features/search/types.ts`. Stories + covers are the SAME catalog the
+ * Library uses (reusing `COVERS` above) — every `coverSrc` resolves to a real
+ * `/covers/*.webp`. Order mirrors the Figma "Screen / Search" grids.
+ */
+const searchStories: SearchStory[] = [
+  // Fables (4) — Figma idle defaults to this category selected.
+  {
+    id: "the-ant-and-the-grasshopper",
+    title: "The Ant and the Grasshopper",
+    level: "A2",
+    minutes: 6,
+    coverSrc: COVERS.antGrasshopper,
+    category: "fables",
+    href: "/read/the-ant-and-the-grasshopper",
+  },
+  {
+    id: "the-clever-crow",
+    title: "The Clever Crow",
+    level: "A1",
+    minutes: 4,
+    coverSrc: COVERS.cleverCrow,
+    category: "fables",
+    href: "/read/the-clever-crow",
+  },
+  {
+    id: "the-boy-who-cried-wolf",
+    title: "The Boy Who Cried Wolf",
+    level: "A2",
+    minutes: 5,
+    coverSrc: COVERS.boyWhoCriedWolf,
+    category: "fables",
+    href: "/read/the-boy-who-cried-wolf",
+  },
+  {
+    id: "the-tortoise-and-the-hare",
+    title: "The Tortoise and the Hare",
+    level: "A1",
+    minutes: 5,
+    coverSrc: COVERS.tortoiseHare,
+    category: "fables",
+    href: "/read/the-tortoise-and-the-hare",
+  },
+  // Daily Life (2)
+  {
+    id: "a-morning-in-the-city",
+    title: "A Morning in the City",
+    level: "A2",
+    minutes: 6,
+    coverSrc: COVERS.morningCity,
+    category: "daily-life",
+    href: "/read/a-morning-in-the-city",
+  },
+  {
+    id: "the-lost-keys",
+    title: "The Lost Keys",
+    level: "A2",
+    minutes: 4,
+    coverSrc: COVERS.lostKeys,
+    category: "daily-life",
+    href: "/read/the-lost-keys",
+  },
+  // Technology (2)
+  {
+    id: "my-first-smartphone",
+    title: "My First Smartphone",
+    level: "B1",
+    minutes: 6,
+    coverSrc: COVERS.firstSmartphone,
+    category: "technology",
+    href: "/read/my-first-smartphone",
+  },
+  {
+    id: "the-helpful-robot",
+    title: "The Helpful Robot",
+    level: "A2",
+    minutes: 5,
+    coverSrc: COVERS.helpfulRobot,
+    category: "technology",
+    href: "/read/the-helpful-robot",
+  },
+  // Travel (2)
+  {
+    id: "a-trip-to-the-mountains",
+    title: "A Trip to the Mountains",
+    level: "B1",
+    minutes: 6,
+    coverSrc: COVERS.tripMountains,
+    category: "travel",
+    href: "/read/a-trip-to-the-mountains",
+  },
+  {
+    id: "lost-at-the-airport",
+    title: "Lost at the Airport",
+    level: "B1",
+    minutes: 7,
+    coverSrc: COVERS.lostAirport,
+    category: "travel",
+    href: "/read/lost-at-the-airport",
+  },
+];
+
+/**
+ * The four browse categories, in Figma display order. `storyCount` is DERIVED
+ * from `searchStories` so it can never drift from the stories it counts (the
+ * backend will compute it the same way).
+ */
+const searchCategoryMeta: Array<Pick<SearchCategory, "id" | "label">> = [
+  { id: "fables", label: "Fables" },
+  { id: "daily-life", label: "Daily Life" },
+  { id: "technology", label: "Technology" },
+  { id: "travel", label: "Travel" },
+];
+
+const searchData: SearchData = {
+  categories: searchCategoryMeta.map(({ id, label }) => ({
+    id,
+    label,
+    storyCount: searchStories.filter((story) => story.category === id).length,
+  })),
+  stories: searchStories,
+};
+
 export const handlers = [
   // Health/echo — the canary that proves mocking is live in any environment.
   http.get("/api/health", () => {
@@ -321,5 +456,10 @@ export const handlers = [
   // Library landing — the catalog `getLibrary()` consumes.
   http.get("/api/library", () => {
     return HttpResponse.json(libraryData);
+  }),
+
+  // Search browse-by-category — the payload `getSearch()` consumes.
+  http.get("/api/search", () => {
+    return HttpResponse.json(searchData);
   }),
 ];
