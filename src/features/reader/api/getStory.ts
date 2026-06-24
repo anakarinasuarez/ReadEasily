@@ -1,26 +1,34 @@
-import type { Story, NewSavedWord } from "../types";
+import { DEFAULT_LANGUAGE, type Language, type Story, type NewSavedWord } from "../types";
 import type { SavedWord } from "@/features/saved/types";
 
 /**
  * The Reader read seam — a thin, typed network boundary mirroring
  * `getLibrary()` / `getSaved()`.
  *
- * `getStory(id)` fetches `/api/story/:id` and returns a typed `Story`; the MSW
- * mock parses the Markdown + merges the Spanish sidecar today, a real backend
- * returns the same shape tomorrow. Callers go through `useStory` and never know
- * which.
+ * `getStory(id, lang)` fetches `/api/story/:id?lang=<lang>` and returns a typed
+ * `Story` in that language; the MSW mock parses the Markdown + merges the
+ * matching translation sidecar today, a real backend returns the same shape
+ * tomorrow. Callers go through `useStory` and never know which.
  */
-export async function getStory(id: string): Promise<Story> {
-  const res = await fetch(`/api/story/${encodeURIComponent(id)}`);
+export async function getStory(
+  id: string,
+  language: Language = DEFAULT_LANGUAGE,
+): Promise<Story> {
+  const res = await fetch(
+    `/api/story/${encodeURIComponent(id)}?lang=${encodeURIComponent(language)}`,
+  );
   if (!res.ok) {
     throw new Error(`getStory failed: ${res.status} ${res.statusText}`);
   }
   return (await res.json()) as Story;
 }
 
-/** Stable per-story cache key. Import so the query + any invalidation agree. */
-export function storyQueryKey(id: string): readonly ["story", string] {
-  return ["story", id] as const;
+/** Stable per-story+language cache key. Import so query + invalidation agree. */
+export function storyQueryKey(
+  id: string,
+  language: Language = DEFAULT_LANGUAGE,
+): readonly ["story", string, Language] {
+  return ["story", id, language] as const;
 }
 
 /**

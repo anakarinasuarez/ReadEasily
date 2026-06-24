@@ -138,7 +138,12 @@
   --text-label-s-size: 12px;
   --text-label-s-line-height: 16px;
   --text-label-s-weight: var(--font-weight-semibold);
-  --text-label-s-tracking: 4px;
+  /* [C] confirmed from Figma Label/S (12px, 4% → 0.48px, node 1154:3342 — the
+     language-dropdown code chips render tracking-[0.48px]): Figma stores
+     letterSpacing as a PERCENTAGE (4%), so 4% × 12px = 0.48px. Do NOT let a
+     regen reintroduce `4px` — that is the same px-vs-percent misread already
+     fixed for label/m and display/l. */
+  --text-label-s-tracking: 0.48px;
 
   /* --- Caption  [C] --------------------------------------------------- */
   --text-caption-family: var(--font-ui);

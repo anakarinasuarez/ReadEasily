@@ -141,6 +141,9 @@ export function ReadingParagraph({
                   wordRefs.current[token.wordIndex] = el;
                 }}
                 data-word-id={token.id}
+                // Page-global word index — the auto-scroll-follow hook locates
+                // the active sentence's first word by this attribute.
+                data-word-index={token.wordIndex}
                 word={token.text}
                 selected={token.id === selectedWordId}
                 speaking={

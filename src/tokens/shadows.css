@@ -49,6 +49,10 @@
      (more spread) — a genuinely softer elevation, so it gets its own token. */
   --shadow-empty: 0 5px 18px rgba(79, 51, 23, 0.06);
 
+  /* [C] Reader language/voice dropdown menu lift — Figma node 1154:3342. A high,
+     soft, slightly-inset warm shadow (negative spread) distinct from the cards. */
+  --shadow-dropdown: 0px 12px 32px -6px rgba(77, 51, 31, 0.22);
+
   /* --- Library featured-carousel cover elevations ---------------------- */
   /* [C] Measured by design-lead from Figma Book Carousel node 1272:4611.
      center cover (`book-center`) = heavy warm lift; side covers
@@ -96,4 +100,5 @@
   /* [D] deepened Reader elevations for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
   --shadow-reading-card: 0px 20px 50px 0px rgba(0, 0, 0, 0.50);
   --shadow-popover: 0px 18px 40px -8px rgba(0, 0, 0, 0.55);
+  --shadow-dropdown: 0px 12px 32px -6px rgba(0, 0, 0, 0.55);
 }

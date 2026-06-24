@@ -8,7 +8,8 @@ import { test, expect } from "@playwright/test";
  * confirmed in-dialog by the Save button flipping to "Saved". (A full reload to
  * the Saved screen would reset the in-memory mock, so the Saved-list reflection
  * is asserted in the behavior tests, not here.) Roving-tabindex / pagination /
- * translation toggle / save-gating are covered by the ReaderScreen behavior tests.
+ * voice switch / save-gating are covered by the ReaderScreen + hook tests. A
+ * second test covers the translation-language dropdown journey.
  */
 test("reader opens a story, shows a word meaning, and saves it", async ({ page }) => {
   const pageErrors: string[] = [];
@@ -64,6 +65,38 @@ test("reader opens a story, shows a word meaning, and saves it", async ({ page }
   // in-memory mock, so the journey ends at the confirmed save.
   await dialog.getByRole("button", { name: "Save word" }).click();
   await expect(dialog.getByRole("button", { name: "Saved" })).toBeVisible();
+
+  expect(pageErrors).toEqual([]);
+});
+
+/**
+ * E2E — the translation-language dropdown (Figma 1154:3342). Open the story,
+ * confirm the default Spanish translation block, open the ES/FR/PT menu from the
+ * header pill, pick Français, and confirm the block re-renders in French in
+ * place (and the Spanish text is gone). Audio-independent, so it never flakes on
+ * speechSynthesis availability.
+ */
+test("reader switches the translation language from the header dropdown", async ({
+  page,
+}) => {
+  const pageErrors: string[] = [];
+  page.on("pageerror", (err) => pageErrors.push(err.message));
+
+  await page.goto("/read/the-clever-crow");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "The Clever Crow" }),
+  ).toBeVisible();
+
+  // Default language is Spanish.
+  await expect(page.getByText(/Un cuervo tiene mucha sed/)).toBeVisible();
+
+  // Open the language menu and choose Français.
+  await page.getByRole("button", { name: "Translation language" }).click();
+  await page.getByRole("menuitemradio", { name: "Français" }).click();
+
+  // The translation block re-renders in French in place.
+  await expect(page.getByText(/Un corbeau a très soif/)).toBeVisible();
+  await expect(page.getByText(/Un cuervo tiene mucha sed/)).toHaveCount(0);
 
   expect(pageErrors).toEqual([]);
 });

@@ -10,9 +10,9 @@ import { GlobeIcon } from "./icons";
  * node 1157:3132). Stacks, top to bottom:
  *   1. the page's English passage (ReadingParagraph — tappable words),
  *   2. a hairline divider,
- *   3. the Spanish translation block (globe + "ESPAÑOL" label + italic Spanish),
- *      shown only when the story has a translation AND the reader hasn't hidden
- *      it via the ES toggle,
+ *   3. the translation block (globe + the active language's uppercased label +
+ *      the italic translation), shown only when the story has a translation in
+ *      the selected language,
  *   4. a hairline divider,
  *   5. ReadingProgress ("Page X of N" + page chevrons).
  *
@@ -28,8 +28,14 @@ export interface ReadingCardProps {
   page: StoryPage;
   /** Total pages (for the progress label + chevron bounds). */
   pageCount: number;
-  /** Whether the translation block is shown (ES toggle + sidecar present). */
+  /** Whether the translation block is shown (sidecar present + reader hasn't
+   *  switched to a language that has none). */
   translationVisible: boolean;
+  /** The translation block's label, e.g. "Español" / "Français" (uppercased in
+   *  the UI), reflecting the active language. */
+  translationLabel: string;
+  /** BCP-47 lang for the translation paragraphs' `lang` attribute (es/fr/pt). */
+  translationLang: string;
   /** The open word's id, and the voiced word's id (highlight states). */
   selectedWordId?: string | null;
   speakingWordId?: string | null;
@@ -44,7 +50,7 @@ export interface ReadingCardProps {
 
 const dividerClasses = "h-px w-full bg-[var(--border-default)]";
 
-const espanolLabelClasses =
+const translationLabelClasses =
   "uppercase whitespace-nowrap text-[color:var(--feedback-info)] " +
   "[font-family:var(--text-label-m-family)] [font-size:var(--text-label-m-size)] " +
   "[font-weight:var(--text-label-m-weight)] [line-height:var(--text-label-m-line-height)] " +
@@ -59,6 +65,8 @@ export function ReadingCard({
   page,
   pageCount,
   translationVisible,
+  translationLabel,
+  translationLang,
   selectedWordId = null,
   speakingWordId = null,
   speakingWordRange = null,
@@ -97,10 +105,10 @@ export function ReadingCard({
                 >
                   <GlobeIcon />
                 </span>
-                <span className={espanolLabelClasses}>Español</span>
+                <span className={translationLabelClasses}>{translationLabel}</span>
               </div>
               {page.translationParagraphs.map((paragraph, i) => (
-                <p key={i} className={translationTextClasses} lang="es">
+                <p key={i} className={translationTextClasses} lang={translationLang}>
                   {paragraph}
                 </p>
               ))}

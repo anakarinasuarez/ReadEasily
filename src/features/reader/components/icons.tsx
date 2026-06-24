@@ -127,6 +127,44 @@ export function UsFlagIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** UK (Union Jack) flag chip for the en-GB voice option. Decorative. */
+export function UkFlagIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <rect x="2" y="5" width="20" height="14" rx="2" fill="#012169" />
+      <path d="M2 5l20 14M22 5L2 19" stroke="#fff" strokeWidth="2.2" />
+      <path d="M2 5l20 14M22 5L2 19" stroke="#c8102e" strokeWidth="1.1" />
+      <path d="M12 5v14M2 12h20" stroke="#fff" strokeWidth="3.4" />
+      <path d="M12 5v14M2 12h20" stroke="#c8102e" strokeWidth="1.8" />
+      <rect
+        x="2"
+        y="5"
+        width="20"
+        height="14"
+        rx="2"
+        stroke="var(--border-default)"
+        strokeWidth="1"
+      />
+    </svg>
+  );
+}
+
+/** Check mark — the selected row in the language / voice dropdown (Figma
+ *  1154:3342). 16px, inherits `currentColor` (the row's feedback-info ink). */
+export function CheckIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Glyph strokeWidth={2.2} {...props}>
+      <path d="m5 12.5 4.5 4.5L19 6.5" />
+    </Glyph>
+  );
+}
+
 /** Circular-arrow refresh — the error-state retry affordance. */
 export function RefreshIcon(props: SVGProps<SVGSVGElement>) {
   return (

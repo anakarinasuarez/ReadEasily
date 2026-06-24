@@ -15,6 +15,7 @@ import {
   type ReaderSpeech,
 } from "../audio/speechController";
 import type { ReaderSentence } from "../audio/sentences";
+import { DEFAULT_VOICE, type VoiceAccent } from "../types";
 
 /**
  * useReaderAudio — the Reader's text-to-speech engine, as a hook.
@@ -52,6 +53,13 @@ export interface UseReaderAudioParams {
   supported?: boolean;
   /** Changes when the page turns — resets + stops playback (no audio bleed). */
   resetKey?: string | number;
+  /**
+   * Which English accent the spoken voice should match (`en-US` | `en-GB`,
+   * default `en-US`). The hook picks a voice whose lang matches; if none is
+   * installed it falls back to any English voice, then the platform default —
+   * switching never breaks playback.
+   */
+  voiceAccent?: VoiceAccent;
 }
 
 export interface UseReaderAudio {
@@ -125,6 +133,7 @@ export function useReaderAudio({
   controller: providedController,
   supported: supportedOverride,
   resetKey,
+  voiceAccent = DEFAULT_VOICE,
 }: UseReaderAudioParams): UseReaderAudio {
   // One controller for the hook's lifetime (the real one is SSR-safe to build).
   const controller = useMemo(
@@ -157,22 +166,26 @@ export function useReaderAudio({
 
   const total = sentences.length;
 
-  // Pick an en-US voice once voices are available (they arrive async via the
-  // `voiceschanged` event on first use). The header US pill defaults to this.
+  // Pick a voice matching the chosen accent once voices are available (they
+  // arrive async via `voiceschanged` on first use). Graceful fallback chain:
+  // exact lang (en-US / en-GB) → same-prefix → any English → platform default
+  // (null). Re-runs when the accent changes, so the header voice pill switches
+  // the voice used for subsequent utterances; if the browser has no en-GB voice,
+  // UK simply falls back to an available English voice rather than breaking.
   useEffect(() => {
     if (!supported) return;
+    const want = voiceAccent.toLowerCase();
     const pick = () => {
       const voices = controller.getVoices();
-      const enUS =
-        voices.find((v) => v.lang === "en-US") ??
-        voices.find((v) => v.lang?.toLowerCase().startsWith("en-us")) ??
+      voiceRef.current =
+        voices.find((v) => v.lang?.toLowerCase() === want) ??
+        voices.find((v) => v.lang?.toLowerCase().startsWith(want)) ??
         voices.find((v) => v.lang?.toLowerCase().startsWith("en")) ??
         null;
-      if (enUS) voiceRef.current = enUS;
     };
     pick();
     return controller.onVoicesChanged(pick);
-  }, [supported, controller]);
+  }, [supported, controller, voiceAccent]);
 
   // Invalidate any in-flight utterance and stop the synth.
   const hardStop = useCallback(() => {

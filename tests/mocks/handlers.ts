@@ -11,7 +11,12 @@ import {
   type SavedWord,
 } from "@/features/saved/types";
 import { loadStory } from "@/features/reader/content/loader";
-import type { NewSavedWord } from "@/features/reader/types";
+import {
+  DEFAULT_LANGUAGE,
+  LANGUAGES,
+  type Language,
+  type NewSavedWord,
+} from "@/features/reader/types";
 
 /**
  * Mock-first API surface. ReadEasily runs against these handlers everywhere —
@@ -629,12 +634,19 @@ export const handlers = [
     return HttpResponse.json(created, { status: 201 });
   }),
 
-  // One story — the payload `getStory(id)` consumes. Parses the Markdown +
-  // merges the Spanish sidecar (via the content loader, the same code the app
-  // would call), then attaches the catalog cover. 404 for an unknown id.
-  http.get("/api/story/:id", ({ params }) => {
+  // One story — the payload `getStory(id, lang)` consumes. Parses the Markdown +
+  // merges the requested language's translation sidecar (via the content loader,
+  // the same code the app would call), then attaches the catalog cover. The
+  // `?lang=` query selects es|fr|pt (default es; an unknown value falls back to
+  // the default). A story with no sidecar for the language degrades to
+  // no-translation inside the loader. 404 for an unknown id.
+  http.get("/api/story/:id", ({ params, request }) => {
     const { id } = params as { id: string };
-    const story = loadStory(id);
+    const raw = new URL(request.url).searchParams.get("lang");
+    const language: Language = LANGUAGES.includes(raw as Language)
+      ? (raw as Language)
+      : DEFAULT_LANGUAGE;
+    const story = loadStory(id, language);
     if (!story) {
       return new HttpResponse(null, { status: 404 });
     }

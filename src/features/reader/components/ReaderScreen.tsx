@@ -11,8 +11,17 @@ import { useSaved } from "@/features/saved/hooks/useSaved";
 import { useStory } from "../hooks/useStory";
 import { useSaveWord } from "../hooks/useSaveWord";
 import { useReaderAudio } from "../hooks/useReaderAudio";
+import { useFollowReadingScroll } from "../hooks/useFollowReadingScroll";
 import { buildSentences } from "../audio/sentences";
 import { lookupWord } from "../content/lemma";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_VOICE,
+  LANGUAGE_LABELS,
+  type Language,
+  type VoiceAccent,
+} from "../types";
+import type { ReaderSpeech } from "../audio/speechController";
 import { ReadingCard } from "./ReadingCard";
 import { ReaderToggles } from "./ReaderToggles";
 import { ReaderError, ReaderSkeleton } from "./ReaderStates";
@@ -42,6 +51,14 @@ import { AudioWaveIcon, ChevronLeftIcon, SparkleIcon } from "./icons";
 export interface ReaderScreenProps {
   /** The story id from the route param. */
   storyId: string;
+  /**
+   * Test seam: inject a fake TTS controller (+ force support) so the audio
+   * transport — and the auto-scroll-follow that rides on it — can be exercised
+   * in jsdom, which has no `speechSynthesis`. Omitted in the app (real Web
+   * Speech via feature-detection).
+   */
+  audioController?: ReaderSpeech;
+  audioSupported?: boolean;
 }
 
 /** Strip surrounding punctuation from a tapped surface; Title-case it for the
@@ -73,14 +90,23 @@ interface SelectedWord {
   surface: string;
 }
 
-export function ReaderScreen({ storyId }: ReaderScreenProps) {
-  const { data: story, isPending, isError, refetch } = useStory(storyId);
+export function ReaderScreen({
+  storyId,
+  audioController,
+  audioSupported,
+}: ReaderScreenProps) {
+  // Translation language + audio voice are reader preferences owned here. The
+  // screen is keyed by story id at the route, so these reset per story (fresh
+  // mount) but persist across page turns and same-screen state changes.
+  const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE);
+  const [voice, setVoice] = useState<VoiceAccent>(DEFAULT_VOICE);
+
+  const { data: story, isPending, isError, refetch } = useStory(storyId, language);
   const { data: savedData } = useSaved();
   const save = useSaveWord();
 
   // Local UI state.
   const [pageIndex, setPageIndex] = useState(0);
-  const [translationVisible, setTranslationVisible] = useState(true);
   const [hintDismissed, setHintDismissed] = useState(false);
   const [selectedWord, setSelectedWord] = useState<SelectedWord | null>(null);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
@@ -140,10 +166,29 @@ export function ReaderScreen({ storyId }: ReaderScreenProps) {
     () => (currentPage ? buildSentences(currentPage) : []),
     [currentPage],
   );
-  const audio = useReaderAudio({ sentences, resetKey: pageIndex });
+  const audio = useReaderAudio({
+    sentences,
+    resetKey: pageIndex,
+    voiceAccent: voice,
+    controller: audioController,
+    supported: audioSupported,
+  });
+  // Stable ref for the word-activate callback's dep (the hook memoizes pause).
+  const pauseAudio = audio.pause;
+
+  // Auto-scroll follow: while playing, keep the spoken sentence in view. Driven
+  // by the active sentence's first word index; pauses with the audio and honors
+  // prefers-reduced-motion (inside the hook).
+  useFollowReadingScroll({
+    targetWordIndex: audio.currentWordRange?.start ?? null,
+    playing: audio.playing,
+  });
 
   const handleActivateWord = useCallback(
     (info: { id: string; surface: string }) => {
+      // Opening a word's meaning pauses story playback so the narration doesn't
+      // keep running over the user while they read the popover (stays paused).
+      pauseAudio();
       setHintDismissed(true);
       setSelectedWord({ id: info.id, surface: info.surface });
       // Capture the live word element's rect for desktop anchoring.
@@ -152,7 +197,7 @@ export function ReaderScreen({ storyId }: ReaderScreenProps) {
       );
       setAnchorRect(el?.getBoundingClientRect() ?? null);
     },
-    [],
+    [pauseAudio],
   );
 
   // Close the popover and return focus to the originating word (the popover
@@ -249,9 +294,10 @@ export function ReaderScreen({ storyId }: ReaderScreenProps) {
           <Breadcrumb />
           {story && (
             <ReaderToggles
-              translationVisible={translationVisible}
-              onToggleTranslation={() => setTranslationVisible((v) => !v)}
-              hasTranslation={story.hasTranslation}
+              language={language}
+              onLanguageChange={setLanguage}
+              voice={voice}
+              onVoiceChange={setVoice}
             />
           )}
         </div>
@@ -289,7 +335,9 @@ export function ReaderScreen({ storyId }: ReaderScreenProps) {
                 <ReadingCard
                   page={currentPage}
                   pageCount={pageCount}
-                  translationVisible={translationVisible}
+                  translationVisible={story.hasTranslation}
+                  translationLabel={LANGUAGE_LABELS[language]}
+                  translationLang={language}
                   selectedWordId={selectedWord?.id ?? null}
                   speakingWordRange={audio.currentWordRange}
                   onActivateWord={handleActivateWord}

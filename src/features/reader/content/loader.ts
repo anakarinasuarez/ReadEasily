@@ -1,17 +1,43 @@
 /**
- * Content loader — turns a raw story Markdown file (+ optional Spanish sidecar)
- * into the typed `Story` the Reader consumes.
+ * Content loader — turns a raw story Markdown file (+ an optional translation
+ * sidecar for a chosen language) into the typed `Story` the Reader consumes.
  *
  * Pipeline: parse frontmatter → split the body into whole paragraphs →
  * paginate by a deterministic word budget (grouping whole paragraphs) → pair
- * each English paragraph with its Spanish translation (by index) → attach the
- * glossary. Pure and synchronous: the MSW handler calls `loadStory(id)` and
+ * each English paragraph with its translation (by index) → attach the glossary.
+ * Pure and synchronous: the MSW handler calls `loadStory(id, lang)` and
  * serializes the result; later a real backend can return the same shape.
  */
-import type { Glossary, Story, StoryPage } from "../types";
+import {
+  DEFAULT_LANGUAGE,
+  type Glossary,
+  type Language,
+  type Story,
+  type StoryPage,
+} from "../types";
 import { RAW_STORIES, type StorySidecar } from "./raw";
+import commonWordsData from "@/content/common-words.json";
 
 export { normalizeLemma } from "./lemma";
+
+/**
+ * Shared high-frequency fallback glossary (the / a / of / is / run …) keyed by
+ * lemma, with a meaning per language. Merged UNDER each story's own glossary so
+ * function words always resolve even when a story didn't list them — the story's
+ * own entries always win on a key clash.
+ */
+const COMMON_WORDS = commonWordsData as Record<
+  string,
+  { pos: string; es: string; fr: string; pt: string }
+>;
+
+function commonGlossary(language: Language): Glossary {
+  const out: Glossary = {};
+  for (const [word, row] of Object.entries(COMMON_WORDS)) {
+    out[word] = { pos: row.pos, translation: row[language] };
+  }
+  return out;
+}
 
 /** Target words per page. Whole paragraphs are grouped up to (around) this. */
 export const WORDS_PER_PAGE = 130;
@@ -123,18 +149,28 @@ function buildPages(
 }
 
 /**
- * Load and assemble one story by id, or `null` if no such story exists. Pure —
- * the same call in node (tests) and the browser worker returns the same object.
+ * Load and assemble one story by id (in the requested language, default ES), or
+ * `null` if no such story exists. Pure — the same call in node (tests) and the
+ * browser worker returns the same object. When the story has no sidecar for the
+ * language, it degrades to no-translation (empty block, pending glossary).
  * `coverSrc` is NOT set here (the content layer has no cover map); the API
  * handler attaches it from the catalog.
  */
-export function loadStory(id: string): Story | null {
+export function loadStory(
+  id: string,
+  language: Language = DEFAULT_LANGUAGE,
+): Story | null {
   const entry = RAW_STORIES[id];
   if (!entry) return null;
 
   const { meta, paragraphs } = parseMarkdown(entry.raw);
-  const { pages, hasTranslation } = buildPages(paragraphs, entry.sidecar);
-  const glossary: Glossary = entry.sidecar?.glossary ?? {};
+  const sidecar = entry.sidecars[language];
+  const { pages, hasTranslation } = buildPages(paragraphs, sidecar);
+  // Story glossary spread last so its entries win over the shared fallback.
+  const glossary: Glossary = {
+    ...commonGlossary(language),
+    ...(sidecar?.glossary ?? {}),
+  };
 
   return {
     id: meta.id || id,
@@ -145,6 +181,7 @@ export function loadStory(id: string): Story | null {
     pages,
     glossary,
     hasTranslation,
+    language,
   };
 }
 

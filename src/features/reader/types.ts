@@ -3,19 +3,55 @@
  *
  * Mirrors the Library/Search/Saved contract style: these types are the single
  * source of truth for the seam between frontend and backend. Today the bytes
- * come from an MSW mock of `/api/story/:id` (which parses the Markdown in
- * `src/content/stories/*.md` and merges a per-story `*.es.json` sidecar); later
- * a Supabase-backed `getStory()` returns the SAME shape. A rename surfaces as a
- * type error here and in every reader — by design.
+ * come from an MSW mock of `/api/story/:id?lang=` (which parses the Markdown in
+ * `src/content/stories/*.md` and merges the requested language's
+ * `*.{es,fr,pt}.json` sidecar); later a Supabase-backed `getStory()` returns the
+ * SAME shape. A rename surfaces as a type error here and in every reader.
  *
  * The Reader paginates a story's body into pages of whole paragraphs, renders
- * each word as a tappable token, and on tap shows a Spanish meaning pulled from
- * the story's glossary. Stories without a sidecar degrade gracefully: no
- * translation block, and the popover shows a "pending translation" note.
+ * each word as a tappable token, and on tap shows the selected language's
+ * meaning pulled from the story's glossary. Stories without a sidecar for the
+ * language degrade gracefully: no translation block, and the popover shows a
+ * "pending translation" note.
  */
 
 /** A CEFR level label, e.g. "A1", "B1". */
 export type StoryLevel = string;
+
+/**
+ * The translation languages the Reader can load a sidecar for. Each story ships
+ * a `<id>.<lang>.json` per language; all three now share one shape (a generic
+ * `translation` field), so adding a language is a sidecar + a list entry.
+ */
+export type Language = "es" | "fr" | "pt";
+
+/** The set of supported translation languages, in display order. */
+export const LANGUAGES: readonly Language[] = ["es", "fr", "pt"] as const;
+
+/** Human label for each language, shown in the dropdown + the translation block. */
+export const LANGUAGE_LABELS: Record<Language, string> = {
+  es: "Español",
+  fr: "Français",
+  pt: "Português",
+};
+
+/** The default translation language (Spanish), matching the original behaviour. */
+export const DEFAULT_LANGUAGE: Language = "es";
+
+/** The audio voice accent — the BCP-47 lang the TTS engine should match. */
+export type VoiceAccent = "en-US" | "en-GB";
+
+/** The supported voice accents, in display order. */
+export const VOICE_ACCENTS: readonly VoiceAccent[] = ["en-US", "en-GB"] as const;
+
+/** Short code chip + full label for each voice accent (Figma voice dropdown). */
+export const VOICE_LABELS: Record<VoiceAccent, { code: string; name: string }> = {
+  "en-US": { code: "US", name: "US English" },
+  "en-GB": { code: "UK", name: "UK English" },
+};
+
+/** The default voice accent (US English). */
+export const DEFAULT_VOICE: VoiceAccent = "en-US";
 
 /**
  * One glossary sense — the meaning shown in the WordPopover when a word is
@@ -27,8 +63,9 @@ export interface GlossaryEntry {
    *  a fixed set (noun, verb, adjective, …) — per Figma the pill reads English.
    *  Consistency across all sidecars is guarded in loader.test.ts. */
   pos: string;
-  /** The Spanish meaning (senses may be comma-joined). */
-  es: string;
+  /** The meaning in the loaded language (senses may be comma-joined). All three
+   *  sidecar languages share this generic field. */
+  translation: string;
   /** Optional IPA pronunciation, e.g. "/kroʊ/". */
   ipa?: string;
 }
@@ -57,15 +94,16 @@ export interface StoryWord {
 /**
  * One reading page — a deterministic group of whole paragraphs under a word
  * budget. `paragraphs` is the English body; `translationParagraphs` is the
- * Spanish, one-per-English-paragraph in the same order. When the story has no
- * sidecar, `translationParagraphs` is empty and the translation block hides.
+ * loaded language's translation, one-per-English-paragraph in the same order.
+ * When the story has no sidecar for the language, `translationParagraphs` is
+ * empty and the translation block hides.
  */
 export interface StoryPage {
   /** 0-based page index. */
   index: number;
   /** English body paragraphs for this page. */
   paragraphs: string[];
-  /** Spanish translation paragraphs (same length as `paragraphs`), or empty. */
+  /** Translation paragraphs (same length as `paragraphs`), or empty. */
   translationParagraphs: string[];
 }
 
@@ -85,10 +123,12 @@ export interface Story {
   coverSrc?: string;
   /** Paginated body. `pages.length` drives "Page X of N". */
   pages: StoryPage[];
-  /** Lemma → sense map for the tap-a-word popover. */
+  /** Lemma → sense map for the tap-a-word popover (in the loaded language). */
   glossary: Glossary;
-  /** True when a Spanish sidecar was merged (drives the translation block). */
+  /** True when a sidecar for the loaded language was merged (drives the block). */
   hasTranslation: boolean;
+  /** The translation language this payload was loaded for. */
+  language: Language;
 }
 
 /**

@@ -197,6 +197,7 @@
   --shadow-accent-glow: var(--shadow-accent-glow);
   --shadow-reading-card: var(--shadow-reading-card);
   --shadow-popover: var(--shadow-popover);
+  --shadow-dropdown: var(--shadow-dropdown);
 
   /* Type-style font sizes (paired line-heights) -> text-display-l, text-reading-m... */
   --text-display-l: var(--text-display-l-size);

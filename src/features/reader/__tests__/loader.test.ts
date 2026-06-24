@@ -40,8 +40,43 @@ describe("reader content loader", () => {
     for (const page of story!.pages) {
       expect(page.translationParagraphs).toHaveLength(page.paragraphs.length);
     }
-    // Glossary covers content words.
-    expect(story!.glossary.crow?.es).toBe("cuervo");
+    // Glossary covers content words (generic `translation` field for all langs).
+    expect(story!.glossary.crow?.translation).toBe("cuervo");
+    expect(story!.language).toBe("es");
+  });
+
+  it("loads each language's sidecar with the generic translation field", () => {
+    // ES (default), FR and PT all share one shape now.
+    const es = loadStory("the-clever-crow", "es")!;
+    expect(es.glossary.crow?.translation).toBe("cuervo");
+    expect(es.pages[0].translationParagraphs[0]).toMatch(/Un cuervo/);
+
+    const fr = loadStory("the-clever-crow", "fr")!;
+    expect(fr.language).toBe("fr");
+    expect(fr.hasTranslation).toBe(true);
+    expect(fr.glossary.crow?.translation).toBe("corbeau");
+    expect(fr.pages[0].translationParagraphs[0]).toMatch(/Un corbeau/);
+
+    const pt = loadStory("the-clever-crow", "pt")!;
+    expect(pt.language).toBe("pt");
+    expect(pt.glossary.crow?.translation).toBe("corvo");
+    expect(pt.pages[0].translationParagraphs[0]).toMatch(/Um corvo/);
+  });
+
+  it("wires all three languages 1:1 for every story", () => {
+    for (const id of listStoryIds()) {
+      for (const lang of ["es", "fr", "pt"] as const) {
+        const story = loadStory(id, lang);
+        expect(story, `${id}/${lang}`).not.toBeNull();
+        expect(story!.hasTranslation, `${id}/${lang}`).toBe(true);
+        expect(Object.keys(story!.glossary).length, `${id}/${lang}`).toBeGreaterThan(0);
+        for (const page of story!.pages) {
+          expect(page.translationParagraphs, `${id}/${lang}`).toHaveLength(
+            page.paragraphs.length,
+          );
+        }
+      }
+    }
   });
 
   it("wires every story's sidecar 1:1 (all ten are translatable)", () => {
@@ -78,12 +113,15 @@ describe("reader content loader", () => {
       "numeral",
     ]);
     for (const id of listStoryIds()) {
-      const story = loadStory(id);
-      for (const [surface, entry] of Object.entries(story!.glossary)) {
-        if (entry.pos == null || entry.pos === "") continue;
-        expect(ALLOWED_POS, `${id} → ${surface} (${entry.pos})`).toContain(
-          entry.pos,
-        );
+      for (const lang of ["es", "fr", "pt"] as const) {
+        const story = loadStory(id, lang);
+        for (const [surface, entry] of Object.entries(story!.glossary)) {
+          if (entry.pos == null || entry.pos === "") continue;
+          expect(
+            ALLOWED_POS,
+            `${id}/${lang} → ${surface} (${entry.pos})`,
+          ).toContain(entry.pos);
+        }
       }
     }
   });

@@ -8,10 +8,12 @@
  * Next/Turbopack, and the MSW browser worker) — Turbopack rejects `?raw`. A
  * plain `.ts` module of strings is universally importable, zero-config, zero-dep.
  *
- * Spanish sidecars (`*.es.json`) ARE imported directly — JSON is supported by
- * every bundler natively. All ten stories now ship a sidecar (per-paragraph
- * translation + glossary). A story whose sidecar is absent or misaligned still
- * degrades gracefully (no translation block) — see the loader.
+ * Translation sidecars (`*.{es,fr,pt}.json`) ARE imported directly — JSON is
+ * supported by every bundler natively. All ten stories ship a sidecar per
+ * language (per-paragraph translation + glossary), all three sharing one shape
+ * (a generic `translation` field). A story whose sidecar for a requested
+ * language is absent or misaligned still degrades gracefully (no translation
+ * block) — see the loader.
  */
 import { STORY_MARKDOWN } from "./corpus.generated";
 
@@ -26,44 +28,109 @@ import firstSmartphoneEs from "@/content/stories/my-first-smartphone.es.json";
 import helpfulRobotEs from "@/content/stories/the-helpful-robot.es.json";
 import lostAirportEs from "@/content/stories/lost-at-the-airport.es.json";
 
-import type { Glossary } from "../types";
+import cleverCrowFr from "@/content/stories/the-clever-crow.fr.json";
+import tripMountainsFr from "@/content/stories/a-trip-to-the-mountains.fr.json";
+import antGrasshopperFr from "@/content/stories/the-ant-and-the-grasshopper.fr.json";
+import boyCriedWolfFr from "@/content/stories/the-boy-who-cried-wolf.fr.json";
+import tortoiseHareFr from "@/content/stories/the-tortoise-and-the-hare.fr.json";
+import morningCityFr from "@/content/stories/a-morning-in-the-city.fr.json";
+import lostKeysFr from "@/content/stories/the-lost-keys.fr.json";
+import firstSmartphoneFr from "@/content/stories/my-first-smartphone.fr.json";
+import helpfulRobotFr from "@/content/stories/the-helpful-robot.fr.json";
+import lostAirportFr from "@/content/stories/lost-at-the-airport.fr.json";
 
-/** The shape of a `*.es.json` sidecar (per-paragraph Spanish + glossary). */
+import cleverCrowPt from "@/content/stories/the-clever-crow.pt.json";
+import tripMountainsPt from "@/content/stories/a-trip-to-the-mountains.pt.json";
+import antGrasshopperPt from "@/content/stories/the-ant-and-the-grasshopper.pt.json";
+import boyCriedWolfPt from "@/content/stories/the-boy-who-cried-wolf.pt.json";
+import tortoiseHarePt from "@/content/stories/the-tortoise-and-the-hare.pt.json";
+import morningCityPt from "@/content/stories/a-morning-in-the-city.pt.json";
+import lostKeysPt from "@/content/stories/the-lost-keys.pt.json";
+import firstSmartphonePt from "@/content/stories/my-first-smartphone.pt.json";
+import helpfulRobotPt from "@/content/stories/the-helpful-robot.pt.json";
+import lostAirportPt from "@/content/stories/lost-at-the-airport.pt.json";
+
+import type { Glossary, Language } from "../types";
+
+/** The shape of a sidecar (per-paragraph translation + glossary). */
 export interface StorySidecar {
-  /** Spanish translation, one entry per English body paragraph, same order. */
+  /** Translation, one entry per English body paragraph, same order. */
   paragraphs: string[];
   /** Lemma → sense map for the tap-a-word popover. */
   glossary: Glossary;
 }
 
-/** One corpus entry: the raw Markdown plus an optional Spanish sidecar. */
+/** A story's sidecars, by language. A language may be absent (degrades). */
+export type StorySidecars = Partial<Record<Language, StorySidecar>>;
+
+/** One corpus entry: the raw Markdown plus its per-language sidecars. */
 export interface RawStory {
   raw: string;
-  sidecar?: StorySidecar;
+  sidecars: StorySidecars;
 }
 
-/** Sidecars, keyed by story id. Add an entry here when a `*.es.json` lands. */
-const SIDECARS: Record<string, StorySidecar> = {
-  "the-clever-crow": cleverCrowEs as StorySidecar,
-  "a-trip-to-the-mountains": tripMountainsEs as StorySidecar,
-  "the-ant-and-the-grasshopper": antGrasshopperEs as StorySidecar,
-  "the-boy-who-cried-wolf": boyCriedWolfEs as StorySidecar,
-  "the-tortoise-and-the-hare": tortoiseHareEs as StorySidecar,
-  "a-morning-in-the-city": morningCityEs as StorySidecar,
-  "the-lost-keys": lostKeysEs as StorySidecar,
-  "my-first-smartphone": firstSmartphoneEs as StorySidecar,
-  "the-helpful-robot": helpfulRobotEs as StorySidecar,
-  "lost-at-the-airport": lostAirportEs as StorySidecar,
+/** Sidecars, keyed by story id then language. Add an entry per language file. */
+const SIDECARS: Record<string, StorySidecars> = {
+  "the-clever-crow": {
+    es: cleverCrowEs as StorySidecar,
+    fr: cleverCrowFr as StorySidecar,
+    pt: cleverCrowPt as StorySidecar,
+  },
+  "a-trip-to-the-mountains": {
+    es: tripMountainsEs as StorySidecar,
+    fr: tripMountainsFr as StorySidecar,
+    pt: tripMountainsPt as StorySidecar,
+  },
+  "the-ant-and-the-grasshopper": {
+    es: antGrasshopperEs as StorySidecar,
+    fr: antGrasshopperFr as StorySidecar,
+    pt: antGrasshopperPt as StorySidecar,
+  },
+  "the-boy-who-cried-wolf": {
+    es: boyCriedWolfEs as StorySidecar,
+    fr: boyCriedWolfFr as StorySidecar,
+    pt: boyCriedWolfPt as StorySidecar,
+  },
+  "the-tortoise-and-the-hare": {
+    es: tortoiseHareEs as StorySidecar,
+    fr: tortoiseHareFr as StorySidecar,
+    pt: tortoiseHarePt as StorySidecar,
+  },
+  "a-morning-in-the-city": {
+    es: morningCityEs as StorySidecar,
+    fr: morningCityFr as StorySidecar,
+    pt: morningCityPt as StorySidecar,
+  },
+  "the-lost-keys": {
+    es: lostKeysEs as StorySidecar,
+    fr: lostKeysFr as StorySidecar,
+    pt: lostKeysPt as StorySidecar,
+  },
+  "my-first-smartphone": {
+    es: firstSmartphoneEs as StorySidecar,
+    fr: firstSmartphoneFr as StorySidecar,
+    pt: firstSmartphonePt as StorySidecar,
+  },
+  "the-helpful-robot": {
+    es: helpfulRobotEs as StorySidecar,
+    fr: helpfulRobotFr as StorySidecar,
+    pt: helpfulRobotPt as StorySidecar,
+  },
+  "lost-at-the-airport": {
+    es: lostAirportEs as StorySidecar,
+    fr: lostAirportFr as StorySidecar,
+    pt: lostAirportPt as StorySidecar,
+  },
 };
 
 /**
  * The corpus, keyed by story id (matching the frontmatter `id` and the route
- * param), built from the embedded Markdown + any sidecar. Generated from the
+ * param), built from the embedded Markdown + any sidecars. Generated from the
  * `.md` filenames, so a new story flows through automatically once snapshotted.
  */
 export const RAW_STORIES: Record<string, RawStory> = Object.fromEntries(
   Object.entries(STORY_MARKDOWN).map(([id, raw]) => [
     id,
-    { raw, sidecar: SIDECARS[id] },
+    { raw, sidecars: SIDECARS[id] ?? {} },
   ]),
 );

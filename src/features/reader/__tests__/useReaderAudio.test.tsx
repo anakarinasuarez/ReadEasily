@@ -141,6 +141,66 @@ describe("useReaderAudio", () => {
     expect(calls.length).toBe(0);
   });
 
+  it("picks the voice matching the chosen accent, switching on accent change", () => {
+    const enUS = { lang: "en-US", name: "US voice" } as SpeechSynthesisVoice;
+    const enGB = { lang: "en-GB", name: "UK voice" } as SpeechSynthesisVoice;
+    const calls: { text: string; options?: SpeakOptions }[] = [];
+    const controller: ReaderSpeech = {
+      speak: (text, options) => calls.push({ text, options }),
+      cancel: vi.fn(),
+      pause: vi.fn(),
+      resume: vi.fn(),
+      getVoices: () => [enUS, enGB],
+      onVoicesChanged: () => () => {},
+    };
+
+    const { result, rerender } = renderHook(
+      ({ accent }: { accent: "en-US" | "en-GB" }) =>
+        useReaderAudio({
+          sentences: SENTENCES,
+          controller,
+          supported: true,
+          resetKey: 0,
+          voiceAccent: accent,
+        }),
+      { initialProps: { accent: "en-US" } },
+    );
+
+    act(() => result.current.play());
+    expect(last(calls).options?.voice?.lang).toBe("en-US");
+
+    rerender({ accent: "en-GB" });
+    act(() => result.current.restart());
+    expect(last(calls).options?.voice?.lang).toBe("en-GB");
+  });
+
+  it("falls back to any English voice when the requested accent is missing", () => {
+    const enUS = { lang: "en-US", name: "US voice" } as SpeechSynthesisVoice;
+    const calls: { text: string; options?: SpeakOptions }[] = [];
+    const controller: ReaderSpeech = {
+      speak: (text, options) => calls.push({ text, options }),
+      cancel: vi.fn(),
+      pause: vi.fn(),
+      resume: vi.fn(),
+      // No en-GB installed → UK should gracefully fall back to the en-US voice.
+      getVoices: () => [enUS],
+      onVoicesChanged: () => () => {},
+    };
+
+    const { result } = renderHook(() =>
+      useReaderAudio({
+        sentences: SENTENCES,
+        controller,
+        supported: true,
+        resetKey: 0,
+        voiceAccent: "en-GB",
+      }),
+    );
+
+    act(() => result.current.play());
+    expect(last(calls).options?.voice?.lang).toBe("en-US");
+  });
+
   it("cancels speech on page turn and on unmount", () => {
     const { controller, cancel } = makeFake();
     const { rerender, unmount } = renderHook(

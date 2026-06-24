@@ -1,9 +1,25 @@
 import { describe, expect, it } from "vitest";
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { renderWithQuery } from "../../../../tests/utils/query";
 import { ReaderScreen } from "../components/ReaderScreen";
+import type { ReaderSpeech, SpeakOptions } from "../audio/speechController";
+
+/** A fake TTS controller: records `speak` calls so the test can drive the
+ *  per-sentence transport (and the auto-scroll that rides on it) in jsdom. */
+function makeFakeSpeech() {
+  const calls: { text: string; options?: SpeakOptions }[] = [];
+  const controller: ReaderSpeech = {
+    speak: (text, options) => calls.push({ text, options }),
+    cancel: () => {},
+    pause: () => {},
+    resume: () => {},
+    getVoices: () => [],
+    onVoicesChanged: () => () => {},
+  };
+  return { controller, calls };
+}
 
 /**
  * Behavior tests for the Reader. MSW serves the same `/api/story/:id` +
@@ -111,18 +127,24 @@ describe("ReaderScreen", () => {
     ).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("opens the popover for a non-glossary word but does NOT allow saving it", async () => {
+  it("resolves a common word via the shared fallback and allows saving it", async () => {
     const user = userEvent.setup();
     renderWithQuery(<ReaderScreen storyId={STORY} />);
     await waitForStory();
 
-    // "very" is unique on page one and is NOT in the glossary. The popover still
-    // opens (the placeholder translation is fine for reading) but Save is gated
-    // off so a junk "(traducción pendiente)" entry can never be persisted.
+    // "very" is a high-frequency function word that isn't in the story's own
+    // glossary but IS covered by the shared common-words fallback (merged in at
+    // load), so the popover shows a real meaning — not the pending placeholder —
+    // and Save is enabled. (The "true miss → Save disabled" guarantee is unit-
+    // tested on lookupWord, since no real story word misses anymore.)
     await user.click(within(readingGroup()).getByRole("button", { name: "very" }));
     const dialog = await screen.findByRole("dialog", { name: "Very" });
-    expect(within(dialog).getByText("(traducción pendiente)")).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: "Save word" })).toBeDisabled();
+    expect(
+      within(dialog).queryByText("(traducción pendiente)"),
+    ).not.toBeInTheDocument();
+    expect(
+      within(dialog).getByRole("button", { name: "Save word" }),
+    ).toBeEnabled();
   });
 
   it("renders the pronounce chip inert (audio deferred) and skips it on focus", async () => {
@@ -185,25 +207,101 @@ describe("ReaderScreen", () => {
     expect(document.body).not.toHaveFocus();
   });
 
-  it("toggles the Spanish translation block", async () => {
+  it("switches the translation language for the block and the popover", async () => {
     const user = userEvent.setup();
     renderWithQuery(<ReaderScreen storyId={STORY} />);
     await waitForStory();
 
-    // The translation block is visible by default.
+    // Default is Spanish — the translation block reads ES.
     expect(screen.getByText(/Un cuervo tiene mucha sed/)).toBeInTheDocument();
 
+    // Open the language menu (a real role=menu of menuitemradio rows) and pick FR.
     await user.click(
-      screen.getByRole("button", { name: "Hide Spanish translation" }),
+      screen.getByRole("button", { name: "Translation language" }),
     );
-    await waitFor(() =>
-      expect(screen.queryByText(/Un cuervo tiene mucha sed/)).not.toBeInTheDocument(),
+    await user.click(
+      await screen.findByRole("menuitemradio", { name: "Français" }),
     );
 
-    // Toggle is now in the "show" state.
+    // The block re-renders in French in place; the Spanish text is gone.
     expect(
-      screen.getByRole("button", { name: "Show Spanish translation" }),
+      await screen.findByText(/Un corbeau a très soif/),
     ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.queryByText(/Un cuervo tiene mucha sed/),
+      ).not.toBeInTheDocument(),
+    );
+    // The block label reflects the language (CSS-uppercased; node text "Français").
+    expect(screen.getByText("Français")).toBeInTheDocument();
+
+    // The tap-a-word popover now resolves the meaning in French too.
+    await user.click(within(readingGroup()).getByRole("button", { name: "sun" }));
+    const dialog = await screen.findByRole("dialog", { name: "Sun" });
+    expect(within(dialog).getByText("soleil")).toBeInTheDocument();
+  });
+
+  it("auto-scrolls to follow the spoken sentence while playing", async () => {
+    const user = userEvent.setup();
+    const { controller, calls } = makeFakeSpeech();
+
+    // jsdom has no scrollIntoView; record the elements it's called on.
+    const scrolled: Element[] = [];
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function scrollIntoView(this: Element) {
+      scrolled.push(this);
+    };
+
+    try {
+      renderWithQuery(
+        <ReaderScreen
+          storyId={STORY}
+          audioController={controller}
+          audioSupported
+        />,
+      );
+      await waitForStory();
+
+      // Start playback → the fake records sentence 0's utterance.
+      await user.click(screen.getByRole("button", { name: "Play" }));
+      // Begin voicing sentence 0 → the active sentence highlights → follow.
+      act(() => calls[0].options?.onStart?.());
+
+      await waitFor(() => expect(scrolled).toHaveLength(1));
+      expect((scrolled[0] as HTMLElement).getAttribute("data-word-index")).toBe(
+        "0",
+      );
+
+      // Advance to sentence 1 → the scroll target updates to a later word.
+      act(() => calls[0].options?.onEnd?.());
+      act(() => calls[1].options?.onStart?.());
+
+      await waitFor(() => expect(scrolled).toHaveLength(2));
+      expect(
+        (scrolled[1] as HTMLElement).getAttribute("data-word-index"),
+      ).not.toBe("0");
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
+  it("pauses story playback when a word's meaning popover is opened", async () => {
+    const user = userEvent.setup();
+    const { controller } = makeFakeSpeech();
+    renderWithQuery(
+      <ReaderScreen storyId={STORY} audioController={controller} audioSupported />,
+    );
+    await waitForStory();
+
+    // Start playback → the transport flips to Pause.
+    await user.click(screen.getByRole("button", { name: "Play" }));
+    expect(screen.getByRole("button", { name: "Pause" })).toBeInTheDocument();
+
+    // Tapping a word to see its meaning must stop the narration running over the
+    // reader — the transport returns to Play (paused).
+    await user.click(within(readingGroup()).getByRole("button", { name: "very" }));
+    await screen.findByRole("dialog", { name: "Very" });
+    expect(screen.getByRole("button", { name: "Play" })).toBeInTheDocument();
   });
 
   it("keeps the passage readable as continuous prose for assistive tech", async () => {
