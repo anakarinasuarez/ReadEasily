@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
@@ -14,6 +14,15 @@ import type { LibraryData } from "../types";
  * mocked catalog, not bespoke fixtures. Per-test handler overrides exercise the
  * loading / error / empty branches.
  */
+
+// The screen routes the navbar account avatar via the App Router; mock it so
+// the component renders without a mounted router in jsdom.
+const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock, prefetch: vi.fn() }),
+}));
+
+beforeEach(() => pushMock.mockClear());
 
 /** Resolve once the query has settled into its loaded UI. */
 async function waitForLoaded() {
@@ -48,6 +57,15 @@ describe("LibraryScreen", () => {
     expect(
       screen.getByRole("link", { name: /The Tortoise and the Hare/ }),
     ).toHaveAttribute("href", "/story/the-tortoise-and-the-hare");
+  });
+
+  it("routes the navbar account avatar to /profile (navigation contract)", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<LibraryScreen />);
+    await waitForLoaded();
+
+    await user.click(screen.getByRole("button", { name: "Account" }));
+    expect(pushMock).toHaveBeenCalledWith("/profile");
   });
 
   it("links the featured CTA to the reader for the featured book", async () => {

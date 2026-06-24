@@ -32,7 +32,7 @@ figma.connect(
         ReadingAccent: "accent",
         Autoplay: "success",
         Pronounce: "warning",
-        Motion: "accent",
+        Motion: "plum",
       }),
     },
     // The Figma canonical node is the Translation (segmented) row; its trailing

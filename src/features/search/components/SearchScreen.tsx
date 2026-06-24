@@ -2,6 +2,7 @@
 
 import { useId, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { SectionHeader } from "@/components/section-header";
 import { Navbar, type NavbarItem } from "@/components/navbar";
 import { EmptyState } from "@/components/empty-state";
@@ -82,6 +83,7 @@ export interface SearchScreenProps {
 }
 
 export function SearchScreen({ initialCategory }: SearchScreenProps) {
+  const router = useRouter();
   const { data, isPending, isError, refetch } = useSearch();
 
   // Local UI state #1: the active browse view. Seeded from the validated
@@ -170,7 +172,12 @@ export function SearchScreen({ initialCategory }: SearchScreenProps) {
       {/* Sticky navbar — matches the Library screen (consistent across screens).
           The back affordance is NOT in this row; it scrolls with the content. */}
       <div className="sticky top-0 z-50 mx-auto w-full max-w-7xl px-lg pt-lg">
-        <Navbar items={NAV_ITEMS} activeKey="search" user={SCREEN_USER} />
+        <Navbar
+          items={NAV_ITEMS}
+          activeKey="search"
+          user={SCREEN_USER}
+          onAccountClick={() => router.push("/profile")}
+        />
       </div>
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-start gap-2xl px-lg py-2xl">

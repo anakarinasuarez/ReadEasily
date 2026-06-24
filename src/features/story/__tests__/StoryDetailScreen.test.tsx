@@ -1,9 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { renderWithQuery } from "../../../../tests/utils/query";
 import { StoryDetailScreen } from "../components/StoryDetailScreen";
+
+// The screen routes the navbar account avatar via the App Router; mock it so
+// the component renders without a mounted router in jsdom.
+const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock, prefetch: vi.fn() }),
+}));
 
 /**
  * Behavior tests for Story Detail. MSW (wired in tests/setup.ts) serves the same

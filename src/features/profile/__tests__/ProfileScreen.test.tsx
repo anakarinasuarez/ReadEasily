@@ -1,0 +1,165 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
+import { axe } from "jest-axe";
+import { server } from "../../../../tests/mocks/server";
+import { renderWithQuery } from "../../../../tests/utils/query";
+import {
+  usePreferences,
+  DEFAULT_PREFERENCES,
+} from "@/stores/preferences";
+import { ProfileScreen } from "../components/ProfileScreen";
+
+/**
+ * ProfileScreen behavior tests. The screen reads the user + stats from the
+ * MSW-mocked `/api/profile` (Query) and the five preferences from the global
+ * persisted store; we assert the header/stats render from the payload, the
+ * stats reflect the derived saved-words counts, each setting writes the store,
+ * the destructive rows open a confirm modal, and the navbar avatar routes to
+ * `/profile`. Store PERSISTENCE itself is covered in `stores/preferences.test`.
+ */
+
+const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock, prefetch: vi.fn() }),
+}));
+
+beforeEach(() => {
+  pushMock.mockClear();
+  // Each test starts from factory preferences + empty storage.
+  localStorage.clear();
+  usePreferences.setState({ ...DEFAULT_PREFERENCES, _hasHydrated: false });
+});
+
+describe("ProfileScreen — header + stats from getProfile", () => {
+  it("renders the user identity from the payload", async () => {
+    renderWithQuery(<ProfileScreen />);
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Ana" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/ana@readeasily\.app/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Joined June 2026/)).toBeInTheDocument();
+  });
+
+  it("renders the four stat tiles, derived from the saved-words list", async () => {
+    renderWithQuery(<ProfileScreen />);
+
+    // Seed = 8 saved words, 2 with ready practice sentences (deriveSavedStats).
+    expect(await screen.findByText("Words saved")).toBeInTheDocument();
+    expect(screen.getByText("8")).toBeInTheDocument(); // wordsSaved
+    expect(screen.getByText("Practice sets")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument(); // practiceSets
+    expect(screen.getByText("In progress")).toBeInTheDocument();
+    expect(screen.getByText("Finished")).toBeInTheDocument();
+  });
+
+  it("shows an error block with retry when the profile fetch fails", async () => {
+    server.use(
+      http.get("/api/profile", () =>
+        HttpResponse.json({ message: "boom" }, { status: 500 }),
+      ),
+    );
+    renderWithQuery(<ProfileScreen />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /couldn.t load your profile/i,
+    );
+    // Settings still render below the error — they don't depend on the server.
+    expect(screen.getByText("Translation language")).toBeInTheDocument();
+  });
+});
+
+describe("ProfileScreen — settings write the global store", () => {
+  it("changes the translation language via the segmented control", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileScreen />);
+    await screen.findByText("Translation language");
+
+    expect(usePreferences.getState().translationLang).toBe("ES");
+    await user.click(screen.getByRole("radio", { name: "FR" }));
+    expect(usePreferences.getState().translationLang).toBe("FR");
+  });
+
+  it("changes the reading accent via the segmented control", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileScreen />);
+    await screen.findByText("Reading accent");
+
+    expect(usePreferences.getState().readingAccent).toBe("US");
+    await user.click(screen.getByRole("radio", { name: "UK" }));
+    expect(usePreferences.getState().readingAccent).toBe("UK");
+  });
+
+  it("flips a toggle preference (Autoplay narration)", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileScreen />);
+    await screen.findByText("Autoplay narration");
+
+    expect(usePreferences.getState().autoplay).toBe(false);
+    await user.click(screen.getByRole("switch", { name: "Autoplay narration" }));
+    expect(usePreferences.getState().autoplay).toBe(true);
+  });
+
+  it("flips the Reduce motion toggle (plum row)", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileScreen />);
+    await screen.findByText("Reduce motion");
+
+    expect(usePreferences.getState().reduceMotion).toBe(false);
+    await user.click(screen.getByRole("switch", { name: "Reduce motion" }));
+    expect(usePreferences.getState().reduceMotion).toBe(true);
+  });
+});
+
+describe("ProfileScreen — destructive account rows confirm before acting", () => {
+  it("opens a confirm modal for Reset learning data", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileScreen />);
+    await screen.findByText("Account");
+
+    await user.click(
+      screen.getByRole("button", { name: "Reset learning data" }),
+    );
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Reset learning data?")).toBeInTheDocument();
+  });
+
+  it("opens a confirm modal for Delete account", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileScreen />);
+    await screen.findByText("Account");
+
+    await user.click(screen.getByRole("button", { name: "Delete account" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Delete account?")).toBeInTheDocument();
+
+    // Cancel closes it without acting.
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    );
+  });
+});
+
+describe("ProfileScreen — navigation contract", () => {
+  it("routes the navbar account avatar to /profile", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileScreen />);
+    await screen.findByText("Words saved");
+
+    await user.click(screen.getByRole("button", { name: "Account" }));
+    expect(pushMock).toHaveBeenCalledWith("/profile");
+  });
+});
+
+describe("ProfileScreen — a11y", () => {
+  it("has no axe violations once loaded", async () => {
+    const { container } = renderWithQuery(<ProfileScreen />);
+    await screen.findByText("Words saved");
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});

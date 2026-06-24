@@ -30,7 +30,16 @@ import { Badge, type BadgeTone } from "@/ui/badge";
  */
 
 /** Leading icon-tile theme. Maps to the Figma per-setting-type tile colors. */
-export type SettingsRowTone = "accent" | "info" | "success" | "warning" | "danger";
+export type SettingsRowTone =
+  | "accent"
+  | "info"
+  | "success"
+  | "warning"
+  | "danger"
+  | "plum";
+
+/** Title color. `danger` (text-danger) is used by the Delete-account nav row. */
+export type SettingsRowTitleTone = "default" | "danger";
 
 /** Fields shared by every variant. */
 interface SettingsRowBase {
@@ -40,6 +49,9 @@ interface SettingsRowBase {
   iconTone?: SettingsRowTone;
   /** Primary label (Heading/H4). Required — carries the row's meaning. */
   label: string;
+  /** Title color. Defaults to `default` (text-primary); `danger` → text-danger
+   *  for the destructive Delete-account row. */
+  titleTone?: SettingsRowTitleTone;
   /** Secondary line (Caption, muted). Optional. */
   description?: string;
   /** Dims the row and blocks its control. */
@@ -95,6 +107,13 @@ const TILE_TONE: Record<SettingsRowTone, string> = {
   success: "bg-success-subtle text-success",
   warning: "bg-warning-subtle text-warning",
   danger: "bg-danger-subtle text-danger",
+  plum: "bg-settings-plum-subtle text-settings-plum",
+};
+
+/** Title color per titleTone — token-bound. */
+const TITLE_TONE: Record<SettingsRowTitleTone, string> = {
+  default: "text-primary",
+  danger: "text-danger",
 };
 
 /** Shared row geometry. `min-h-11` = 44px tap target (a11y law). */
@@ -156,6 +175,7 @@ export const SettingsRow = React.forwardRef<HTMLElement, SettingsRowProps>(
       icon,
       iconTone = "accent",
       label,
+      titleTone = "default",
       description,
       disabled = false,
       divider = false,
@@ -180,7 +200,10 @@ export const SettingsRow = React.forwardRef<HTMLElement, SettingsRowProps>(
       <>
         <span
           id={labelId}
-          className="font-display text-heading-h4 font-semibold text-primary"
+          className={cx(
+            "font-display text-heading-h4 font-semibold",
+            TITLE_TONE[titleTone],
+          )}
         >
           {label}
         </span>

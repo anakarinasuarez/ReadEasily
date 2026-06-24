@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Navbar, type NavbarItem } from "@/components/navbar";
 import { useLibrary } from "../hooks/useLibrary";
 import { CategoryFilter } from "./CategoryFilter";
@@ -38,6 +39,7 @@ const NAV_ITEMS: NavbarItem[] = [
 const LOADING_USER = { name: "Reader" };
 
 export function LibraryScreen() {
+  const router = useRouter();
   const { data, isPending, isError, refetch } = useLibrary();
 
   // The only local UI state: the active filter chip. Defaults to the "all"
@@ -77,7 +79,12 @@ export function LibraryScreen() {
     <main className="flex min-h-full flex-1 flex-col bg-canvas">
       {/* Floating navbar — sticky so it stays in view as rails scroll. */}
       <div className="sticky top-0 z-50 mx-auto w-full max-w-7xl px-lg pt-lg">
-        <Navbar items={NAV_ITEMS} activeKey="library" user={user} />
+        <Navbar
+          items={NAV_ITEMS}
+          activeKey="library"
+          user={user}
+          onAccountClick={() => router.push("/profile")}
+        />
       </div>
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center gap-3xl px-lg py-3xl">

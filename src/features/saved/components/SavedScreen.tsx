@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Navbar, type NavbarItem } from "@/components/navbar";
 import { StatPill } from "@/components/stat-pill";
 import { Button } from "@/ui/button";
@@ -175,6 +176,7 @@ function Breadcrumb({ hideOnMobile = false }: { hideOnMobile?: boolean }) {
 }
 
 export function SavedScreen() {
+  const router = useRouter();
   const { data, isPending, isError, refetch } = useSaved();
   const remove = useRemoveSavedWord();
 
@@ -267,7 +269,12 @@ export function SavedScreen() {
       {/* Sticky navbar — consistent with Library/Search. The back affordance is
           NOT in this row; it scrolls with the content. */}
       <div className="sticky top-0 z-50 mx-auto w-full max-w-7xl px-lg pt-lg">
-        <Navbar items={NAV_ITEMS} activeKey="saved" user={SCREEN_USER} />
+        <Navbar
+          items={NAV_ITEMS}
+          activeKey="saved"
+          user={SCREEN_USER}
+          onAccountClick={() => router.push("/profile")}
+        />
       </div>
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-start gap-2xl px-lg py-2xl">

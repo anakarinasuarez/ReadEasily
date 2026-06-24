@@ -10,6 +10,7 @@ import {
   type SavedData,
   type SavedWord,
 } from "@/features/saved/types";
+import type { ProfileData } from "@/features/profile/types";
 import { loadStory } from "@/features/reader/content/loader";
 import {
   DEFAULT_LANGUAGE,
@@ -808,6 +809,32 @@ function currentSavedData(): SavedData {
 }
 
 /**
+ * Shape the current state into the `ProfileData` contract (Profile screen). The
+ * name/avatar come from the existing library `user` (single source of identity);
+ * `email` + `joinedAt` are MOCKED here (no auth backend yet). The stats reuse
+ * `deriveSavedStats` over the SAME live `savedWords` list as the Saved screen,
+ * so the Profile tiles can never drift from Saved. `inProgress`/`finished` are
+ * placeholders (0) — there is no reading-progress model yet.
+ */
+function currentProfileData(): ProfileData {
+  const saved = deriveSavedStats(savedWords);
+  const name = libraryData.user.name;
+  return {
+    user: {
+      name,
+      email: `${name.toLowerCase()}@readeasily.app`,
+      joinedAt: "2026-06-01T00:00:00.000Z",
+    },
+    stats: {
+      wordsSaved: saved.wordsToReview,
+      practiceSets: saved.practiceSets,
+      inProgress: 0,
+      finished: 0,
+    },
+  };
+}
+
+/**
  * A tiny seeded PRNG (mulberry32) + Fisher-Yates shuffle. The Practice overlay's
  * "New sentences" bumps a `?nonce=`, and the overlay expects a VISIBLY different
  * ordering each press; keying the shuffle on the nonce makes the reorder
@@ -859,6 +886,14 @@ export const handlers = [
   // Saved words — the collection `getSaved()` consumes (stats derived).
   http.get("/api/saved", () => {
     return HttpResponse.json(currentSavedData());
+  }),
+
+  // Profile — the user identity + derived learning stats `getProfile()`
+  // consumes. Preferences are NOT here (they live in the persisted client
+  // store). Stats reuse the live saved-words list, so a removed word lowers the
+  // Profile "Words saved" tile too.
+  http.get("/api/profile", () => {
+    return HttpResponse.json(currentProfileData());
   }),
 
   // Unsave a word — the write seam behind the card's remove button. Removes the

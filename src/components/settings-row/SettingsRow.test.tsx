@@ -162,6 +162,41 @@ describe("SettingsRow — badge & custom variants", () => {
   });
 });
 
+describe("SettingsRow — tone extensions (plum tile + danger title)", () => {
+  it("renders the plum icon tile tone", () => {
+    render(
+      <SettingsRow
+        variant="toggle"
+        iconTone="plum"
+        icon={<svg data-testid="motion-glyph" />}
+        label="Reduce motion"
+        checked={false}
+        onCheckedChange={() => {}}
+      />,
+    );
+    const tile = screen.getByTestId("motion-glyph").parentElement;
+    expect(tile?.className).toContain("bg-settings-plum-subtle");
+    expect(tile?.className).toContain("text-settings-plum");
+  });
+
+  it("renders the danger title tone on a nav row (Delete account)", () => {
+    render(
+      <SettingsRow
+        variant="nav"
+        titleTone="danger"
+        iconTone="danger"
+        label="Delete account"
+        description="Remove your profile and all data"
+        onClick={() => {}}
+      />,
+    );
+    // The title still names the button; only its color changes.
+    const title = screen.getByText("Delete account");
+    expect(title.className).toContain("text-danger");
+    expect(screen.getByRole("button")).toHaveAccessibleName("Delete account");
+  });
+});
+
 describe("SettingsRow — a11y (jest-axe)", () => {
   it("toggle variant has no violations", async () => {
     const { container } = render(<ControlledToggle label="Autoplay" description="Play stories" />);

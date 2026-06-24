@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
@@ -6,6 +6,13 @@ import { axe } from "jest-axe";
 import { server } from "../../../../tests/mocks/server";
 import { renderWithQuery } from "../../../../tests/utils/query";
 import { SearchScreen } from "../components/SearchScreen";
+
+// The screen routes the navbar account avatar via the App Router; mock it so
+// the component renders without a mounted router in jsdom.
+const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock, prefetch: vi.fn() }),
+}));
 
 /**
  * Behavior tests for the Search screen. MSW serves the same `/api/search`

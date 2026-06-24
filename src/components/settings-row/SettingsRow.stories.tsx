@@ -192,7 +192,7 @@ export const Custom: CustomStory = {
   },
 };
 
-/* --- the 5 tile tones ----------------------------------------------------- */
+/* --- the 6 tile tones ----------------------------------------------------- */
 export const IconTones: BadgeStory = {
   args: { variant: "badge", label: "Tone", badge: { children: "Badge" } },
   render: () => (
@@ -201,9 +201,23 @@ export const IconTones: BadgeStory = {
       <SettingsRow variant="badge" divider icon={<GlobeIcon />} iconTone="info" label="Info tile" badge={{ tone: "info", children: "info" }} />
       <SettingsRow variant="badge" divider icon={<PlayIcon />} iconTone="success" label="Success tile" badge={{ tone: "success", children: "success" }} />
       <SettingsRow variant="badge" divider icon={<VolumeIcon />} iconTone="warning" label="Warning tile" badge={{ tone: "warning", children: "warning" }} />
+      <SettingsRow variant="badge" divider icon={<BoltIcon />} iconTone="plum" label="Plum tile" badge={{ tone: "info", children: "plum" }} />
       <SettingsRow variant="badge" icon={<BoltIcon />} iconTone="danger" label="Danger tile" badge={{ tone: "danger", children: "danger" }} />
     </>
   ),
+};
+
+/* --- destructive nav row (danger title + tile, Delete account) ------------ */
+export const DangerNav: NavStory = {
+  args: {
+    variant: "nav",
+    iconTone: "danger",
+    titleTone: "danger",
+    icon: <BoltIcon />,
+    label: "Delete account",
+    description: "Remove your profile and all data",
+    onClick: () => {},
+  },
 };
 
 /* --- grouped in a card (the real Settings list) --------------------------- */
