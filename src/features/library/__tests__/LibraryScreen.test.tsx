@@ -44,10 +44,10 @@ describe("LibraryScreen", () => {
       screen.getByRole("heading", { level: 2, name: "Continue listening" }),
     ).toBeInTheDocument();
 
-    // A book card from a rail links into the reader.
+    // A book card from a rail links into Story Detail (not straight to /read).
     expect(
       screen.getByRole("link", { name: /The Tortoise and the Hare/ }),
-    ).toHaveAttribute("href", "/read/the-tortoise-and-the-hare");
+    ).toHaveAttribute("href", "/story/the-tortoise-and-the-hare");
   });
 
   it("links the featured CTA to the reader for the featured book", async () => {

@@ -40,10 +40,11 @@ test("saved screen lists words and removes one", async ({ page }) => {
   await expect(page.getByText("words to review")).toBeVisible();
   await expect(page.getByText("practice sets")).toBeVisible();
 
-  // The word link is origin-aware — it points at its source story in the reader.
+  // The word link is origin-aware — it points at its source story's detail
+  // screen (catalog cards land on Story Detail first).
   await expect(page.getByRole("link", { name: "Path" })).toHaveAttribute(
     "href",
-    "/read/the-ant-and-the-grasshopper",
+    "/story/the-ant-and-the-grasshopper",
   );
 
   // Remove "Path": its card animates out and disappears; the rest remain.

@@ -50,10 +50,11 @@ describe("ReaderScreen", () => {
     renderWithQuery(<ReaderScreen storyId={STORY} />);
     await waitForStory();
 
-    // Breadcrumb-back returns to Library (Story Detail route doesn't exist yet).
+    // Breadcrumb-back is origin-aware: catalog cards reach the reader via Story
+    // Detail, so back returns to this story's detail screen.
     expect(
-      screen.getByRole("link", { name: "Back to Library" }),
-    ).toHaveAttribute("href", "/");
+      screen.getByRole("link", { name: "Back to Story Detail" }),
+    ).toHaveAttribute("href", `/story/${STORY}`);
 
     // The passage is one roving group of word buttons.
     const group = readingGroup();

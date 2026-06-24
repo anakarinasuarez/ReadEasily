@@ -72,15 +72,21 @@ function displayWord(surface: string): string {
   return cleaned[0].toUpperCase() + cleaned.slice(1);
 }
 
-/** The breadcrumb-back. Story Detail doesn't exist yet, so it returns to Library. */
-function Breadcrumb() {
+/** The breadcrumb-back. Origin-aware: catalog cards reach the reader VIA Story
+ *  Detail (`/story/${id}` → "Read & Listen" → here), so back returns to that
+ *  story's detail screen (`‹ Story Detail`), not all the way to the Library. */
+function Breadcrumb({ storyId }: { storyId: string }) {
   return (
     <Button asChild variant="ghost" size="sm" className="-ml-[var(--space-md)]">
-      <Link href="/" aria-label="Back to Library" className="gap-[var(--space-xs)] no-underline">
+      <Link
+        href={`/story/${storyId}`}
+        aria-label="Back to Story Detail"
+        className="gap-[var(--space-xs)] no-underline"
+      >
         <span aria-hidden="true" className="inline-flex size-[16px] [&>svg]:size-full">
           <ChevronLeftIcon />
         </span>
-        Library
+        Story Detail
       </Link>
     </Button>
   );
@@ -327,7 +333,7 @@ export function ReaderScreen({
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-lg pt-lg pb-[200px]">
         {/* Header band — breadcrumb-back (left), ES/US pills (right). In-flow. */}
         <div className="flex w-full items-center justify-between gap-lg">
-          <Breadcrumb />
+          <Breadcrumb storyId={storyId} />
           {story && (
             <ReaderToggles
               language={language}

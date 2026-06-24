@@ -32,14 +32,16 @@ describe("getLibrary", () => {
     // A `continue` section, when present, sorts first.
     expect(data.sections[0].id).toBe("continue");
 
-    // Every section names a solid accent utility; every book routes to /read/${id}.
+    // Every section names a solid accent utility; every CARD now routes to
+    // Story Detail (/story/${id}) — the card's "Read & Listen" CTA is the hop on
+    // to the reader. (The featured HERO above keeps its direct /read CTA.)
     for (const section of data.sections) {
       expect(section.accent).toBeTruthy();
     }
     const books = data.sections.flatMap((s) => s.books);
     expect(books.length).toBeGreaterThan(0);
     for (const book of books) {
-      expect(book.href).toBe(`/read/${book.id}`);
+      expect(book.href).toBe(`/story/${book.id}`);
     }
   });
 

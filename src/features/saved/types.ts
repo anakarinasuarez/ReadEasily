@@ -23,7 +23,8 @@ export interface SavedWord {
   phonetic?: string;
   /** Translation — senses comma-joined, e.g. "sendero, camino". */
   translation: string;
-  /** Id of the story the word was saved from — drives `/read/${id}`. */
+  /** Id of the story the word was saved from — the card links to its Story
+   *  Detail (`/story/${id}`). */
   sourceStoryId: string;
   /** Source-story title shown (truncated) in the card footer. */
   sourceStoryTitle: string;

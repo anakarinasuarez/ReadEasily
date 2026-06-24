@@ -17,6 +17,7 @@ import {
   type Language,
   type NewSavedWord,
 } from "@/features/reader/types";
+import type { StoryDetail, StoryKeyWord } from "@/features/story/types";
 import { resolvePracticeSet } from "@/features/practice/content";
 import type {
   PracticeResponse,
@@ -459,6 +460,243 @@ const searchData: SearchData = {
 };
 
 /**
+ * User-confirmed flow: catalog CARDS (Library rails + Search results) now route
+ * to STORY DETAIL first (`/story/${id}`); Story Detail's "Read & Listen" CTA is
+ * the single hop onward into the reader. The Library FEATURED HERO keeps its
+ * direct `/read` CTA (its CTA is the read action, not a card), so only the
+ * section + search card hrefs are repointed here — featured hrefs stay `/read`.
+ */
+for (const section of libraryData.sections) {
+  for (const book of section.books) {
+    book.href = `/story/${book.id}`;
+  }
+}
+for (const story of searchStories) {
+  story.href = `/story/${story.id}`;
+}
+
+/* ---------------------------------------------------------------------------
+ * Story Detail catalog — the lightweight payload `getStoryDetail(id)` consumes
+ * (Figma "Screen / Story Detail" 122:136). Built from the shared catalog rows
+ * (reusing `searchStories` for id/title/level/minutes/cover/category) enriched
+ * with the Story-Detail-only blocks: a per-story `eyebrow`/`levelLabel`/`teaser`,
+ * the `words`/`moral` and a curated `keyWords` list whose senses are pulled from
+ * the SAME story glossary the Reader uses (so the chip meanings can never drift
+ * from the in-story translations). `keyWords` resolve in the catalog's default
+ * language (Spanish); Story Detail has no language switcher per Figma.
+ * ------------------------------------------------------------------------- */
+
+/** Story-Detail eyebrow per category (Figma centre reads "A CLASSIC FABLE  ·  …"). */
+const DETAIL_EYEBROWS: Record<string, string> = {
+  fables: "A CLASSIC FABLE  ·  FOR ENGLISH LEARNERS",
+  travel: "A TRAVEL TALE  ·  FOR ENGLISH LEARNERS",
+  technology: "A MODERN STORY  ·  FOR ENGLISH LEARNERS",
+  "daily-life": "AN EVERYDAY STORY  ·  FOR ENGLISH LEARNERS",
+};
+
+/** Human label for each CEFR level (matches the Library featured labels). */
+const DETAIL_LEVEL_LABELS: Record<string, string> = {
+  A1: "Beginner",
+  A2: "Elementary",
+  B1: "Intermediate",
+  B2: "Upper-Intermediate",
+  C1: "Advanced",
+  C2: "Proficient",
+};
+
+/** One-line hook per story (Figma centre teaser for the Ant; written for the rest). */
+const DETAIL_TEASERS: Record<string, string> = {
+  "the-ant-and-the-grasshopper":
+    "All summer long the grasshopper sings while the ants store grain. When winter comes, only one of them is ready.",
+  "the-tortoise-and-the-hare":
+    "The hare laughs at the slow tortoise — until a steady pace turns a sure win into a famous lesson.",
+  "the-boy-who-cried-wolf":
+    "A bored shepherd boy raises one false alarm too many — and learns what a lie really costs.",
+  "the-clever-crow":
+    "Thirsty and stuck, a crow finds that a few small stones can solve a very big problem.",
+  "a-trip-to-the-mountains":
+    "A weekend hike, a wrong turn, and a view worth every step — simple English for the road ahead.",
+  "lost-at-the-airport":
+    "A missed gate, a lost bag, and a kind stranger — find your way through a busy airport in clear English.",
+  "my-first-smartphone":
+    "Unboxing, set-up, and a few funny mistakes — the words you need for a brand-new phone.",
+  "a-morning-in-the-city":
+    "An alarm, a warm cup of coffee, and a city waking up — an easy English walk through an ordinary morning.",
+  "the-lost-keys":
+    "Late for the bus and the keys are gone — a small everyday panic, told in clear, simple English.",
+  "the-helpful-robot":
+    "A little white robot arrives with a gift and a question: how can I help? A warm, simple tech tale.",
+};
+
+/**
+ * The fable morals — shown in the inline callout, in English to match Figma's
+ * Reading/L italic line. Only the four fables carry one; non-fables omit it so
+ * the callout hides.
+ */
+const DETAIL_MORALS: Record<string, string> = {
+  "the-ant-and-the-grasshopper":
+    "There is a time for work and a time for play.",
+  "the-tortoise-and-the-hare": "Slow and steady wins the race.",
+  "the-boy-who-cried-wolf":
+    "Nobody believes a liar — even when he tells the truth.",
+  "the-clever-crow": "Little by little does the trick.",
+};
+
+/**
+ * Curated key words per story as `{ surface, lemma }` pairs: `surface` is the
+ * exact English shown on the chip (Figma shows plurals like "ants"/"seeds"),
+ * `lemma` is the glossary key the sense is looked up under. The Ant set is read
+ * 1:1 from Figma 122:208; the rest are ~8 meaningful content words per story.
+ */
+const DETAIL_KEY_WORDS: Record<string, Array<{ surface: string; lemma: string }>> = {
+  "the-ant-and-the-grasshopper": [
+    { surface: "grasshopper", lemma: "grasshopper" },
+    { surface: "field", lemma: "field" },
+    { surface: "summer", lemma: "summer" },
+    { surface: "winter", lemma: "winter" },
+    { surface: "ants", lemma: "ant" },
+    { surface: "ant", lemma: "ant" },
+    { surface: "grain", lemma: "grain" },
+    { surface: "seeds", lemma: "seed" },
+  ],
+  "the-tortoise-and-the-hare": [
+    { surface: "tortoise", lemma: "tortoise" },
+    { surface: "hare", lemma: "hare" },
+    { surface: "race", lemma: "race" },
+    { surface: "slow", lemma: "slow" },
+    { surface: "steady", lemma: "steady" },
+    { surface: "rest", lemma: "rest" },
+    { surface: "win", lemma: "win" },
+    { surface: "finish", lemma: "finish" },
+  ],
+  "the-boy-who-cried-wolf": [
+    { surface: "wolf", lemma: "wolf" },
+    { surface: "sheep", lemma: "sheep" },
+    { surface: "village", lemma: "village" },
+    { surface: "shepherd", lemma: "boy" },
+    { surface: "shout", lemma: "shout" },
+    { surface: "trick", lemma: "trick" },
+    { surface: "villagers", lemma: "villager" },
+    { surface: "angry", lemma: "angry" },
+  ],
+  "the-clever-crow": [
+    { surface: "crow", lemma: "crow" },
+    { surface: "thirsty", lemma: "thirsty" },
+    { surface: "water", lemma: "water" },
+    { surface: "jug", lemma: "jug" },
+    { surface: "beak", lemma: "beak" },
+    { surface: "stones", lemma: "stone" },
+    { surface: "reach", lemma: "reach" },
+    { surface: "drink", lemma: "drink" },
+  ],
+  "a-trip-to-the-mountains": [
+    { surface: "mountains", lemma: "mountain" },
+    { surface: "trip", lemma: "trip" },
+    { surface: "journey", lemma: "journey" },
+    { surface: "pine", lemma: "pine" },
+    { surface: "trees", lemma: "tree" },
+    { surface: "mist", lemma: "mist" },
+    { surface: "climb", lemma: "climb" },
+    { surface: "sky", lemma: "sky" },
+  ],
+  "lost-at-the-airport": [
+    { surface: "airport", lemma: "airport" },
+    { surface: "suitcase", lemma: "suitcase" },
+    { surface: "flight", lemma: "flight" },
+    { surface: "gate", lemma: "gate" },
+    { surface: "departure", lemma: "departure" },
+    { surface: "sign", lemma: "sign" },
+    { surface: "language", lemma: "language" },
+    { surface: "screen", lemma: "screen" },
+  ],
+  "my-first-smartphone": [
+    { surface: "smartphone", lemma: "smartphone" },
+    { surface: "phone", lemma: "phone" },
+    { surface: "screen", lemma: "screen" },
+    { surface: "glow", lemma: "glow" },
+    { surface: "parents", lemma: "parent" },
+    { surface: "promise", lemma: "promise" },
+    { surface: "world", lemma: "world" },
+    { surface: "box", lemma: "box" },
+  ],
+  "the-helpful-robot": [
+    { surface: "robot", lemma: "robot" },
+    { surface: "gift", lemma: "gift" },
+    { surface: "kitchen", lemma: "kitchen" },
+    { surface: "tea", lemma: "tea" },
+    { surface: "daughter", lemma: "daughter" },
+    { surface: "help", lemma: "help" },
+    { surface: "house", lemma: "house" },
+    { surface: "cup", lemma: "cup" },
+  ],
+  "the-lost-keys": [
+    { surface: "keys", lemma: "key" },
+    { surface: "coat", lemma: "coat" },
+    { surface: "pocket", lemma: "pocket" },
+    { surface: "coffee", lemma: "coffee" },
+    { surface: "newspaper", lemma: "newspaper" },
+    { surface: "bus", lemma: "bus" },
+    { surface: "sofa", lemma: "sofa" },
+    { surface: "jacket", lemma: "jacket" },
+  ],
+  "a-morning-in-the-city": [
+    { surface: "alarm", lemma: "alarm" },
+    { surface: "city", lemma: "city" },
+    { surface: "streets", lemma: "street" },
+    { surface: "coffee", lemma: "coffee" },
+    { surface: "toast", lemma: "toast" },
+    { surface: "kitchen", lemma: "kitchen" },
+    { surface: "breakfast", lemma: "breakfast" },
+    { surface: "jacket", lemma: "jacket" },
+  ],
+};
+
+/**
+ * Build one story's `StoryDetail`, resolving each curated key word's sense from
+ * the story glossary (default language). Returns `null` for an unknown id (the
+ * handler answers 404), mirroring the Reader's graceful not-found.
+ */
+function buildStoryDetail(id: string): StoryDetail | null {
+  const base = searchStories.find((s) => s.id === id);
+  if (!base) return null;
+  const story = loadStory(id, DEFAULT_LANGUAGE);
+  if (!story) return null;
+
+  const keyWords: StoryKeyWord[] = (DETAIL_KEY_WORDS[id] ?? []).flatMap(
+    ({ surface, lemma }) => {
+      const entry = story.glossary[lemma];
+      if (!entry) return [];
+      return [
+        {
+          surface,
+          pos: entry.pos,
+          translation: entry.translation,
+          ...(entry.ipa != null ? { ipa: entry.ipa } : {}),
+        },
+      ];
+    },
+  );
+
+  return {
+    id: base.id,
+    title: base.title,
+    level: base.level,
+    levelLabel: DETAIL_LEVEL_LABELS[base.level] ?? base.level,
+    minutes: base.minutes,
+    words: story.wordCount,
+    coverSrc: base.coverSrc,
+    category: base.category,
+    // The CTA destination — the reader, NOT this screen's own `/story` route.
+    href: `/read/${base.id}`,
+    eyebrow:
+      DETAIL_EYEBROWS[base.category] ?? "A STORY  ·  FOR ENGLISH LEARNERS",
+    teaser: DETAIL_TEASERS[id] ?? "",
+    keyWords,
+    moral: DETAIL_MORALS[id],
+  };
+}
+
+/**
  * Saved-words collection — the payload `getSaved()` consumes. Read 1:1 from the
  * Figma "Screen / Saved" (137:154): eight words a reader kept while reading "The
  * Ant and the Grasshopper", newest first. Two carry ready practice sentences
@@ -730,5 +968,19 @@ export const handlers = [
     }
     const coverSrc = searchStories.find((s) => s.id === id)?.coverSrc;
     return HttpResponse.json({ ...story, coverSrc });
+  }),
+
+  // One story's DETAIL — the lightweight payload `getStoryDetail(id)` consumes
+  // (Story Detail screen). DISTINCT from `/api/story/:id` above (the heavy
+  // paginated Reader payload): this returns only the catalog fields + the
+  // key-words + moral. 404 for an unknown id, so the screen shows its
+  // not-found state.
+  http.get("/api/story/:id/detail", ({ params }) => {
+    const { id } = params as { id: string };
+    const detail = buildStoryDetail(id);
+    if (!detail) {
+      return new HttpResponse(null, { status: 404 });
+    }
+    return HttpResponse.json(detail);
   }),
 ];

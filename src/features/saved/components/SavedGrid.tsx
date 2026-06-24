@@ -61,7 +61,7 @@ export const SavedGrid = forwardRef<HTMLUListElement, SavedGridProps>(
               translation={word.translation}
               sourceStoryTitle={word.sourceStoryTitle}
               sentencesReady={word.sentencesReady}
-              wordHref={`/read/${word.sourceStoryId}`}
+              wordHref={`/story/${word.sourceStoryId}`}
               onListen={() => onListen(word)}
               onRemove={() => onRemove(word, index)}
             />

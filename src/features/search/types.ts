@@ -35,7 +35,8 @@ export interface SearchStory {
   coverSrc: string;
   /** Category id this story belongs to — matches a `SearchCategory.id`. */
   category: CategoryId;
-  /** Reader destination, always `/read/${id}`. */
+  /** Card destination — `/story/${id}` (cards open Story Detail first; its
+   *  "Read & Listen" CTA is what continues to `/read/${id}`). */
   href: string;
 }
 

@@ -23,10 +23,11 @@ test("reader opens a story, shows a word meaning, and saves it", async ({ page }
   await expect(
     page.getByRole("heading", { level: 1, name: "The Clever Crow" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Back to Library" })).toHaveAttribute(
-    "href",
-    "/",
-  );
+  // Breadcrumb-back is origin-aware: catalog cards reach the reader via Story
+  // Detail, so back returns to this story's detail screen.
+  await expect(
+    page.getByRole("link", { name: "Back to Story Detail" }),
+  ).toHaveAttribute("href", "/story/the-clever-crow");
 
   // The passage renders as a roving group of word buttons.
   const group = page.getByRole("group", {

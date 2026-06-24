@@ -56,10 +56,11 @@ describe("SavedScreen", () => {
     expect(screen.getByRole("link", { name: "Taught" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Bright" })).toBeInTheDocument();
 
-    // The word link is origin-aware: it points at its source story in the reader.
+    // The word link is origin-aware: it points at its source story's detail
+    // screen (catalog cards land on Story Detail first).
     expect(screen.getByRole("link", { name: "Path" })).toHaveAttribute(
       "href",
-      "/read/the-ant-and-the-grasshopper",
+      "/story/the-ant-and-the-grasshopper",
     );
 
     // Derived stat pills: 8 words to review, 2 practice sets.

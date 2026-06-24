@@ -112,11 +112,11 @@ describe("Button", () => {
   it("renders as the child element when asChild is set", () => {
     render(
       <Button asChild>
-        <a href="/story">Go to story</a>
+        <a href="https://example.com/story">Go to story</a>
       </Button>,
     );
     const link = screen.getByRole("link", { name: "Go to story" });
-    expect(link).toHaveAttribute("href", "/story");
+    expect(link).toHaveAttribute("href", "https://example.com/story");
   });
 
   it("has no detectable a11y violations across variants", async () => {

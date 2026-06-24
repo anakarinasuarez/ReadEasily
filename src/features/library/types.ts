@@ -31,7 +31,8 @@ export interface Book {
   coverSrc: string;
   /** Category id this book belongs to — matches a `Category.id`. */
   category: string;
-  /** Reader destination, always `/read/${id}`. */
+  /** Card destination — `/story/${id}` (catalog cards open Story Detail first;
+   *  its "Read & Listen" CTA is what continues to `/read/${id}`). */
   href: string;
 }
 
