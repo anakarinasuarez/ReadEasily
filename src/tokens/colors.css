@@ -165,6 +165,17 @@
   --category-travel-bg: var(--color-teal-50);    /* [C] #d2efe9 (node 1260:3678) = teal-50 */
   --category-travel-fg: var(--color-teal-500);   /* [C] #2f9f93 (node 1260:3678) = teal-500 / --cat-travel */
 
+  /* --- Semantic: settings icon-tile tones (SettingsRow IconTile) -------- */
+  /* [C] Profile "Reduce motion" row tile = PLUM (Figma "Motion (plum)",
+     node 159:286). Measured: solid glyph #a865b3 (rgb 168,101,179); tile fill
+     #f1e6f0 == that solid at 16% over --bg-elevated (#fffffb) — verified by
+     compositing. Mirrors the --cat-* tone pattern (solid accent + ~16% subtle
+     rgba; alpha can't be a hex var). Decorative — the row LABEL carries meaning,
+     so this is not text-contrast gated. Standalone hue (no plum ramp), kept as a
+     semantic literal like --cat-tech. Dark unverified — inherits light. */
+  --settings-plum: #a865b3;                        /* [C] solid plum glyph */
+  --settings-plum-subtle: rgba(168, 101, 179, 0.16); /* [C] plum @16% = tile tint #f1e6f0 */
+
   /* --- Semantic: overlay & glass surfaces (composites) ----------------- */
   /* [D-design] raw values from the Figma Navbar/Modal specs — reconcile in
      Dev Mode. Used via arbitrary-value classes (gradients, backdrop-blur). */
@@ -173,6 +184,17 @@
   --surface-glass-to: rgba(253, 247, 237, 0.40);   /* navbar glass gradient end */
   --surface-glass-border: rgba(255, 255, 255, 0.65);
   --surface-glass-blur: 10px;                      /* backdrop-blur radius */
+
+  /* [C] Profile header banner — warm peach hero gradient (Figma node 149:241).
+     Not covered by any existing gradient: the navbar glass gradient is
+     white-translucent and the EmptyState surface is canvas->subtle paper; this
+     is a distinct warm-hero fill, so it gets its own var. Gradients are not a
+     Tailwind theme namespace — the component consumes it via an arbitrary class:
+     `bg-[image:var(--gradient-profile-banner)]` (same approach as the navbar
+     glass gradient / EmptyState). Stored as the full gradient string to match
+     Figma 1:1 (specific 170deg angle, 0%/73% stops, alpha on the 2nd stop).
+     Dark unverified — [D] dark variant below. */
+  --gradient-profile-banner: linear-gradient(170deg, #f7d9c7 0%, rgba(237, 166, 140, 0.45) 73%);
 
   /* [C] BookShowcase INACTIVE position dot (node 1272:4600) = translucent cocoa
      rgba(79,51,23,0.16) = #4f3317 @16%. No exact primitive (distinct cocoa + alpha),
@@ -222,6 +244,15 @@
   --feedback-warning-subtle: #38301c; /* [D] */
   --feedback-danger: #e58a72;         /* [D] brighter red, legible on dark */
   --feedback-danger-subtle: #3a211c;  /* [D] */
+
+  /* [D] plum settings tile, deepened for dark surfaces (UNVERIFIED — reconcile
+     w/ Figma dark, like the --cat-* tints). Brighter glyph + low-alpha tint. */
+  --settings-plum: #c98fd1;                          /* [D] brighter plum glyph for dark */
+  --settings-plum-subtle: rgba(168, 101, 179, 0.22); /* [D] plum tint on dark surface */
+
+  /* [D] warm peach banner deepened for dark surfaces (UNVERIFIED — reconcile w/
+     Figma dark). Lower-luminance warm stops so the hero reads on dark canvas. */
+  --gradient-profile-banner: linear-gradient(170deg, #5a3322 0%, rgba(120, 64, 44, 0.45) 73%);
 
   /* --focus-ring inherits border/accent re-point above */
 }

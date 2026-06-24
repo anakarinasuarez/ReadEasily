@@ -123,6 +123,12 @@
   --color-category-travel-bg: var(--category-travel-bg);
   --color-category-travel-fg: var(--category-travel-fg);
 
+  /* Settings icon-tile tones (SettingsRow) -> bg-settings-plum-subtle, text-settings-plum.
+     NOTE: --gradient-profile-banner is intentionally NOT mapped here — gradients aren't
+     a Tailwind theme namespace; consume via bg-[image:var(--gradient-profile-banner)]. */
+  --color-settings-plum: var(--settings-plum);
+  --color-settings-plum-subtle: var(--settings-plum-subtle);
+
   /* Focus ring */
   --color-focus-ring: var(--focus-ring);
 
@@ -191,6 +197,7 @@
   --shadow-modal: var(--shadow-modal);
   --shadow-card: var(--shadow-card);
   --shadow-empty: var(--shadow-empty);
+  --shadow-profile-header: var(--shadow-profile-header);
   --shadow-field: var(--shadow-field);
   --shadow-stat: var(--shadow-stat);
   --shadow-cover-center: var(--shadow-cover-center);

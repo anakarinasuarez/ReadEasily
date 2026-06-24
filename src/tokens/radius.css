@@ -26,4 +26,10 @@
                             elevation/radius reuse rule, no separate --radius-popover. */
   --radius-icon: 13px;   /* [C] Search 44px icon tile. CANONICAL icon-tile radius —
                             SettingsRow IconTile (rounded-md=16) should adopt rounded-icon. */
+
+  /* Profile header card (Figma node 149:240) measures 26px. NOT minted as a
+     token: 26 -> 28 is a 2px delta to --radius-2xl, the same sub-perceptual
+     threshold the codebase already reuses across (Word Popover 22->radius-card,
+     Saved card shadow, accent-glow play button). RECONCILED to --radius-2xl
+     (28px) — consume `rounded-2xl`. No --radius-profile-header. */
 }

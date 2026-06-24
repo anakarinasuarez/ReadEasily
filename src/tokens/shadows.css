@@ -53,6 +53,13 @@
      (more spread) — a genuinely softer elevation, so it gets its own token. */
   --shadow-empty: 0 5px 18px rgba(79, 51, 23, 0.06);
 
+  /* [C] Profile header card — large, diffuse warm lift. Figma node 149:240 =
+     0 10px 30px rgba(79,51,23,0.10). Distinct from the existing warm ramp: a
+     bigger offset/blur than --shadow-card (0 5 16 /.07), --shadow-stat
+     (0 5 14 /.10, a tight pill) and --shadow-empty (0 5 18 /.06). Same warm ink
+     (79,51,23) but a genuinely higher, softer card elevation — own token. */
+  --shadow-profile-header: 0 10px 30px rgba(79, 51, 23, 0.10);
+
   /* [C] Reader language/voice dropdown menu lift — Figma node 1154:3342. A high,
      soft, slightly-inset warm shadow (negative spread) distinct from the cards. */
   --shadow-dropdown: 0px 12px 32px -6px rgba(77, 51, 31, 0.22);
@@ -98,6 +105,8 @@
   --shadow-stat: 0 5px 14px rgba(0, 0, 0, 0.45);
   /* [D] empty-state lift, deepened for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
   --shadow-empty: 0 5px 18px rgba(0, 0, 0, 0.38);
+  /* [D] profile-header lift, deepened for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
+  --shadow-profile-header: 0 10px 30px rgba(0, 0, 0, 0.45);
   /* [D] deepened carousel cover elevations for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
   --shadow-cover-center: 0px 22px 42px rgba(0, 0, 0, 0.55);
   --shadow-cover-side: 4px 10px 20px rgba(0, 0, 0, 0.40);

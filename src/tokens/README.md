@@ -191,9 +191,50 @@ for a 2px delta would bloat the contract with no visible gain. `22 → --radius-
 (24), `26 → --radius-2xl` (28). (Named off-scale is reserved for `--radius-card`/
 `-icon`, which are widely used and clearly distinct from the scale.)
 
-> **TODO(pending-design):** the Profile "Reduce motion" tile uses a plum/violet
-> tone that is NOT in any current ramp. Awaiting a design decision — remap to an
-> existing tone vs. add `--feedback-violet-subtle`. **Do not add the token yet.**
+**Plum settings tile (RESOLVED — Profile build, design-lead spec §11).** The
+"Reduce motion" row tile (Figma "Motion (plum)", node 159:286) is a plum tone
+absent from every ramp. Measured from the node: solid glyph **#a865b3**
+(rgb 168,101,179); tile fill **#f1e6f0** == that solid at **16%** over
+`--bg-elevated` (verified by compositing). It mirrors the `--cat-*` tone pattern
+(solid + ~16% rgba tint), so it ships as a semantic tile pair — **not** a
+`--feedback-*` (it is decorative, the row label carries meaning, so it is not
+contrast-gated). Kept as a semantic literal (no plum primitive ramp), like
+`--cat-tech`.
+
+| Token | Value | Tailwind |
+| --- | --- | --- |
+| `--settings-plum` | #a865b3 | `text-settings-plum` |
+| `--settings-plum-subtle` | rgba(168,101,179,.16) | `bg-settings-plum-subtle` |
+
+SettingsRow's `iconTone` adds `plum: "bg-settings-plum-subtle text-settings-plum"`.
+
+### Profile screen reconciliation (Phase: Profile build, spec §11)
+
+Token gaps measured by the design-lead for the Profile screen (desktop node
+149:212). Tokens only — no component edits.
+
+- **Header radius (26px, node 149:240) — reconciled, no token.** 26 → 28 is a
+  2px delta to `--radius-2xl`, the sub-perceptual reuse threshold the codebase
+  already applies. Consume `rounded-2xl`. (Same call as the earlier 22/26 snap
+  note above.) No `--radius-profile-header` minted.
+- **Header card shadow (node 149:240) — new token.** `0 10px 30px
+  rgba(79,51,23,0.10)` is a bigger, more diffuse warm lift than `--shadow-card`
+  (0 5 16 /.07), `--shadow-stat` (0 5 14 /.10, a tight pill) or `--shadow-empty`
+  (0 5 18 /.06) — same warm ink, genuinely higher elevation, so it gets its own
+  `--shadow-profile-header`. Tailwind: `shadow-profile-header`.
+- **Header banner gradient (node 149:241) — new gradient var.** `linear-gradient(170deg,
+  #f7d9c7 0%, rgba(237,166,140,0.45) 73%)` — a warm peach hero, not covered by
+  the navbar glass gradient (white-translucent) or EmptyState (canvas→subtle).
+  Gradients are not a Tailwind theme namespace, so it is the CSS var
+  `--gradient-profile-banner` (full gradient string, Figma 1:1) and is consumed
+  via an arbitrary class: `bg-[image:var(--gradient-profile-banner)]` (same
+  approach as the navbar glass gradient). **Not** added to `@theme`.
+- **Plum settings tile** — see the RESOLVED block above (`--settings-plum` pair).
+- **Name-edit pencil chip** uses `--bg-subtle` (#fdf8ed) — confirmed present, no
+  action.
+
+Dark-mode values for the three new color/gradient/shadow tokens are `[D]`
+(unverified), consistent with the rest of the dark block.
 
 ### Reader screen reconciliation (Phase 1)
 
