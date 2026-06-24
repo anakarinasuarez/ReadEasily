@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDownIcon, GlobeIcon, SpeakerIcon } from "./icons";
+import { ChevronDownIcon, GlobeIcon, UsFlagIcon } from "./icons";
 
 /**
  * ReaderToggles — the header's compact pills (Figma node 1159:3382):
@@ -26,7 +26,7 @@ export interface ReaderTogglesProps {
 
 const pillBase =
   "inline-flex items-center gap-[6px] rounded-[var(--radius-pill)] " +
-  "bg-[var(--bg-elevated)] shadow-[var(--shadow-sm)] pl-[12px] pr-[8px] py-[10px] " +
+  "bg-[var(--bg-elevated)] shadow-[var(--shadow-sm)] pl-[12px] pr-[8px] py-[12px] opacity-[0.92] " +
   "[font-family:var(--text-meta-family)] [font-size:var(--text-meta-size)] " +
   "[font-weight:var(--text-meta-weight)] [line-height:var(--text-meta-line-height)] " +
   "outline-none focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]";
@@ -83,9 +83,9 @@ export function ReaderToggles({
         <span className="sr-only">Audio voice — coming soon</span>
         <span
           aria-hidden="true"
-          className="inline-flex size-[14px] items-center justify-center [&>svg]:size-full"
+          className="inline-flex size-[16px] items-center justify-center [&>svg]:size-full"
         >
-          <SpeakerIcon />
+          <UsFlagIcon />
         </span>
         <span aria-hidden="true">US</span>
         <span

@@ -17,7 +17,9 @@ import { GlobeIcon } from "./icons";
  *   5. ReadingProgress ("Page X of N" + page chevrons).
  *
  * Geometry follows Figma exactly: `--bg-elevated`, 28px radius, the reading-card
- * shadow, and the off-scale `pt-[50px] pb-[var(--space-xl)] px-[60px]` padding.
+ * shadow, and responsive insets — mobile `px-[var(--space-xl)] pt-[var(--space-2xl)]`
+ * (~24/32, Figma mobile 856:928) stepping up to the off-scale desktop
+ * `md:px-[60px] md:pt-[50px]` (a 60px inset would cramp a ~358px mobile card).
  * The card content is keyed by page so a page change cross-fades (same-screen
  * morph; honored only under no-reduced-motion via the `.re-fade-in` utility).
  */
@@ -43,7 +45,7 @@ export interface ReadingCardProps {
 const dividerClasses = "h-px w-full bg-[var(--border-default)]";
 
 const espanolLabelClasses =
-  "uppercase whitespace-nowrap text-[color:var(--color-sky-700)] " +
+  "uppercase whitespace-nowrap text-[color:var(--feedback-info)] " +
   "[font-family:var(--text-label-m-family)] [font-size:var(--text-label-m-size)] " +
   "[font-weight:var(--text-label-m-weight)] [line-height:var(--text-label-m-line-height)] " +
   "[letter-spacing:var(--text-label-m-tracking)]";
@@ -68,7 +70,7 @@ export function ReadingCard({
     translationVisible && page.translationParagraphs.length > 0;
 
   return (
-    <div className="flex w-full max-w-[745px] flex-col gap-[var(--space-xl)] rounded-[28px] bg-[var(--bg-elevated)] shadow-[var(--shadow-reading-card)] pt-[50px] pb-[var(--space-xl)] px-[60px]">
+    <div className="flex w-full max-w-[745px] flex-col gap-[var(--space-xl)] rounded-[28px] bg-[var(--bg-elevated)] shadow-[var(--shadow-reading-card)] px-[var(--space-xl)] pt-[var(--space-2xl)] pb-[var(--space-xl)] md:px-[60px] md:pt-[50px]">
       {/* Reading body ONLY is keyed by page → cross-fade it on a page change
           (morph). The footer below is a stable sibling (see ReadingProgress). */}
       <div
@@ -91,7 +93,7 @@ export function ReadingCard({
               <div className="flex items-center gap-[var(--space-sm)]">
                 <span
                   aria-hidden="true"
-                  className="inline-flex size-[16px] items-center justify-center text-[color:var(--color-sky-700)] [&>svg]:size-full"
+                  className="inline-flex size-[16px] items-center justify-center text-[color:var(--feedback-info)] [&>svg]:size-full"
                 >
                   <GlobeIcon />
                 </span>

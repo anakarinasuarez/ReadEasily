@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import { IconButton } from "@/ui/icon-button";
 import { ChevronLeftIcon, ChevronRightIcon } from "./icons";
 
 /**
@@ -30,6 +29,16 @@ export interface ReadingProgressProps {
   /** Go to the next page. */
   onNext: () => void;
 }
+
+// Figma 1157:3132 draws these as 22px PLAIN chevron glyphs — no button frame,
+// no hover fill. They remain real buttons (accessible name + visible focus ring),
+// just visually frameless. The hit area is the 22px glyph plus the focus offset.
+const chevronClasses =
+  "inline-flex shrink-0 items-center justify-center rounded-[var(--radius-sm)] " +
+  "text-[color:var(--text-secondary)] transition-colors " +
+  "hover:text-[color:var(--text-primary)] " +
+  "disabled:cursor-not-allowed disabled:text-[color:var(--text-muted)] disabled:opacity-40 disabled:hover:text-[color:var(--text-muted)] " +
+  "outline-none focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]";
 
 const labelClasses =
   "select-none whitespace-nowrap text-[color:var(--text-muted)] " +
@@ -67,26 +76,34 @@ export function ReadingProgress({
 
   return (
     <div className="flex w-full items-center justify-between">
-      <IconButton
+      <button
         ref={prevRef}
-        size="sm"
-        icon={<ChevronLeftIcon />}
+        type="button"
         aria-label="Previous page"
         disabled={atStart}
         onClick={handlePrev}
-      />
+        className={chevronClasses}
+      >
+        <span aria-hidden="true" className="inline-flex size-[22px] [&>svg]:size-full">
+          <ChevronLeftIcon />
+        </span>
+      </button>
       <p className={labelClasses} aria-live="polite">
         <span className="sr-only">Currently on </span>
         Page {human} of {pageCount}
       </p>
-      <IconButton
+      <button
         ref={nextRef}
-        size="sm"
-        icon={<ChevronRightIcon />}
+        type="button"
         aria-label="Next page"
         disabled={atEnd}
         onClick={handleNext}
-      />
+        className={chevronClasses}
+      >
+        <span aria-hidden="true" className="inline-flex size-[22px] [&>svg]:size-full">
+          <ChevronRightIcon />
+        </span>
+      </button>
     </div>
   );
 }

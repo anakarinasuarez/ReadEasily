@@ -31,7 +31,11 @@
   --text-display-l-size: 44px;
   --text-display-l-line-height: 52px;
   --text-display-l-weight: var(--font-weight-extrabold);
-  --text-display-l-tracking: -1.5px;
+  /* [C] confirmed from Figma Display/L (44px, -1.5% → -0.66px): Figma stores
+     letterSpacing as a PERCENTAGE (-1.5%), so -1.5% × 44px = -0.66px. The Figma
+     export computes tracking-[-0.66px]. Do NOT let a regen reintroduce `-1.5px`
+     — that is the same px-vs-percent misread already fixed for label/m. */
+  --text-display-l-tracking: -0.66px;
 
   /* --- Heading/H3  [C] ------------------------------------------------- */
   --text-heading-h3-family: var(--font-display);

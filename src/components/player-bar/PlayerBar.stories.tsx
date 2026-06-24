@@ -93,9 +93,21 @@ export const Playing: Story = {
   ),
 };
 
-/** Mid-progress with the per-sentence boundary ticks + playhead visible. */
-export const MidProgressWithTicks: Story = {
+/** Mid-progress — the orange fill over the dotted rail + playhead visible
+ *  (Figma 1128:2573: the unfilled track is a uniform dotted rail, not a solid
+ *  bar or per-sentence ticks). */
+export const MidProgressDottedRail: Story = {
   render: () => <PlayerDemo status="ready" initialProgress={0.55} />,
+};
+
+/** Mobile transport (Figma 856:928) — at <768px the level chip and the settings
+ *  gear drop out, leaving speed · restart · prev · play · next · skip. Rendered
+ *  at a 390px viewport so the `hidden md:flex` controls are absent. */
+export const Mobile: Story = {
+  parameters: {
+    viewport: { defaultViewport: "mobile1" },
+  },
+  render: () => <PlayerDemo status="ready" initialProgress={0.32} />,
 };
 
 /** Loading — the play button buffers (spinner, aria-busy). */

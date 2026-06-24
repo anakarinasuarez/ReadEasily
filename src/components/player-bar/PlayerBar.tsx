@@ -71,7 +71,8 @@ function clamp01(n: number): number {
  * to a CSS custom property from src/tokens/*. The only literals are the
  * geometry the design system does not tokenize and which the spec explicitly
  * allows: the 0.92 frame opacity, the 14px knob, the 4px rail/fill height, the
- * 3px ticks, the 56px primary footprint, and the off-scale 22px/30px padding.
+ * 3px dotted-rail dots (15px pitch), the 56px primary footprint, and the
+ * off-scale 22px/30px padding.
  * Each is commented at its use site.
  *
  * NOTE on the 16px values: the design-lead spec calls the vertical gap / top
@@ -292,15 +293,6 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
         ? `${elapsedLabel} of ${totalLabel}`
         : `${valueNow}%`;
 
-    // Internal sentence boundaries → one tick each (none for ≤1 sentence).
-    const tickFractions: number[] =
-      sentenceCount && sentenceCount > 1
-        ? Array.from(
-            { length: sentenceCount - 1 },
-            (_, i) => (i + 1) / sentenceCount,
-          )
-        : [];
-
     const seekTo = (fraction: number) => onSeek?.(clamp01(fraction));
 
     const seekFromClientX = (clientX: number) => {
@@ -403,26 +395,28 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
               "focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:4px] outline-none",
             )}
           >
-            {/* Rail — full-width unfilled track */}
+            {/* Dotted rail — the unfilled track is NOT a solid bar (Figma
+                1128:2573): it is a row of evenly-spaced 3px dots (~every 15px)
+                reading as a dotted rail. A repeating radial-gradient paints one
+                3px dot per 15px cell, vertically centered in the 4px band. */}
             <span
               aria-hidden="true"
-              className="absolute left-0 top-1/2 h-[4px] w-full -translate-y-1/2 rounded-[var(--radius-pill)] bg-[var(--border-default)]"
+              className="absolute left-0 top-1/2 h-[4px] w-full -translate-y-1/2"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at center, var(--border-strong) 1.5px, transparent 1.6px)",
+                backgroundSize: "15px 4px",
+                backgroundRepeat: "repeat-x",
+                backgroundPosition: "left center",
+              }}
             />
-            {/* Filled segment (4px tall, 2px radius per Figma) */}
+            {/* Filled segment (4px tall, 2px radius per Figma) — sits over the
+                dotted rail up to the current progress. */}
             <span
               aria-hidden="true"
               className="absolute left-0 top-1/2 h-[4px] -translate-y-1/2 rounded-[2px] bg-[var(--bg-accent)]"
               style={{ width: `${pct}%` }}
             />
-            {/* Per-sentence boundary ticks (3px dots) */}
-            {tickFractions.map((f, i) => (
-              <span
-                key={i}
-                aria-hidden="true"
-                className="absolute top-1/2 size-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--border-strong)]"
-                style={{ left: `${f * 100}%` }}
-              />
-            ))}
             {/* Draggable playhead knob (14px) */}
             <span
               aria-hidden="true"
@@ -534,30 +528,38 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
           {/* Spacer */}
           <span aria-hidden="true" className="flex-1" />
 
-          {/* Level chip (decorative-ish: just surfaces the story level) */}
+          {/* Level chip (decorative-ish: just surfaces the story level).
+              Figma mobile (856:928) drops it from the transport — desktop only,
+              so it lives in a `hidden md:flex` wrapper (deterministic display
+              override, unlike layering `hidden` onto the chip's own inline-flex). */}
           {level != null && level !== "" && (
-            <span
-              className={cn(
-                chipBaseClasses,
-                "px-[14px] py-[8px] text-[var(--text-secondary)]", // 14/8 = Figma chip padding
-                // Dim with the rest of the bar when there's no audio, so the
-                // disabled state doesn't read as half-active.
-                isDisabled && "opacity-50",
-              )}
-            >
-              <span className="sr-only">Story level </span>
-              {level}
+            <span className="hidden md:flex">
+              <span
+                className={cn(
+                  chipBaseClasses,
+                  "px-[14px] py-[8px] text-[var(--text-primary)]", // 14/8 = Figma chip padding; "A2" = #3c2c1d
+                  // Dim with the rest of the bar when there's no audio, so the
+                  // disabled state doesn't read as half-active.
+                  isDisabled && "opacity-50",
+                )}
+              >
+                <span className="sr-only">Story level </span>
+                {level}
+              </span>
             </span>
           )}
 
-          <IconButton
-            size="md"
-            icon={<SettingsGlyph />}
-            aria-label="Settings"
-            disabled={isDisabled}
-            onClick={onOpenSettings}
-            className={roundBtnClasses}
-          />
+          {/* Settings — also desktop-only on the Figma mobile transport. */}
+          <span className="hidden md:flex">
+            <IconButton
+              size="md"
+              icon={<SettingsGlyph />}
+              aria-label="Settings"
+              disabled={isDisabled}
+              onClick={onOpenSettings}
+              className={roundBtnClasses}
+            />
+          </span>
         </div>
       </div>
     );

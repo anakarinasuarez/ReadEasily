@@ -349,7 +349,7 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
         )}
       >
         {/* Header — accent bar: word + pronounce chip on the left, close right */}
-        <div className="flex items-center justify-between bg-[var(--bg-accent-strong)] pl-[22px] pr-[18px] py-[var(--space-md)]">
+        <div className="flex items-center justify-between bg-[var(--bg-accent-strong)] pl-[22px] pr-[18px] py-[var(--space-lg)]">
           <div className="flex items-center gap-[var(--space-md)]">
             <p id={titleId} className={wordClasses}>
               {word}

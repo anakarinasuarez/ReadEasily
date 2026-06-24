@@ -23,7 +23,9 @@ export type StoryLevel = string;
  * lemma of the surface word (see `normalizeLemma`).
  */
 export interface GlossaryEntry {
-  /** Part of speech, shown in the popover's POS pill (Spanish, e.g. "verbo"). */
+  /** Part of speech, shown in the popover's POS pill. English, lowercase, from
+   *  a fixed set (noun, verb, adjective, …) — per Figma the pill reads English.
+   *  Consistency across all sidecars is guarded in loader.test.ts. */
   pos: string;
   /** The Spanish meaning (senses may be comma-joined). */
   es: string;

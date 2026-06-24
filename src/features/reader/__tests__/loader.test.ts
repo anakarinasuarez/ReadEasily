@@ -60,6 +60,34 @@ describe("reader content loader", () => {
     }
   });
 
+  it("keeps every glossary POS tag in the canonical English set across all sidecars", () => {
+    // The popover POS pill reads English ("noun"), per Figma. Two sidecars once
+    // shipped Spanish POS ("sustantivo", "verbo", …) while the rest were English;
+    // this guard makes that drift impossible to reintroduce silently.
+    const ALLOWED_POS = new Set([
+      "noun",
+      "verb",
+      "adjective",
+      "adverb",
+      "article",
+      "pronoun",
+      "preposition",
+      "conjunction",
+      "interjection",
+      "determiner",
+      "numeral",
+    ]);
+    for (const id of listStoryIds()) {
+      const story = loadStory(id);
+      for (const [surface, entry] of Object.entries(story!.glossary)) {
+        if (entry.pos == null || entry.pos === "") continue;
+        expect(ALLOWED_POS, `${id} → ${surface} (${entry.pos})`).toContain(
+          entry.pos,
+        );
+      }
+    }
+  });
+
   it("returns null for an unknown id", () => {
     expect(loadStory("nope")).toBeNull();
   });

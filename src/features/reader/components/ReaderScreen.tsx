@@ -16,7 +16,7 @@ import { lookupWord } from "../content/lemma";
 import { ReadingCard } from "./ReadingCard";
 import { ReaderToggles } from "./ReaderToggles";
 import { ReaderError, ReaderSkeleton } from "./ReaderStates";
-import { ChevronLeftIcon } from "./icons";
+import { AudioWaveIcon, ChevronLeftIcon, SparkleIcon } from "./icons";
 
 /**
  * ReaderScreen — the Reader route (`/read/[id]`), the heart of the app (Figma
@@ -210,8 +210,18 @@ export function ReaderScreen({ storyId }: ReaderScreenProps) {
   }
 
   return (
-    <main className="relative flex min-h-full flex-1 flex-col bg-canvas">
-      {/* Full-bleed warm backdrop — faint cover under a wash, else atmosphere. */}
+    // NOTE: main is transparent — the atmospheric backdrop below is fixed behind
+    // it (negative z). An opaque bg here would paint OVER that backdrop and flatten
+    // the whole scene (the bug the design-QA caught), so the cream base lives on
+    // the backdrop layer instead.
+    <main className="relative flex min-h-full flex-1 flex-col">
+      {/* Cream base — always under everything (covers load/no-cover states too). */}
+      <div aria-hidden="true" className="fixed inset-0 -z-20 bg-canvas pointer-events-none" />
+      {/* Full-bleed atmospheric backdrop (Figma 125:153): the story illustration
+          fills the screen, kept present (not washed flat) under a soft WARM-CREAM
+          veil — rgba(255,250,235,0.45), the measured Figma overlay. The reading
+          text sits on the opaque card, so legibility is unaffected by the livelier
+          backdrop. A faint giant title watermark floats behind the header. */}
       {story?.coverSrc ? (
         <div aria-hidden="true" className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
           <Image
@@ -220,9 +230,14 @@ export function ReaderScreen({ storyId }: ReaderScreenProps) {
             fill
             priority
             sizes="100vw"
-            className="object-cover opacity-40"
+            className="object-cover opacity-[0.55]"
           />
-          <div className="absolute inset-0 bg-canvas opacity-60" />
+          {/* Warm-cream veil (Figma rgba(255,250,235,0.45) — allowed literal, like --scrim). */}
+          <div className="absolute inset-0 bg-[rgba(255,250,235,0.45)]" />
+          {/* Giant faded story-title watermark, centered behind the header. */}
+          <span className="absolute left-1/2 top-[8px] -translate-x-1/2 whitespace-nowrap font-display font-extrabold leading-none text-[color:var(--text-primary)] opacity-[0.05] [font-size:150px]">
+            {story.title}
+          </span>
         </div>
       ) : (
         <BgDecorations fixed />
@@ -241,34 +256,59 @@ export function ReaderScreen({ storyId }: ReaderScreenProps) {
           )}
         </div>
 
-        {/* Centered reading column. */}
-        <div className="mt-2xl flex w-full flex-1 flex-col items-center gap-[var(--space-3xl)]">
+        {/* Centered reading column. The title↔card gap is Figma-exact off-scale
+            geometry: 120px on desktop (column 234:851), scaled down on mobile
+            where a 120px gap would waste the 390px viewport. The tap-hint is NOT
+            part of this gap — it sits tight under the card (see below). */}
+        <div className="mt-2xl flex w-full flex-1 flex-col items-center gap-[64px] md:gap-[120px]">
           {isError ? (
             <ReaderError onRetry={() => void refetch()} />
           ) : isPending || !story || !currentPage ? (
             <ReaderSkeleton />
           ) : (
             <>
-              <h1 className="text-center text-[color:var(--text-primary)] [font-family:var(--text-display-l-family)] [font-size:var(--text-display-l-size)] [font-weight:var(--text-display-l-weight)] [line-height:var(--text-display-l-line-height)] [letter-spacing:var(--text-display-l-tracking)]">
+              {/* Title row (Figma 125:159): title text + a decorative 18px
+                  terracotta waveform glyph (12px gap). Responsive type: mobile
+                  ~30px (Figma mobile 856:928 — no --text-heading-h2 token exists
+                  yet, so the size is an off-scale literal, flagged for tokens) →
+                  md Display/L (44/52, tracking -0.66px). */}
+              <h1 className="flex items-center justify-center gap-[12px] text-center text-[color:var(--text-primary)] [font-family:var(--text-display-l-family)] [font-weight:var(--text-display-l-weight)] text-[30px] leading-[38px] md:text-[length:var(--text-display-l-size)] md:[line-height:var(--text-display-l-line-height)] md:[letter-spacing:var(--text-display-l-tracking)]">
                 {story.title}
+                <span
+                  aria-hidden="true"
+                  className="inline-flex size-[18px] shrink-0 items-center justify-center text-[color:var(--text-accent)] [&>svg]:size-full"
+                >
+                  <AudioWaveIcon />
+                </span>
               </h1>
 
-              <ReadingCard
-                page={currentPage}
-                pageCount={pageCount}
-                translationVisible={translationVisible}
-                selectedWordId={selectedWord?.id ?? null}
-                speakingWordRange={audio.currentWordRange}
-                onActivateWord={handleActivateWord}
-                onPrevPage={() => goToPage(pageIndex - 1)}
-                onNextPage={() => goToPage(pageIndex + 1)}
-              />
+              {/* Card + tap-hint: the hint sits tight under the card (Figma
+                  125:198), so it lives in this inner stack — not in the big
+                  title↔card column gap above. */}
+              <div className="flex w-full flex-col items-center">
+                <ReadingCard
+                  page={currentPage}
+                  pageCount={pageCount}
+                  translationVisible={translationVisible}
+                  selectedWordId={selectedWord?.id ?? null}
+                  speakingWordRange={audio.currentWordRange}
+                  onActivateWord={handleActivateWord}
+                  onPrevPage={() => goToPage(pageIndex - 1)}
+                  onNextPage={() => goToPage(pageIndex + 1)}
+                />
 
-              {!hintDismissed && (
-                <p className="text-center text-[color:var(--text-muted)] [font-family:var(--text-label-m-family)] [font-size:var(--text-label-m-size)] [font-weight:var(--text-label-m-weight)] [line-height:var(--text-label-m-line-height)] [letter-spacing:var(--text-label-m-tracking)]">
-                  Tap any word to hear it &amp; see its meaning
-                </p>
-              )}
+                {!hintDismissed && (
+                  <p className="mt-[var(--space-md)] inline-flex items-center justify-center gap-[var(--space-xs)] text-center text-[color:var(--text-muted)] [font-family:var(--text-label-m-family)] [font-size:var(--text-label-m-size)] [font-weight:var(--text-label-m-weight)] [line-height:var(--text-label-m-line-height)] [letter-spacing:var(--text-label-m-tracking)]">
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex size-[12px] shrink-0 items-center justify-center text-[color:var(--text-accent)] [&>svg]:size-full"
+                    >
+                      <SparkleIcon />
+                    </span>
+                    Tap any word to hear it &amp; see its meaning
+                  </p>
+                )}
+              </div>
             </>
           )}
         </div>

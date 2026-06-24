@@ -88,8 +88,8 @@ describe("ReaderScreen", () => {
 
     const dialog = await screen.findByRole("dialog", { name: "Sun" });
     expect(within(dialog).getByText("sol")).toBeInTheDocument();
-    // POS pill from the glossary.
-    expect(within(dialog).getByText("sustantivo")).toBeInTheDocument();
+    // POS pill from the glossary (English POS, per Figma — "noun").
+    expect(within(dialog).getByText("noun")).toBeInTheDocument();
   });
 
   it("saves a word optimistically and reflects the saved state", async () => {

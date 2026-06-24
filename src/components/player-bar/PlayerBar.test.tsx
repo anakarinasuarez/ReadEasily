@@ -133,13 +133,19 @@ describe("PlayerBar", () => {
     expect(onSeek).toHaveBeenLastCalledWith(1);
   });
 
-  it("renders one tick per internal sentence boundary", () => {
+  it("paints a uniform dotted rail, not per-sentence tick dots", () => {
     const { container } = render(
       <PlayerBar sentenceCount={4} progress={0} />,
     );
-    // 4 sentences → 3 internal boundaries. Ticks are 3px dots.
-    const ticks = container.querySelectorAll("span.size-\\[3px\\]");
-    expect(ticks).toHaveLength(3);
+    // The unfilled track is a single dotted-rail element (a repeating
+    // radial-gradient), not discrete per-sentence tick spans. sentenceCount
+    // still drives the seek step + aria (covered above), but the visual is a
+    // uniform dotted rail (Figma 1128:2573).
+    expect(container.querySelectorAll("span.size-\\[3px\\]")).toHaveLength(0);
+    const rail = Array.from(container.querySelectorAll("span")).find((el) =>
+      el.getAttribute("style")?.includes("radial-gradient"),
+    );
+    expect(rail).toBeTruthy();
   });
 
   it("buffers on loading: play button is busy and does not toggle", async () => {
