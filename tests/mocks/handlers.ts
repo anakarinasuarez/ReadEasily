@@ -17,6 +17,11 @@ import {
   type Language,
   type NewSavedWord,
 } from "@/features/reader/types";
+import { resolvePracticeSet } from "@/features/practice/content";
+import type {
+  PracticeResponse,
+  PracticeSentence,
+} from "@/features/practice/types";
 
 /**
  * Mock-first API surface. ReadEasily runs against these handlers everywhere —
@@ -564,6 +569,33 @@ function currentSavedData(): SavedData {
   return { words: savedWords, stats: deriveSavedStats(savedWords) };
 }
 
+/**
+ * A tiny seeded PRNG (mulberry32) + Fisher-Yates shuffle. The Practice overlay's
+ * "New sentences" bumps a `?nonce=`, and the overlay expects a VISIBLY different
+ * ordering each press; keying the shuffle on the nonce makes the reorder
+ * deterministic (same nonce → same order) so it is stable in tests yet changes
+ * between presses. A real generator plugs in behind the same seam later.
+ */
+function seededShuffle(
+  sentences: PracticeSentence[],
+  seed: number,
+): PracticeSentence[] {
+  let state = (seed || 1) >>> 0;
+  const rand = () => {
+    state |= 0;
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const out = [...sentences];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 export const handlers = [
   // Health/echo — the canary that proves mocking is live in any environment.
   http.get("/api/health", () => {
@@ -602,6 +634,52 @@ export const handlers = [
       return new HttpResponse(null, { status: 404 });
     }
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  // Mark practice sentences ready on an already-saved word — the write seam
+  // behind "Save to practice later" when the word is already saved. Sets
+  // `sentencesReady` from the JSON body and echoes the updated `SavedWord` so the
+  // Saved screen flips "Practice" → "Review". 404 for an unknown id.
+  http.patch("/api/saved/:id", async ({ params, request }) => {
+    const { id } = params as { id: string };
+    const body = (await request.json()) as { sentencesReady?: number };
+    const index = savedWords.findIndex((w) => w.id === id);
+    if (index === -1) {
+      return new HttpResponse(null, { status: 404 });
+    }
+    const updated: SavedWord = {
+      ...savedWords[index],
+      sentencesReady: body.sentencesReady ?? savedWords[index].sentencesReady,
+    };
+    savedWords = savedWords.map((w, i) => (i === index ? updated : w));
+    return HttpResponse.json(updated, { status: 200 });
+  }),
+
+  // Practice sentences for a word — the payload `getPracticeSentences()`
+  // consumes. Resolves the precomputed sample via the Reader's lemma matching
+  // (so "paths"/"running" hit "path"/"run"); on a hit returns `found:true` with
+  // 10 sentences, deterministically reordered by `?nonce=` so "New sentences"
+  // visibly refreshes. A word with no sample resolves to `found:false` + `[]`
+  // (HTTP 200, NOT 404) so the overlay shows its graceful empty state.
+  http.get("/api/practice/:word", ({ params, request }) => {
+    const { word } = params as { word: string };
+    const decoded = decodeURIComponent(word);
+    const nonce = Number(
+      new URL(request.url).searchParams.get("nonce") ?? "0",
+    );
+    const set = resolvePracticeSet(decoded);
+    if (!set) {
+      const miss: PracticeResponse = {
+        word: decoded,
+        found: false,
+        sentences: [],
+      };
+      return HttpResponse.json(miss);
+    }
+    const sentences =
+      nonce > 0 ? seededShuffle(set.sentences, nonce) : set.sentences;
+    const hit: PracticeResponse = { word: set.word, found: true, sentences };
+    return HttpResponse.json(hit);
   }),
 
   // Save a word — the write seam behind the Reader popover's Save button.

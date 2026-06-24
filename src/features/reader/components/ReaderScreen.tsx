@@ -7,6 +7,7 @@ import { Button } from "@/ui/button";
 import { PlayerBar } from "@/components/player-bar";
 import { WordPopover } from "@/components/word-popover";
 import { BgDecorations } from "@/components/bg-decorations";
+import { PracticeOverlay } from "@/features/practice/components";
 import { useSaved } from "@/features/saved/hooks/useSaved";
 import { useStory } from "../hooks/useStory";
 import { useSaveWord } from "../hooks/useSaveWord";
@@ -111,6 +112,14 @@ export function ReaderScreen({
   const [selectedWord, setSelectedWord] = useState<SelectedWord | null>(null);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  // The word the Practice overlay is open for (null = closed). `wordId` is kept
+  // so focus returns to the originating token when the overlay dismisses.
+  const [practiceTarget, setPracticeTarget] = useState<{
+    word: string;
+    translation: string;
+    phonetic?: string;
+    wordId: string;
+  } | null>(null);
 
   // Track the mobile breakpoint so the popover renders anchored (desktop) or as
   // a centered panel (mobile). matchMedia keeps it in sync on resize/rotate.
@@ -214,6 +223,17 @@ export function ReaderScreen({
     });
   }, [selectedWord]);
 
+  // Return focus to the originating word token when the Practice overlay closes
+  // (Radix would restore focus to the now-unmounted popover trigger otherwise).
+  const closePractice = useCallback(() => {
+    const id = practiceTarget?.wordId;
+    setPracticeTarget(null);
+    if (!id) return;
+    requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>(`[data-word-id="${id}"]`)?.focus();
+    });
+  }, [practiceTarget]);
+
   const goToPage = useCallback(
     (next: number) => {
       if (!story) return;
@@ -252,6 +272,22 @@ export function ReaderScreen({
       sentencesReady: 0,
       savedAt: new Date().toISOString(),
     });
+  }
+
+  // Open the Practice overlay for the selected word, in the active language +
+  // voice. Pauses story audio (it stays paused) and hands the popover's panel
+  // over to the overlay, keeping the word id for focus-restore on close.
+  function handleOpenPractice() {
+    if (!selectedWord || !meaning || !story) return;
+    pauseAudio();
+    setPracticeTarget({
+      word: wordLabel,
+      translation: meaning.translation,
+      phonetic: meaning.phonetic,
+      wordId: selectedWord.id,
+    });
+    setSelectedWord(null);
+    setAnchorRect(null);
   }
 
   return (
@@ -436,13 +472,32 @@ export function ReaderScreen({
                   : undefined
               }
               onToggleSave={handleToggleSave}
-              onPractice={() => {
-                // TODO(practice): open the practice flow once it exists.
-              }}
+              onPractice={handleOpenPractice}
               onClose={closePopover}
             />
           </div>
         </div>
+      )}
+
+      {/* Practice overlay — opened from the popover's Practice button for the
+          selected word, in the active language + voice. Records provenance from
+          the current story; closing returns focus to the originating token. */}
+      {story && (
+        <PracticeOverlay
+          open={!!practiceTarget}
+          onOpenChange={(next) => {
+            if (!next) closePractice();
+          }}
+          word={practiceTarget?.word ?? ""}
+          translation={practiceTarget?.translation}
+          phonetic={practiceTarget?.phonetic}
+          language={language}
+          voice={voice}
+          sourceStoryId={story.id}
+          sourceStoryTitle={story.title}
+          audioController={audioController}
+          audioSupported={audioSupported}
+        />
       )}
     </main>
   );
