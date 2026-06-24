@@ -19,10 +19,14 @@
     0 2px 4px rgba(60, 44, 29, 0.06),
     0 4px 8px rgba(60, 44, 29, 0.10);
 
-  /* [D] */
+  /* [C] shadow/lg — confirmed from Figma effect style (resolved on Story Detail
+     node 122:136). Two stacked warm drop shadows on ink #2E2117 (rgb 46,33,23):
+     0 12 28 @ #2E21171F = .12, then 0 4 8 @ #2E21170F = .06. Was [D] (wrong
+     offsets/ink); corrected to the real Figma value. Story Detail hero cover
+     overrides BookCover's shadow-md with this. Tailwind: shadow-lg. */
   --shadow-lg:
-    0 4px 8px rgba(60, 44, 29, 0.07),
-    0 10px 20px rgba(60, 44, 29, 0.12);
+    0 12px 28px rgba(46, 33, 23, 0.12),
+    0 4px 8px rgba(46, 33, 23, 0.06);
 
   /* [D-design] glass Navbar — warm two-layer lift (from Figma navbar spec) */
   --shadow-glass:
@@ -86,8 +90,8 @@
     0 2px 4px rgba(0, 0, 0, 0.30),
     0 4px 8px rgba(0, 0, 0, 0.40);
   --shadow-lg:
-    0 4px 8px rgba(0, 0, 0, 0.35),
-    0 10px 20px rgba(0, 0, 0, 0.45);
+    0 12px 28px rgba(0, 0, 0, 0.45),
+    0 4px 8px rgba(0, 0, 0, 0.35);
   /* [D] deepened warm-elevation for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
   --shadow-card: 0 5px 16px rgba(0, 0, 0, 0.40);
   --shadow-field: 0 2px 8px rgba(0, 0, 0, 0.35);

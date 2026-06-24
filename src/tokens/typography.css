@@ -37,6 +37,28 @@
      — that is the same px-vs-percent misread already fixed for label/m. */
   --text-display-l-tracking: -0.66px;
 
+  /* --- Display/XL  [C] (Story Detail desktop title) ------------------- */
+  /* Figma style "Display/XL" (node 122:136 / title 122:180): Baloo 2 ExtraBold
+     56 / line-height 64. letterSpacing -2 is a PERCENTAGE (same %-storage as
+     display/l -1.5% and label/s 4%), so -2% × 56px = -1.12px — the value the
+     Figma export computes per-instance. Do NOT let a regen reintroduce `-2px`. */
+  --text-display-xl-family: var(--font-display);
+  --text-display-xl-size: 56px;
+  --text-display-xl-line-height: 64px;
+  --text-display-xl-weight: var(--font-weight-extrabold);
+  --text-display-xl-tracking: -1.12px;
+
+  /* --- Display/Mobile  [C] (Story Detail mobile title) --------------- */
+  /* Figma style "Display/Mobile" (node 843:1185, 358×80 = two 40px lines):
+     Baloo 2 ExtraBold 32 / line-height 40. Distinct named style (NOT display-l
+     44/52). letterSpacing -1 is a PERCENTAGE → -1% × 32px = -0.32px.
+     Feature binds this on mobile; md: steps up to text-display-xl on desktop. */
+  --text-display-mobile-family: var(--font-display);
+  --text-display-mobile-size: 32px;
+  --text-display-mobile-line-height: 40px;
+  --text-display-mobile-weight: var(--font-weight-extrabold);
+  --text-display-mobile-tracking: -0.32px;
+
   /* --- Heading/H3  [C] ------------------------------------------------- */
   --text-heading-h3-family: var(--font-display);
   --text-heading-h3-size: 22px;

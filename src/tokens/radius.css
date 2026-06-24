@@ -11,6 +11,9 @@
   --radius-lg: 24px;     /* [C] */
   --radius-2xl: 28px;    /* [D-design] Modal container (between lg 24 and xl 32) */
   --radius-xl: 32px;     /* [C] */
+  --radius-3xl: 36px;    /* [C] Story Detail Moral callout card (Figma var --radius-3xl=36,
+                            resolved on node 122:136; container nodes 26:2 / 844:1152).
+                            Next step up from xl(32). Tailwind: rounded-3xl. */
   --radius-pill: 9999px; /* [C] */
 
   /* --- Named off-scale tokens ----------------------------------------- */

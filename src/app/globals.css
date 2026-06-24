@@ -178,6 +178,7 @@
   --radius-lg: var(--radius-lg);
   --radius-2xl: var(--radius-2xl);
   --radius-xl: var(--radius-xl);
+  --radius-3xl: var(--radius-3xl);
   --radius-pill: var(--radius-pill);
   --radius-card: var(--radius-card);
   --radius-icon: var(--radius-icon);
@@ -202,6 +203,10 @@
   /* Type-style font sizes (paired line-heights) -> text-display-l, text-reading-m... */
   --text-display-l: var(--text-display-l-size);
   --text-display-l--line-height: var(--text-display-l-line-height);
+  --text-display-xl: var(--text-display-xl-size);
+  --text-display-xl--line-height: var(--text-display-xl-line-height);
+  --text-display-mobile: var(--text-display-mobile-size);
+  --text-display-mobile--line-height: var(--text-display-mobile-line-height);
   --text-heading-h3: var(--text-heading-h3-size);
   --text-heading-h3--line-height: var(--text-heading-h3-line-height);
   --text-heading-h4: var(--text-heading-h4-size);

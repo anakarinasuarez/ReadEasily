@@ -230,6 +230,44 @@ reuse rule as the Saved card shadow; no new token.
 elevation reuse rule). No `--radius-popover` added. Reading card 28 = `--radius-2xl`
 and player top corners 32 = `--radius-xl` already exist (no action).
 
+## Story Detail token gaps (node 122:136)
+
+Tokens only — no component edits. All values resolved live from the Story Detail
+desktop node `122:136` (Figma variable defs) and the mobile title `843:1185`.
+
+**Radius (1 new, `[C]`).** Brings the radius ramp to 10/16/24/28/32/**36**.
+
+| Token | Value | Tailwind | Figma |
+| --- | --- | --- | --- |
+| `--radius-3xl` | 36px | `rounded-3xl` | var `--radius-3xl`=36 on 122:136; Moral card 26:2 / 844:1152 |
+
+**Typography (2 new styles, `[C]`).** Brings confirmed text styles to **18 of 22**.
+
+| Token | Style | Tailwind | Figma node |
+| --- | --- | --- | --- |
+| `--text-display-xl-*` | Baloo 2 ExtraBold 56/64, tracking **-1.12px** — Story Detail title | `text-display-xl` | 122:180 |
+| `--text-display-mobile-*` | Baloo 2 ExtraBold 32/40, tracking **-0.32px** — mobile Story Detail title | `text-display-mobile` | 843:1185 |
+
+Tracking caveat (same %-storage bug as display/l, label/m, label/s): Figma stores
+`letterSpacing` as a **percentage**. Display/XL `-2` = -2% × 56 = **-1.12px**;
+Display/Mobile `-1` = -1% × 32 = **-0.32px**. A regen must NOT reintroduce `-2px`/`-1px`.
+Mobile title binds `text-display-mobile`, stepping up to `md:text-display-xl` on desktop.
+
+**Shadow — `--shadow-lg` corrected (`[D]` → `[C]`).** The Figma effect style
+`shadow/lg` resolves to `0 12px 28px rgba(46,33,23,.12), 0 4px 8px rgba(46,33,23,.06)`
+(ink #2E2117). The old `[D]` value (`0 4 8 /.07 + 0 10 20 /.12`, ink #3c2c1d) was
+wrong; corrected to the measured Figma value. No component consumed `shadow-lg`,
+so the fix is non-breaking. Story Detail's hero cover overrides BookCover's default
+`shadow-md` with `shadow-lg` at the call site (BookCover default unchanged).
+
+**Level dot — reuse, no new token.** The CEFR meta-row dot (ellipse 122:183, 9px)
+is bound to `var(--feedback-info)` (#3d6082, sky/700) — the SAME single color the
+FeaturedHero level dot already uses (`bg-info`). Figma shows only A2 and it maps to
+the existing semantic, so **reuse `--feedback-info` / `bg-info`**. No `--level-*`
+group: there is no per-level color evidence in the design. If the design-lead later
+confirms distinct A1…C2 dot colors, add `--level-a1…c2` then (decorative — not
+contrast-gated).
+
 ## Tailwind v4 wiring
 
 `src/app/globals.css` `@import`s the token files, then `@theme inline` maps Tailwind
