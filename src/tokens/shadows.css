@@ -80,6 +80,11 @@
      reused rather than a new token (same rule as the Saved card shadow). */
   --shadow-accent-glow: 0 4px 12px rgba(214, 107, 69, 0.3);
 
+  /* [C] Info-tinted glow — the selected segment of an info-tone SegmentedControl
+     (Profile Translation row, Figma node 158:11): a sky/info lift, not terracotta.
+     The accent-tone counterpart is --shadow-accent-glow. */
+  --shadow-info-glow: 0 4px 12px rgba(91, 134, 176, 0.4);
+
   /* --- Reader screen elevations --------------------------------------- */
   /* [C] Reader reading card — heavy warm lift. Figma node 1157:3132. */
   --shadow-reading-card: 0px 20px 50px 0px rgba(69, 46, 20, 0.16);

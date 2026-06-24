@@ -203,6 +203,7 @@
   --shadow-cover-center: var(--shadow-cover-center);
   --shadow-cover-side: var(--shadow-cover-side);
   --shadow-accent-glow: var(--shadow-accent-glow);
+  --shadow-info-glow: var(--shadow-info-glow);
   --shadow-reading-card: var(--shadow-reading-card);
   --shadow-popover: var(--shadow-popover);
   --shadow-dropdown: var(--shadow-dropdown);
