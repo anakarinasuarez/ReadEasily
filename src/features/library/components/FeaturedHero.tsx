@@ -44,10 +44,13 @@ export function FeaturedHero({ featured }: { featured: FeaturedBook[] }) {
   // Clamp defensively so a shrunk array never indexes out of range.
   const current = featured[Math.min(active, featured.length - 1)];
 
+  // The fanned covers behave like catalog cards → they open Story Detail
+  // (/story/[id]). The "Read & Listen" CTA below is the read action → /read/[id]
+  // (current.href). So a cover previews, the CTA starts reading.
   const items = featured.map((book) => ({
     coverSrc: book.coverSrc,
     alt: book.title,
-    href: book.href,
+    href: `/story/${book.id}`,
   }));
 
   const handleActiveChange = (index: number, source: ActiveChangeSource) => {

@@ -158,6 +158,21 @@ describe("LibraryScreen", () => {
     ).toHaveAttribute("href", "/read/a-trip-to-the-mountains");
   });
 
+  it("links the featured fan's centre cover to Story Detail (not straight to the reader)", async () => {
+    renderWithQuery(<LibraryScreen />);
+    await waitForLoaded();
+
+    // Scope to the carousel region so we test the FAN's links, not the rail
+    // cards or the CTA. The centre cover is an aria-hidden pointer affordance
+    // (the dots are the AT control), so query its DOM node directly.
+    const carousel = screen.getByRole("region", { name: "Featured stories" });
+    // The fan's covers open Story Detail…
+    expect(carousel.querySelector('a[href^="/story/"]')).not.toBeNull();
+    // …and the fan never links straight to the reader (that's the CTA's job,
+    // which lives outside this region).
+    expect(carousel.querySelector('a[href^="/read/"]')).toBeNull();
+  });
+
   it("shows the empty state when a filter yields no rails, and resets via Show all", async () => {
     // A category with no matching section drives the empty branch.
     const base = await (await fetch("/api/library")).json() as LibraryData;
