@@ -18,7 +18,14 @@ function makeQueryClient(): QueryClient {
         staleTime: 60_000,
         // Avoid surprise refetches while developing against mocks.
         refetchOnWindowFocus: false,
-        retry: 1,
+        // Retry a few times (exponential backoff ~1s/2s/4s). In dev this rides
+        // out the MSW service-worker "claim" race: the worker is started
+        // fire-and-forget and only takes control of the page a few hundred ms
+        // after the first paint, so the very first query can hit the network
+        // (404) before the mock is live. Retrying lets it succeed on the next
+        // attempt instead of flashing the error state; against a real backend
+        // it just adds normal transient-failure resilience.
+        retry: 3,
         // Always attempt the request instead of pausing when React Query's
         // onlineManager believes the browser is offline. Our data is same-origin
         // (MSW today, an HTTP backend later), so "offline pausing" gives no
