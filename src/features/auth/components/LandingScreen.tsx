@@ -194,10 +194,10 @@ export function LandingScreen() {
                 {LANGUAGES.map((lang) => (
                   <span
                     key={lang.label}
-                    className={`flex items-center justify-center rounded-pill py-[6px] font-display font-semibold text-[length:var(--text-heading-h4-size)] leading-[var(--text-heading-h4-line-height)] text-secondary ${
+                    className={`flex items-center justify-center rounded-pill py-[6px] font-display font-semibold text-[length:var(--text-heading-h4-size)] leading-[var(--text-heading-h4-line-height)] ${
                       lang.emphasised
-                        ? "px-[var(--space-md-plus)]"
-                        : "px-[var(--space-sm)]"
+                        ? "bg-elevated px-[var(--space-md-plus)] text-primary shadow-feature-icon"
+                        : "px-[var(--space-sm)] text-muted"
                     }`}
                   >
                     {lang.label}
