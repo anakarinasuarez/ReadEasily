@@ -9,12 +9,10 @@ import * as React from "react";
  * type stays in exactly one place (and, critically, the colour is never baked
  * in: each surface picks its own AA-safe tone — see StatPill's NUMBER_TONE).
  *
- * NOTE on tokens: the generated typography ramp has no "Display/Mobile" entry
- * (it tops out at Display/L 44/52), so the SIZE / line-height / tracking are
- * Figma-exact arbitrary values. The FONT FAMILY and WEIGHT are token-bound
+ * The numeral binds to the Display/Mobile ramp entry: the `text-display-mobile`
+ * utility carries the 32/40 size + line-height and the tracking binds to
+ * --text-display-mobile-tracking. The FONT FAMILY and WEIGHT are token-bound too
  * (`font-display` → --font-display, `font-extrabold` → 800 = Baloo ExtraBold).
- * If a Display/Mobile text style is added to src/tokens/typography.css later,
- * swap the three literals for that single `text-display-m` utility.
  *
  * This is an internal building block — it has no public story/test of its own;
  * it is exercised through both StatTile and StatPill.
@@ -38,8 +36,8 @@ export function StatNumber({ value, className }: StatNumberProps) {
   return (
     <span
       className={cx(
-        // family numeral: Baloo ExtraBold 32/40, tracking -0.32px (see note above)
-        "font-display font-extrabold text-[32px] leading-[40px] tracking-[-0.32px] tabular-nums",
+        // family numeral: Baloo ExtraBold, Display/Mobile 32/40, tracking -0.32px
+        "font-display font-extrabold text-display-mobile tracking-[var(--text-display-mobile-tracking)] tabular-nums",
         className,
       )}
     >

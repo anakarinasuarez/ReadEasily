@@ -14,9 +14,9 @@ import { forwardRef, type HTMLAttributes } from "react";
  *   • negative z-index — always sits BEHIND the content layer.
  *   • no animation — static by design, so it already honors reduced-motion.
  *
- * Tints are token-bound (primitive hue tokens mixed down to a low alpha with
- * `color-mix`) and softened with a large blur, so there are no raster assets
- * and the colors track the theme.
+ * Tints are token-bound (the semantic --bg-decoration-warm / -cool / -leaf
+ * tokens) and softened with a large blur, so there are no raster assets and the
+ * colors track the theme.
  *
  * Usage: drop it in as the first child of a `relative` screen container. Use
  * `fixed` when the backdrop should stay put while the page scrolls.
@@ -36,10 +36,6 @@ function cn(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");
 }
 
-/** Low-alpha tint built from a token hue — token-bound, no hardcoded color. */
-const tint = (token: string, alpha: number) =>
-  `color-mix(in srgb, var(${token}) ${alpha}%, transparent)`;
-
 export const BgDecorations = forwardRef<HTMLDivElement, BgDecorationsProps>(
   function BgDecorations({ fixed = false, className, ...rest }, ref) {
     return (
@@ -54,20 +50,11 @@ export const BgDecorations = forwardRef<HTMLDivElement, BgDecorationsProps>(
         {...rest}
       >
         {/* terracotta — top-left */}
-        <div
-          className="absolute -left-[10%] -top-[8%] h-[60%] w-[75%] rounded-full blur-3xl"
-          style={{ background: tint("--color-terracotta-300", 40) }}
-        />
+        <div className="absolute -left-[10%] -top-[8%] h-[60%] w-[75%] rounded-full blur-3xl bg-[var(--bg-decoration-warm)]" />
         {/* sky/blue — top-right */}
-        <div
-          className="absolute -right-[12%] -top-[12%] h-[65%] w-[80%] rounded-full blur-3xl"
-          style={{ background: tint("--color-sky-300", 35) }}
-        />
+        <div className="absolute -right-[12%] -top-[12%] h-[65%] w-[80%] rounded-full blur-3xl bg-[var(--bg-decoration-cool)]" />
         {/* forest — bottom-center */}
-        <div
-          className="absolute bottom-[-12%] left-1/4 h-[55%] w-[70%] rounded-full blur-3xl"
-          style={{ background: tint("--color-forest-300", 35) }}
-        />
+        <div className="absolute bottom-[-12%] left-1/4 h-[55%] w-[70%] rounded-full blur-3xl bg-[var(--bg-decoration-leaf)]" />
       </div>
     );
   },

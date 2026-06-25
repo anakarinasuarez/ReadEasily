@@ -68,7 +68,7 @@ const pillBase =
 // Each row. The 2-letter code chip uses Label/S (Nunito SemiBold 12) with the
 // 0.48px tracking token; the name is 15px (Bold when selected, SemiBold else).
 const rowBase =
-  "flex w-full items-center gap-[var(--space-md)] rounded-[10px] p-[10px] text-left " +
+  "flex w-full items-center gap-[var(--space-md)] rounded-sm p-[10px] text-left " +
   "outline-none focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:-2px] " +
   "transition-colors cursor-pointer";
 

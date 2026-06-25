@@ -122,13 +122,14 @@ const eyebrowClasses = cn(
   "[letter-spacing:var(--text-label-s-tracking)]",
 );
 
-// The word: Figma Baloo 2 SemiBold 30px. No 30px display token exists (ramp is
-// Display/L 44 · H3 22 · Title/L 24), so family+weight bind to Title/L tokens and
-// 30px is the one Figma-measured geometry literal — flagged for tokens-engineer.
+// The word: Heading/H1 (Baloo 2 ExtraBold 30/38) — binds to the newly-minted
+// --text-heading-h1 ramp entry (size + line-height via `text-heading-h1`,
+// family + weight via the tokens). This deliberately aligns the headword to the
+// Reader's <h1> (ExtraBold/38), up from the prior SemiBold/leading-none.
 const wordClasses = cn(
   "text-[color:var(--text-primary)] [word-break:break-word]",
-  "[font-family:var(--text-title-l-family)] [font-weight:var(--text-title-l-weight)]",
-  "text-[30px] leading-none",
+  "[font-family:var(--text-heading-h1-family)] [font-weight:var(--text-heading-h1-weight)]",
+  "text-heading-h1",
 );
 
 // Header translation: Reading/quote (Lora Italic 18/28), text-secondary (Figma).

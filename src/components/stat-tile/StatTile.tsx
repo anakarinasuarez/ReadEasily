@@ -57,10 +57,10 @@ export const StatTile = React.forwardRef<HTMLDivElement, StatTileProps>(
       <div
         ref={ref}
         className={cx(
-          // card: elevated surface, 20px radius, warm card shadow. p-22 / gap-14
-          // are Figma-exact (off the 4/8/12/16/24 spacing ramp); w-285 is the
-          // Figma fixed width and can be overridden via className.
-          "flex w-[285px] flex-col items-start gap-[14px] rounded-card bg-surface-elevated p-[22px] shadow-card",
+          // card: elevated surface, 20px radius, warm card shadow. gap-md-plus
+          // (14) / p-lg-plus (22) bind to the spacing ramp; w-285 is the Figma
+          // fixed width and can be overridden via className.
+          "flex w-[285px] flex-col items-start gap-md-plus rounded-card bg-surface-elevated p-lg-plus shadow-card",
           className,
         )}
         {...rest}

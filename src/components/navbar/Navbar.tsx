@@ -129,7 +129,7 @@ function NavbarLogo({ homeHref }: { homeHref: string }) {
         className="font-display text-[14px] font-extrabold leading-[1.4] whitespace-nowrap md:text-[19px]"
       >
         <span className="text-primary">Read</span>
-        <span className="text-[var(--text-accent)]">Easily</span>
+        <span className="text-accent-text">Easily</span>
       </span>
     </a>
   );
@@ -151,7 +151,7 @@ const itemActive = cx(
   "bg-accent-strong text-on-accent shadow-accent-glow",
   // Mobile: icon-only 44×38 pill (label dropped). md: expands to the labeled pill.
   "h-[38px] w-[44px] justify-center",
-  "md:h-auto md:w-auto md:justify-start md:pl-[18px] md:pr-[20px] md:py-[8px]",
+  "md:h-auto md:w-auto md:justify-start md:pl-[18px] md:pr-[20px] md:py-sm",
 );
 
 /**

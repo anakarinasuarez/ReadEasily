@@ -62,7 +62,7 @@ export const StatPill = React.forwardRef<HTMLDivElement, StatPillProps>(
       >
         <StatNumber value={value} className={NUMBER_TONE[tone]} />
         {/* 2-line label — wraps naturally inside the pill width */}
-        <span className="font-ui text-label-s font-semibold leading-[16px] text-secondary">
+        <span className="font-ui text-label-s font-semibold text-secondary">
           {label}
         </span>
       </div>

@@ -85,7 +85,7 @@ const rootClasses = cn(
   "flex w-full flex-col gap-[var(--space-lg)]", // 16px gap (Figma) = --space-lg
   "rounded-t-[var(--radius-xl)] bg-[var(--bg-elevated)]",
   "overflow-hidden",
-  "pt-[var(--space-lg)] pb-[22px] px-[30px]", // 16 / 22 / 30 — 22+30 off-scale literals (Figma)
+  "pt-[var(--space-lg)] pb-lg-plus px-[30px]", // 16 / 22 (pb-lg-plus) / 30 — px-30 off-scale literal (Figma)
 );
 
 /** Elapsed / total time — Heading/H4 (Baloo 2 SemiBold 16/26), secondary ink. */
@@ -449,7 +449,7 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
             aria-label={`Playback speed, ${speedLabel}`}
             className={cn(
               chipBaseClasses,
-              "px-[18px] py-[8px] text-[var(--text-primary)]", // 18/8 = Figma pill padding (off-scale literals)
+              "px-[18px] py-sm text-[var(--text-primary)]", // px-18 off-scale literal; py-sm (8) Figma pill padding
               "transition-opacity hover:opacity-100",
               focusRing,
               "disabled:cursor-not-allowed disabled:text-[var(--text-muted)]",
@@ -537,7 +537,7 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
               <span
                 className={cn(
                   chipBaseClasses,
-                  "px-[14px] py-[8px] text-[var(--text-primary)]", // 14/8 = Figma chip padding; "A2" = #3c2c1d
+                  "px-md-plus py-sm text-[var(--text-primary)]", // px-md-plus (14) / py-sm (8) Figma chip padding; "A2" = #3c2c1d
                   // Dim with the rest of the bar when there's no audio, so the
                   // disabled state doesn't read as half-active.
                   isDisabled && "opacity-50",

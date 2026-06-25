@@ -25,7 +25,7 @@ export function ResultsGrid({ stories, labelledBy }: ResultsGridProps) {
   return (
     <ul
       aria-labelledby={labelledBy}
-      className="grid list-none p-0 m-0 justify-items-center gap-x-[22px] gap-y-xl [grid-template-columns:repeat(2,168px)] md:[grid-template-columns:repeat(4,168px)]"
+      className="grid list-none p-0 m-0 justify-items-center gap-x-lg-plus gap-y-xl [grid-template-columns:repeat(2,168px)] md:[grid-template-columns:repeat(4,168px)]"
     >
       {stories.map((story) => (
         <li key={story.id} className="flex">

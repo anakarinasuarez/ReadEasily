@@ -29,7 +29,7 @@ export function ReaderSkeleton() {
     >
       <span className="sr-only">Loading story…</span>
       <Shimmer className="h-[40px] w-[320px] max-w-full" />
-      <div className="w-full max-w-[745px] rounded-[28px] bg-[var(--bg-elevated)] shadow-[var(--shadow-reading-card)] pt-[50px] pb-[var(--space-xl)] px-[60px]">
+      <div className="w-full max-w-[745px] rounded-2xl bg-[var(--bg-elevated)] shadow-[var(--shadow-reading-card)] pt-[50px] pb-[var(--space-xl)] px-[60px]">
         <div className="flex w-full flex-col gap-[var(--space-md)]">
           <Shimmer className="h-[28px] w-full" />
           <Shimmer className="h-[28px] w-full" />
@@ -53,7 +53,7 @@ export function ReaderError({ onRetry }: ReaderErrorProps) {
   return (
     <div
       role="alert"
-      className="flex w-full max-w-[745px] flex-col items-center gap-[var(--space-lg)] rounded-[28px] bg-[var(--bg-elevated)] shadow-[var(--shadow-reading-card)] px-[60px] py-[var(--space-3xl)] text-center"
+      className="flex w-full max-w-[745px] flex-col items-center gap-[var(--space-lg)] rounded-2xl bg-[var(--bg-elevated)] shadow-[var(--shadow-reading-card)] px-[60px] py-[var(--space-3xl)] text-center"
     >
       <h2 className="text-[color:var(--text-primary)] [font-family:var(--text-heading-h3-family)] [font-size:var(--text-heading-h3-size)] [font-weight:var(--text-heading-h3-weight)] [line-height:var(--text-heading-h3-line-height)]">
         We couldn&rsquo;t open this story

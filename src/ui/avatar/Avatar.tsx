@@ -93,7 +93,7 @@ export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(function Avatar(
       aria-label={showImage ? undefined : name}
       className={cx(
         "relative inline-flex shrink-0 items-center justify-center overflow-hidden align-middle",
-        "rounded-pill bg-accent text-on-accent select-none",
+        "rounded-pill bg-accent-strong text-on-accent select-none",
         sizeBox[size],
         className,
       )}

@@ -42,11 +42,10 @@ export const SectionHeader = forwardRef<HTMLHeadingElement, SectionHeaderProps>(
           aria-hidden="true"
           className="w-[5px] self-stretch shrink-0 rounded-pill bg-accent"
         />
-        {/* Heading/H2: Baloo Bold 28/36, tracking -0.5, text-primary. Size/
-            line-height/tracking are off the tokenized type ramp (no Heading/H2
-            token yet — flagged for tokens-engineer); family/weight/color are
-            token-bound. */}
-        <span className="font-display font-bold text-primary text-[28px] leading-[36px] tracking-[-0.5px]">
+        {/* Heading/H2: Baloo Bold 28/36, tracking -0.14px (Figma-correct, a
+            px-vs-% misread corrected from -0.5px). Size + line-height bind via
+            `text-heading-h2`; tracking + family/weight/color are token-bound. */}
+        <span className="font-display font-bold text-primary text-heading-h2 tracking-[var(--text-heading-h2-tracking)]">
           {title}
         </span>
       </Heading>

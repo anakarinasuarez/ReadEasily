@@ -105,11 +105,10 @@ export const EmptyState = forwardRef<HTMLElement, EmptyStateProps>(
         <p
           id={titleId}
           className={cn(
-            // Baloo (display) Bold ~26. Size/line-height are off the tokenized
-            // type ramp (no Display/M token yet — flagged for tokens-engineer);
-            // family/weight/color are token-bound.
+            // Baloo (display) Bold, Display/M (26 / lh 1.1). Size + line-height
+            // bind via `text-display-m`; family/weight/color are token-bound.
             "font-display font-bold text-primary",
-            "text-[26px] leading-[1.1]",
+            "text-display-m",
           )}
         >
           {title}

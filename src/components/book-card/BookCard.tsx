@@ -173,7 +173,7 @@ export const BookCard = forwardRef<HTMLAnchorElement, BookCardProps>(
           {title}
         </p>
 
-        <div className="flex items-center gap-[8px] font-ui font-semibold text-label-m tracking-[var(--text-label-m-tracking)] text-[var(--text-muted)]">
+        <div className="flex items-center gap-sm font-ui font-semibold text-label-m tracking-[var(--text-label-m-tracking)] text-[var(--text-muted)]">
           <span>{level}</span>
           <span aria-hidden="true">·</span>
           <span>{minutes} min</span>

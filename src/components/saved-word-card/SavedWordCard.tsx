@@ -108,7 +108,7 @@ function GlobeGlyph() {
       fill="none"
       aria-hidden="true"
       focusable="false"
-      className="size-full text-[var(--color-sky-500)]"
+      className="size-full text-icon-info-decorative"
     >
       <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.6" />
       <path

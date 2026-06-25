@@ -366,8 +366,8 @@ export function ReaderScreen({
             sizes="100vw"
             className="object-cover opacity-[0.55]"
           />
-          {/* Warm-cream veil (Figma rgba(255,250,235,0.45) — allowed literal, like --scrim). */}
-          <div className="absolute inset-0 bg-[rgba(255,250,235,0.45)]" />
+          {/* Warm-cream reading veil — token-bound (--veil-reading). */}
+          <div className="absolute inset-0 bg-[var(--veil-reading)]" />
           {/* Giant faded story-title watermark, centered behind the header. */}
           <span className="absolute left-1/2 top-[8px] -translate-x-1/2 whitespace-nowrap font-display font-extrabold leading-none text-[color:var(--text-primary)] opacity-[0.05] [font-size:150px]">
             {story.title}
@@ -403,11 +403,10 @@ export function ReaderScreen({
           ) : (
             <>
               {/* Title row (Figma 125:159): title text + a decorative 18px
-                  terracotta waveform glyph (12px gap). Responsive type: mobile
-                  ~30px (Figma mobile 856:928 — no --text-heading-h2 token exists
-                  yet, so the size is an off-scale literal, flagged for tokens) →
-                  md Display/L (44/52, tracking -0.66px). */}
-              <h1 className="flex items-center justify-center gap-[12px] text-center text-[color:var(--text-primary)] [font-family:var(--text-display-l-family)] [font-weight:var(--text-display-l-weight)] text-[30px] leading-[38px] md:text-[length:var(--text-display-l-size)] md:[line-height:var(--text-display-l-line-height)] md:[letter-spacing:var(--text-display-l-tracking)]">
+                  terracotta waveform glyph (gap-md). Responsive type: mobile
+                  Heading/H1 (30/38, Figma mobile 856:928) → md Display/L (44/52,
+                  tracking -0.66px). */}
+              <h1 className="flex items-center justify-center gap-md text-center text-[color:var(--text-primary)] [font-family:var(--text-display-l-family)] [font-weight:var(--text-display-l-weight)] text-heading-h1 md:text-[length:var(--text-display-l-size)] md:[line-height:var(--text-display-l-line-height)] md:[letter-spacing:var(--text-display-l-tracking)]">
                 {story.title}
                 <span
                   aria-hidden="true"

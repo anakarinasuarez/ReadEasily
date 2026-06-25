@@ -78,7 +78,7 @@ export function ReadingCard({
     translationVisible && page.translationParagraphs.length > 0;
 
   return (
-    <div className="flex w-full max-w-[745px] flex-col gap-[var(--space-xl)] rounded-[28px] bg-[var(--bg-elevated)] shadow-[var(--shadow-reading-card)] px-[var(--space-xl)] pt-[var(--space-2xl)] pb-[var(--space-xl)] md:px-[60px] md:pt-[50px]">
+    <div className="flex w-full max-w-[745px] flex-col gap-[var(--space-xl)] rounded-2xl bg-[var(--bg-elevated)] shadow-[var(--shadow-reading-card)] px-[var(--space-xl)] pt-[var(--space-2xl)] pb-[var(--space-xl)] md:px-[60px] md:pt-[50px]">
       {/* Reading body ONLY is keyed by page → cross-fade it on a page change
           (morph). The footer below is a stable sibling (see ReadingProgress). */}
       <div

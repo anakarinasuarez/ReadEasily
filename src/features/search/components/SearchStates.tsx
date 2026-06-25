@@ -55,7 +55,7 @@ export function SearchSkeleton() {
       </div>
 
       {/* Results grid placeholder — same 4/2-col footprint as ResultsGrid. */}
-      <div className="grid [grid-template-columns:repeat(2,168px)] gap-x-[22px] gap-y-xl justify-items-center md:[grid-template-columns:repeat(4,168px)]">
+      <div className="grid [grid-template-columns:repeat(2,168px)] gap-x-lg-plus gap-y-xl justify-items-center md:[grid-template-columns:repeat(4,168px)]">
         {[0, 1, 2, 3, 4, 5, 6, 7].map((card) => (
           <BookCard
             key={card}

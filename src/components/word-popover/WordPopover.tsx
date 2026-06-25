@@ -191,9 +191,8 @@ function getFocusable(root: HTMLElement): HTMLElement[] {
 
 /* ---------------------------------------------------------------------------
  * Token-bound class fragments. Every color / radius / shadow / space resolves
- * to a CSS custom property. The only literals are the header's translucent
- * white-wash alphas (rgba(255,255,255,.18–.32) on the pronounce chip + close
- * button) — the same pattern as the --scrim token, commented at each use site.
+ * to a CSS custom property. The header's translucent white-wash now binds to
+ * the --overlay-on-accent* tokens (rest / hover / weak), like the --scrim token.
  * ------------------------------------------------------------------------- */
 
 /** Header controls sit on --bg-accent-strong, where the terracotta --focus-ring
@@ -229,9 +228,9 @@ const posPillClasses = cn(
 
 const translationClasses = cn(
   "text-[color:var(--text-primary)] [word-break:break-word]",
-  // Nunito Bold 20 — design-lead-measured. Family/weight bind to tokens; the
-  // 20px size + 28px line-height are the measured geometry literals.
-  "font-ui font-bold [font-size:20px] leading-[28px]",
+  // Nunito Bold 20/28 — UI/XL. Family/weight bind to tokens; size + line-height
+  // bind to the --text-ui-xl ramp entry via the `text-ui-xl` utility.
+  "font-ui font-bold text-ui-xl",
 );
 
 /**
@@ -349,7 +348,7 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
         )}
       >
         {/* Header — accent bar: word + pronounce chip on the left, close right */}
-        <div className="flex items-center justify-between bg-[var(--bg-accent-strong)] pl-[22px] pr-[18px] py-[var(--space-lg)]">
+        <div className="flex items-center justify-between bg-[var(--bg-accent-strong)] pl-lg-plus pr-[18px] py-[var(--space-lg)]">
           <div className="flex items-center gap-[var(--space-md)]">
             <p id={titleId} className={wordClasses}>
               {word}
@@ -361,12 +360,12 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
               aria-label={`Pronounce ${word}`}
               className={cn(
                 "inline-flex size-[30px] shrink-0 items-center justify-center rounded-[var(--radius-pill)]",
-                // Allowed literal: translucent-white wash over the accent header,
-                // same pattern as the --scrim token. Not a themable surface.
-                "bg-[rgba(255,255,255,0.22)] hover:bg-[rgba(255,255,255,0.32)] transition-colors",
+                // Translucent-white wash over the accent header, token-bound
+                // (--overlay-on-accent*), same pattern as --scrim.
+                "bg-[var(--overlay-on-accent)] hover:bg-[var(--overlay-on-accent-strong)] transition-colors",
                 "text-[color:var(--text-on-accent)]",
                 // Audio not wired → inert chip (focus skips it; see mount effect).
-                "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[rgba(255,255,255,0.22)]",
+                "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[var(--overlay-on-accent)]",
                 headerFocus,
               )}
             >
@@ -388,7 +387,7 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
             className={cn(
               "-m-1 inline-flex shrink-0 items-center justify-center rounded-[var(--radius-sm)] p-1",
               "text-[color:var(--text-on-accent)]",
-              "hover:bg-[rgba(255,255,255,0.18)] transition-colors",
+              "hover:bg-[var(--overlay-on-accent-weak)] transition-colors",
               headerFocus,
             )}
           >
@@ -402,7 +401,7 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
         </div>
 
         {/* Body */}
-        <div className="flex flex-col gap-[var(--space-md-plus)] bg-[var(--bg-elevated)] px-[22px] pb-[var(--space-xl)] pt-[18px]">
+        <div className="flex flex-col gap-[var(--space-md-plus)] bg-[var(--bg-elevated)] px-lg-plus pb-[var(--space-xl)] pt-[18px]">
           {showContent && pos != null && pos !== "" && (
             <span className={posPillClasses}>{pos}</span>
           )}
@@ -411,7 +410,7 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
             <div className="flex items-center gap-[10px]">
               <span
                 aria-hidden="true"
-                className="inline-flex size-[18px] shrink-0 items-center justify-center text-[color:var(--color-sky-500)] [&>svg]:size-full"
+                className="inline-flex size-[18px] shrink-0 items-center justify-center text-icon-info-decorative [&>svg]:size-full"
               >
                 <GlobeIcon />
               </span>
