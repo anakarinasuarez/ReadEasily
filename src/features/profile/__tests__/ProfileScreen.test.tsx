@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
@@ -9,6 +9,7 @@ import {
   usePreferences,
   DEFAULT_PREFERENCES,
 } from "@/stores/preferences";
+import { useProfileAvatar } from "@/stores/profileAvatar";
 import { ProfileScreen } from "../components/ProfileScreen";
 
 /**
@@ -30,6 +31,7 @@ beforeEach(() => {
   // Each test starts from factory preferences + empty storage.
   localStorage.clear();
   usePreferences.setState({ ...DEFAULT_PREFERENCES, _hasHydrated: false });
+  useProfileAvatar.setState({ avatarDataUrl: null, _hasHydrated: false });
 });
 
 describe("ProfileScreen — header + stats from getProfile", () => {
@@ -142,6 +144,56 @@ describe("ProfileScreen — destructive account rows confirm before acting", () 
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
     );
+  });
+});
+
+describe("ProfileScreen — changing the avatar persists and renders", () => {
+  const MOCK_DATA_URL = "data:image/png;base64,cGlja2VkYXZhdGFy";
+
+  // Deterministic FileReader so the picked file yields a known data URL.
+  class MockFileReader {
+    result: string | ArrayBuffer | null = null;
+    error: DOMException | null = null;
+    onload: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    readAsDataURL() {
+      this.result = MOCK_DATA_URL;
+      this.onload?.();
+    }
+  }
+
+  beforeEach(() => {
+    vi.stubGlobal("FileReader", MockFileReader);
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("renders an <img> avatar with the picked data URL after a photo is chosen", async () => {
+    const user = userEvent.setup();
+    const { container } = renderWithQuery(<ProfileScreen />);
+
+    // The mock user has no avatarSrc, so before the pick the avatars show the
+    // initials fallback (role="img" via aria-label, but no real <img> element).
+    await screen.findByRole("heading", { level: 1, name: "Ana" });
+    expect(container.querySelector("img")).toBeNull();
+
+    const input = container.querySelector<HTMLInputElement>(
+      'input[type="file"]',
+    );
+    expect(input).not.toBeNull();
+    const file = new File(["x"], "selfie.png", { type: "image/png" });
+    await user.upload(input as HTMLInputElement, file);
+
+    // The store override flows through to the Avatar(s) as real <img> elements
+    // (the header, and the navbar account avatar) whose src is the data URL.
+    await waitFor(() => {
+      const imgs = screen.getAllByAltText("Ana");
+      expect(imgs.length).toBeGreaterThan(0);
+      imgs.forEach((img) => expect(img).toHaveAttribute("src", MOCK_DATA_URL));
+    });
+    // And it persisted to the store immediately.
+    expect(useProfileAvatar.getState().avatarDataUrl).toBe(MOCK_DATA_URL);
   });
 });
 

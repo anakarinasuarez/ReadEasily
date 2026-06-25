@@ -15,6 +15,10 @@ import {
   useHydratePreferences,
   type Preferences,
 } from "@/stores/preferences";
+import {
+  useProfileAvatar,
+  useHydrateProfileAvatar,
+} from "@/stores/profileAvatar";
 import { useProfile } from "../hooks/useProfile";
 import type { ProfileData, ProfileStats } from "../types";
 import { ProfileHeader } from "./ProfileHeader";
@@ -444,8 +448,14 @@ export function ProfileScreen() {
   const router = useRouter();
   const { data, isPending, isError, refetch } = useProfile();
 
-  // Pull the persisted preferences in after mount (SSR-safe — see the store).
+  // Pull the persisted preferences + avatar in after mount (SSR-safe — stores).
   useHydratePreferences();
+  useHydrateProfileAvatar();
+
+  // Local avatar override (device-local, no backend) wins over the server one.
+  const avatarDataUrl = useProfileAvatar((s) => s.avatarDataUrl);
+  const setAvatar = useProfileAvatar((s) => s.setAvatar);
+  const effectiveAvatar = avatarDataUrl ?? data?.user.avatarSrc;
 
   function handleSignOut() {
     // TODO(auth): end the session once an auth backend exists. No-op seam now.
@@ -453,7 +463,7 @@ export function ProfileScreen() {
 
   const navUser = {
     name: data?.user.name ?? "You",
-    avatarSrc: data?.user.avatarSrc,
+    avatarSrc: effectiveAvatar,
   };
 
   return (
@@ -482,7 +492,11 @@ export function ProfileScreen() {
           </>
         ) : (
           <>
-            <ProfileHeader user={(data as ProfileData).user} onSignOut={handleSignOut} />
+            <ProfileHeader
+              user={{ ...(data as ProfileData).user, avatarSrc: effectiveAvatar }}
+              onSignOut={handleSignOut}
+              onAvatarChange={setAvatar}
+            />
             <StatsRow stats={(data as ProfileData).stats} />
           </>
         )}
