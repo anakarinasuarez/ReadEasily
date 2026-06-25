@@ -55,10 +55,29 @@ function BookMark({ className }: { className?: string }) {
 export interface BrandLogoProps {
   /** Extra classes for the outer wrapper (e.g. spacing). */
   className?: string;
+  /**
+   * Visual scale. `"md"` (default) matches the canonical Navbar brand
+   * (responsive 14→19px wordmark, 33×29→40×32 mark) and is what the auth shell
+   * uses. `"lg"` is the larger marketing brand from the Landing Figma
+   * (22/30 wordmark, fixed 40×32 mark).
+   */
+  size?: "md" | "lg";
 }
 
-/** Brand mark + "ReadEasily" wordmark, anchored left (brand law). */
-export function BrandLogo({ className }: BrandLogoProps) {
+/** Book-mark dimensions per scale. */
+const MARK_SIZE: Record<NonNullable<BrandLogoProps["size"]>, string> = {
+  md: "block h-[29px] w-[33px] md:h-[32px] md:w-[40px]",
+  lg: "block h-[32px] w-[40px]",
+};
+
+/** Wordmark type per scale. */
+const WORDMARK_SIZE: Record<NonNullable<BrandLogoProps["size"]>, string> = {
+  md: "text-[14px] leading-[1.4] md:text-[19px]",
+  lg: "text-[length:var(--text-heading-h3-size)] leading-[var(--text-heading-h3-line-height)]",
+};
+
+/** Brand mark + "ReadEasily" wordmark. */
+export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
   return (
     <span
       role="img"
@@ -66,11 +85,14 @@ export function BrandLogo({ className }: BrandLogoProps) {
       className={cx("inline-flex shrink-0 items-center gap-[7px]", className)}
     >
       <span aria-hidden="true" className="inline-flex rotate-[13deg]">
-        <BookMark className="block h-[29px] w-[33px] md:h-[32px] md:w-[40px]" />
+        <BookMark className={MARK_SIZE[size]} />
       </span>
       <span
         aria-hidden="true"
-        className="font-display text-[14px] font-extrabold leading-[1.4] whitespace-nowrap md:text-[19px]"
+        className={cx(
+          "font-display font-extrabold whitespace-nowrap",
+          WORDMARK_SIZE[size],
+        )}
       >
         <span className="text-primary">Read</span>
         <span className="text-accent-text">Easily</span>

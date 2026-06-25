@@ -23,7 +23,7 @@ export interface FeatureRowProps {
  */
 export function FeatureRow({ icon, title, description }: FeatureRowProps) {
   return (
-    <div className="flex items-center gap-[var(--space-lg)]">
+    <div className="flex items-center gap-[var(--space-md-plus)]">
       <span
         aria-hidden="true"
         className={[

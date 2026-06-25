@@ -70,6 +70,27 @@ export const ReadingAccent: Story = {
 };
 
 /**
+ * Large label ramp (`size="lg"` → Heading/H4 16/26 SemiBold) — the Landing
+ * language selector. Geometry and semantics are unchanged; only the label type
+ * steps up from Meta (13/18) to match the hero scale.
+ */
+export const LargeLabels: Story = {
+  render: () => {
+    const [value, setValue] = useState<(typeof TRANSLATION)[number]["value"]>("ES");
+    return (
+      <SegmentedControl
+        tone="info"
+        size="lg"
+        aria-label="Translation language"
+        options={[...TRANSLATION]}
+        value={value}
+        onChange={setValue}
+      />
+    );
+  },
+};
+
+/**
  * Full-width (the wrapped mobile row): `w-full` on the track makes the `flex-1`
  * segments distribute equally. Inline desktop usage (the stories above) sizes to
  * content instead.

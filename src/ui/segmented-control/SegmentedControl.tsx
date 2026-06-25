@@ -46,6 +46,14 @@ export interface SegmentedControlProps<T extends string> {
    *   - `"info"`             → `--feedback-info` fill (Translation language row)
    */
   tone?: "info" | "accent";
+  /**
+   * Label type ramp:
+   *   - `"md"` (default) → Meta (Baloo 2 Bold 13/18) — Profile/Reader rows, UNCHANGED.
+   *   - `"lg"`           → Heading/H4 (Baloo 2 SemiBold 16/26) — the Landing
+   *     language selector, whose larger segment labels match the hero scale.
+   * Purely typographic — geometry and semantics (radiogroup/radio) are identical.
+   */
+  size?: "md" | "lg";
   /** Accessible name for the group. Provide this or `aria-labelledby`. */
   "aria-label"?: string;
   /** Id of an element naming the group. Provide this or `aria-label`. */
@@ -59,17 +67,27 @@ export interface SegmentedControlProps<T extends string> {
 // equally. `items-stretch` keeps every segment the same height.
 const track = "inline-flex items-stretch gap-[var(--space-xs)]";
 
-// Segment box: pill geometry (12px x via --space-md, 7px y via --space-chip-y —
-// the canonical pill vertical padding), pill radius, Meta type (Baloo 2 Bold
-// 13/18), AA-visible 2px focus ring. All token-bound.
-const segment =
+// Segment box geometry (12px x via --space-md, 7px y via --space-chip-y — the
+// canonical pill vertical padding), pill radius, AA-visible 2px focus ring. The
+// type ramp is size-dependent (see `segmentType`). All token-bound.
+const segmentBase =
   "flex-1 inline-flex items-center justify-center whitespace-nowrap select-none cursor-pointer " +
   "px-[var(--space-md)] py-[var(--space-chip-y)] rounded-[var(--radius-pill)] " +
-  "font-[family-name:var(--text-meta-family)] text-[length:var(--text-meta-size)] " +
-  "leading-[var(--text-meta-line-height)] [font-weight:var(--text-meta-weight)] " +
-  "tracking-[var(--text-meta-tracking)] " +
   "transition-colors outline-none " +
   "focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]";
+
+// Per-size label type: `md` = Meta (Baloo 2 Bold 13/18); `lg` = Heading/H4
+// (Baloo 2 SemiBold 16/26). Both fully token-bound.
+const segmentType: Record<"md" | "lg", string> = {
+  md:
+    "font-[family-name:var(--text-meta-family)] text-[length:var(--text-meta-size)] " +
+    "leading-[var(--text-meta-line-height)] [font-weight:var(--text-meta-weight)] " +
+    "tracking-[var(--text-meta-tracking)]",
+  lg:
+    "font-[family-name:var(--text-heading-h4-family)] text-[length:var(--text-heading-h4-size)] " +
+    "leading-[var(--text-heading-h4-line-height)] [font-weight:var(--text-heading-h4-weight)] " +
+    "tracking-[var(--text-heading-h4-tracking)]",
+};
 
 // Selected segment: tone fill + on-accent text + a soft tone-tinted glow.
 //   accent → --bg-accent-strong fill + --shadow-accent-glow (terracotta glow).
@@ -93,6 +111,7 @@ export function SegmentedControl<T extends string>({
   value,
   onChange,
   tone = "accent",
+  size = "md",
   className,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
@@ -163,7 +182,8 @@ export function SegmentedControl<T extends string>({
             tabIndex={index === selectedIndex ? 0 : -1}
             onClick={() => select(index)}
             className={[
-              segment,
+              segmentBase,
+              segmentType[size],
               checked ? selectedByTone[tone] : unselected,
             ].join(" ")}
           >

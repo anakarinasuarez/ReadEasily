@@ -5,12 +5,14 @@ import { LandingScreen } from "./LandingScreen";
 
 /**
  * LandingScreen — the guest-friendly marketing front door (Figma desktop
- * 171:361 / mobile 821:825). One responsive component: a 2-column hero on md+
- * (text left, auto-cycling Book Showcase right) that collapses to a single
- * stacked column below md. The Default story shows the desktop layout; the
- * Mobile story exercises the same component at a phone viewport (no separate
- * build); the FrenchSelected story shows the language SegmentedControl in a
- * non-default selected state.
+ * 171:361 / mobile 821:825). One responsive component: a centered brand header
+ * over a 2-column hero on md+ (a 22px-rhythm text column left, the decorative
+ * auto-cycling LandingShowcase right) that collapses to a single stacked column
+ * below md (logo → eyebrow → h1 → body → showcase → features → translate →
+ * helper → CTA). The Default story shows the desktop layout; the Mobile story
+ * exercises the same component at a phone viewport (no separate build); the
+ * FrenchSelected story shows the language SegmentedControl in a non-default
+ * selected state.
  *
  * The screen binds the translation language to the persisted preferences store,
  * so each story resets that store first to keep the rendered selection

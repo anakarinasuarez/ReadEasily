@@ -19,5 +19,11 @@ export type { AuthTabsProps, AuthTab } from "./auth-tabs";
 export { FeatureRow } from "./feature-row";
 export type { FeatureRowProps } from "./feature-row";
 
+export { LandingShowcase } from "./landing-showcase";
+export type {
+  LandingShowcaseProps,
+  LandingShowcaseItem,
+} from "./landing-showcase";
+
 export { BrandLogo } from "./brand";
 export type { BrandLogoProps } from "./brand";

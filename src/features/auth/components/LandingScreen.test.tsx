@@ -10,11 +10,12 @@ import { LandingScreen } from "./LandingScreen";
 
 /**
  * LandingScreen behavior tests. The screen composes the marketing hero
- * (BrandLogo + Log-in link + intro + 3 FeatureRows + the Book Showcase + the
- * language SegmentedControl + the primary CTA + trust bar). It binds the
- * translation language to the persisted preferences store and pushes to the
- * reading home on the CTA. We reset the store between tests and mock the App
- * Router so the CTA push is observable.
+ * (centered BrandLogo + intro + 3 FeatureRows + the decorative LandingShowcase +
+ * the language SegmentedControl + the primary CTA + trust bar). There is NO
+ * "Log in" entry on the Landing (product decision). It binds the translation
+ * language to the persisted preferences store and pushes to the reading home on
+ * the CTA. We reset the store between tests and mock the App Router so the CTA
+ * push is observable.
  */
 
 const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
@@ -29,10 +30,12 @@ beforeEach(() => {
 });
 
 describe("LandingScreen — structure & content", () => {
-  it("renders exactly one h1 — the hero title", () => {
+  it("renders exactly one h1 whose three line-break spans read as one name", () => {
     render(<LandingScreen />);
     const h1s = screen.getAllByRole("heading", { level: 1 });
     expect(h1s).toHaveLength(1);
+    // The forced line breaks are `block` spans INSIDE the single h1 — the
+    // accessible name is still the full sentence.
     expect(h1s[0]).toHaveTextContent("Learn English, one fable at a time.");
   });
 
@@ -56,17 +59,23 @@ describe("LandingScreen — structure & content", () => {
     expect(
       screen.getByText(/Beloved tales, read aloud\./),
     ).toBeInTheDocument();
-    expect(screen.getByText(/10 fables/)).toHaveTextContent(
-      "10 fables · 4 levels (A1–B1) · 3 languages · 100% free",
-    );
+    // The facts are separate flex children (· dots between them), so assert each.
+    for (const fact of [
+      "10 fables",
+      "4 levels (A1–B1)",
+      "3 languages",
+      "100% free",
+    ]) {
+      expect(screen.getByText(fact)).toBeInTheDocument();
+    }
   });
 
-  it("exposes Log in as a link to /login", () => {
+  it("does NOT render a Log in entry (product decision)", () => {
     render(<LandingScreen />);
-    expect(screen.getByRole("link", { name: "Log in" })).toHaveAttribute(
-      "href",
-      "/login",
-    );
+    expect(screen.queryByRole("link", { name: /log in/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /log in/i }),
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -102,14 +111,13 @@ describe("LandingScreen — CTA", () => {
 });
 
 describe("LandingScreen — keyboard", () => {
-  it("tabs Log in → language option → Start reading and activates the CTA with Enter", async () => {
+  it("tabs language option → Start reading (no Log in) and activates the CTA with Enter", async () => {
     const user = userEvent.setup();
     render(<LandingScreen />);
 
-    await user.tab();
-    expect(screen.getByRole("link", { name: "Log in" })).toHaveFocus();
-
-    // The SegmentedControl is one tab stop (roving): the checked Spanish option.
+    // The SegmentedControl is the first tab stop (roving): the checked Spanish
+    // option. The centered brand and decorative showcase add no tab stops, and
+    // there is no Log in entry.
     await user.tab();
     expect(screen.getByRole("radio", { name: "Spanish" })).toHaveFocus();
 

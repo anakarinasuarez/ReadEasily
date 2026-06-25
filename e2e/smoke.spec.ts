@@ -21,8 +21,9 @@ test("home route renders and hydrates", async ({ page }) => {
 
   await expect(page).toHaveTitle("ReadEasily");
 
-  // The Landing's auth entry point + primary CTA are present once it hydrates.
-  await expect(page.getByRole("link", { name: "Log in" })).toBeVisible();
+  // The Landing's brand + primary CTA are present once it hydrates. (The
+  // header is Figma-exact: centered brand, no Log in link.)
+  await expect(page.getByRole("img", { name: "ReadEasily" })).toBeVisible();
   await expect(
     page.getByRole("button", { name: /Start reading/ }),
   ).toBeVisible();

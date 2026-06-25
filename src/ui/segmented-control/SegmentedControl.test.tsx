@@ -114,6 +114,28 @@ describe("SegmentedControl", () => {
       .forEach((r) => expect(r).toHaveAttribute("tabindex", "-1"));
   });
 
+  it("keeps radiogroup semantics with the lg label size", () => {
+    render(
+      <SegmentedControl
+        size="lg"
+        aria-label="Translation language"
+        options={OPTIONS}
+        value="ES"
+        onChange={() => {}}
+      />,
+    );
+    expect(
+      screen.getByRole("radiogroup", { name: "Translation language" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("radio")).toHaveLength(3);
+    expect(screen.getByRole("radio", { name: "ES" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    // Larger labels must not introduce toggle-button semantics.
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
   it("has no detectable a11y violations (info and accent tones)", async () => {
     const { container } = render(
       <div>
