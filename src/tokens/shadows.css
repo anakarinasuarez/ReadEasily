@@ -85,6 +85,14 @@
      The accent-tone counterpart is --shadow-accent-glow. */
   --shadow-info-glow: 0 4px 12px rgba(91, 134, 176, 0.4);
 
+  /* [C] Landing feature-icon tile — barely-there warm micro-lift. Figma node
+     171:361 = 0px 1px 3px rgba(79,51,23,0.04). Distinct from the existing warm
+     ramp: it is the SOFTEST shadow in the system. Closest is --shadow-field
+     (0 2px 8px /.06) but that is perceptibly heavier — ~2.7x blur (8px vs 3px),
+     ~1.5x opacity (.06 vs .04) and a larger offset — so reusing it would over-
+     shadow these tiles. Own token. Same warm shadow ink (79,51,23). */
+  --shadow-feature-icon: 0px 1px 3px rgba(79, 51, 23, 0.04);
+
   /* --- Reader screen elevations --------------------------------------- */
   /* [C] Reader reading card — heavy warm lift. Figma node 1157:3132. */
   --shadow-reading-card: 0px 20px 50px 0px rgba(69, 46, 20, 0.16);
@@ -119,4 +127,6 @@
   --shadow-reading-card: 0px 20px 50px 0px rgba(0, 0, 0, 0.50);
   --shadow-popover: 0px 18px 40px -8px rgba(0, 0, 0, 0.55);
   --shadow-dropdown: 0px 12px 32px -6px rgba(0, 0, 0, 0.55);
+  /* [D] feature-icon micro-lift, deepened for dark surfaces (UNVERIFIED — reconcile w/ Figma dark) */
+  --shadow-feature-icon: 0px 1px 3px rgba(0, 0, 0, 0.30);
 }

@@ -97,6 +97,18 @@
   --bg-accent-strong: var(--color-terracotta-700); /* #b35029 — AA interactive terracotta */
   --bg-accent-subtle: var(--color-terracotta-50);  /* #fdebe0 */
 
+  /* [D-AA] Auth marketing-panel SURFACE. The Figma panel (node 542:649) is filled
+     with --bg-accent #d66c44, but its body/bullet text fails AA there: the design's
+     rgba(250,245,238,0.8) off-white = only 2.58:1, and even SOLID white is 3.45:1
+     (< 4.5:1 — passes large-text 3:1 only). terracotta-650 #c0703f is still 3.73:1.
+     terracotta-700 #b35029 is the LIGHTEST step on the ramp where solid white clears
+     AA body text: 5.13:1. So the panel surface adopts the AA-safe strong terracotta.
+     Aliased to --bg-accent-strong (NOT a new hex) so it carries the correct value in
+     BOTH modes: light #b35029 + white text-on-accent = 5.13:1; dark #e58a5e + dark-ink
+     text-on-accent = 6.38:1. Pair this token with --text-on-accent for bullets/body —
+     do NOT lower text opacity. Same pattern as --focus-ring → --border-accent. */
+  --bg-accent-panel: var(--bg-accent-strong);
+
   /* --- Semantic: border  (all [C]) ------------------------------------ */
   --border-default: var(--color-ink-100);      /* #f0e2c6 */
   --border-strong: var(--color-ink-200);       /* #e7d6b1 */

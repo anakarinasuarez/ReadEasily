@@ -31,7 +31,7 @@ Figma: `--text-<style>-family / -size / -weight / -line-height / -tracking`.
 
 ```
 text/      primary  secondary  muted  accent  on-accent
-bg/        canvas  subtle  elevated  accent  accent-hover  accent-strong  accent-subtle
+bg/        canvas  subtle  elevated  accent  accent-hover  accent-strong  accent-subtle  accent-panel
 border/    default  strong  accent
 feedback/  success  success-subtle  info  info-subtle
            warning  warning-solid  warning-subtle  danger  danger-subtle
@@ -116,6 +116,11 @@ perceptual weight of an elevation; ≤2px geometry deltas are sub-perceptual.
   `--shadow-empty`**: it differs in opacity (.06 vs .07 = lighter) *and* spread
   (18 vs 16px blur), a genuinely softer/diffuse lift, so it is a distinct
   elevation rather than an approximation. EmptyState should consume `shadow-empty`.
+- **Landing feature-icon tile** (node 171:361, `0px 1px 3px /.04`) gets its **own
+  `--shadow-feature-icon`** — the *softest* shadow in the system. Closest is
+  `--shadow-field` (`0 2px 8px /.06`) but that is perceptibly heavier (~2.7x blur,
+  ~1.5x opacity, larger offset), so reusing it would over-shadow the tiles.
+  Tailwind: `shadow-feature-icon`. Same warm shadow ink `rgba(79,51,23,…)`.
 
 ### AA decisions baked in (from 📋 Handoff & Specs)
 
@@ -145,6 +150,26 @@ because the raw values fail WCAG AA at the sizes the components use:
   design-lead) and fails for the 12px error caption. #bf4636 clears **~5.0:1**
   on canvas and passes for the 2px input error border. Flagged for the
   design-lead to push the AA value back into the Figma variable.
+
+#### Auth marketing-panel surface ([D-AA], node 542:649)
+
+The auth marketing panel is filled with `--bg-accent` (#d66c44) in Figma, but its
+body/bullet text fails WCAG AA there:
+
+| Text on #d66c44 | Ratio | Verdict (16px body needs 4.5:1) |
+| --- | --- | --- |
+| Figma `rgba(250,245,238,0.8)` off-white | **2.58:1** | fails |
+| solid white `--text-on-accent` | **3.45:1** | fails (large-text 3:1 only) |
+| solid white on terracotta-650 #c0703f | 3.73:1 | fails |
+| solid white on terracotta-700 #b35029 | **5.13:1** | **passes** |
+
+Fix is **not** lowering opacity — it is darkening the *surface* to the lightest
+ramp step where solid white clears AA: **terracotta-700**. Published as
+**`--bg-accent-panel`**, a semantic alias of `--bg-accent-strong` (no new hex), so
+it carries the right value in both modes — light #b35029 + white = 5.13:1; dark
+#e58a5e + dark-ink `--text-on-accent` = 6.38:1. Pair the panel with
+`--text-on-accent`. Tailwind: `bg-accent-panel`. Locked by `contrast.test.ts`.
+Flagged for the design-lead to darken the panel fill in the Figma source.
 
 ### Screen-spec reconciliation (Search / Saved / Profile)
 
