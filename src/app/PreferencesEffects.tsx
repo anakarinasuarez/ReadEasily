@@ -6,6 +6,7 @@ import {
   useHydratePreferences,
 } from "@/stores/preferences";
 import { useHydrateProfileOverrides } from "@/stores/profileOverrides";
+import { useHydrateSession } from "@/stores/session";
 
 /**
  * PreferencesEffects — app-root side effects for the global device-local stores.
@@ -30,6 +31,9 @@ import { useHydrateProfileOverrides } from "@/stores/profileOverrides";
 export function PreferencesEffects() {
   useHydratePreferences();
   useHydrateProfileOverrides();
+  // Read a returning reader's persisted session in after first paint, so the
+  // auth screens (and anything that lights up off "who's signed in") see it.
+  useHydrateSession();
   const reduceMotion = usePreferences((s) => s.reduceMotion);
 
   useEffect(() => {

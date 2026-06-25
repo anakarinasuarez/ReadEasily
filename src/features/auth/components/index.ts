@@ -1,8 +1,11 @@
 /**
- * Auth feature composites — the reusable building blocks the auth SCREENS
- * (Log-in / Sign-up / Forgot) assemble in the next phase. No routes, no data
- * wiring here.
+ * Auth feature surface — the reusable composites PLUS the three assembled auth
+ * SCREENS (Log-in / Sign-up / Forgot) the App Router routes render.
  */
+export { LoginScreen } from "./LoginScreen";
+export { SignupScreen } from "./SignupScreen";
+export { ForgotPasswordScreen } from "./ForgotPasswordScreen";
+
 export { AuthLayout } from "./auth-layout";
 export type { AuthLayoutProps } from "./auth-layout";
 

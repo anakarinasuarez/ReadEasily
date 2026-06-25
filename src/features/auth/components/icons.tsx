@@ -32,6 +32,15 @@ export function ChevronLeftIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Arrow-right — the forward affordance on every auth CTA (Figma "every CTA carries an icon"). */
+export function ArrowRightIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Glyph {...props}>
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </Glyph>
+  );
+}
+
 /** Small check — the marketing-panel bullet marker. */
 export function CheckIcon(props: SVGProps<SVGSVGElement>) {
   return (
