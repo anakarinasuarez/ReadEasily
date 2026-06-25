@@ -15,7 +15,7 @@ import {
   HeadphonesIcon,
   TapWordIcon,
 } from "./icons";
-import { READING_HOME } from "../lib/routes";
+import { SIGNUP } from "../lib/routes";
 
 /* ---------------------------------------------------------------------------
  * Static content — the marketing copy is fixed (no backend contract for the
@@ -109,9 +109,9 @@ const TRUST_FACTS = [
  * with source order logo → eyebrow → h1 → body → showcase → features → translate
  * → helper → CTA (matching the mobile Figma). A trust bar closes the page.
  *
- * Client component because it pushes to the reading home on the CTA and reads
- * `reduceMotion` for the decorative showcase. The route shell stays a Server
- * Component; this is the single client boundary. `BgDecorations` paints the
+ * Client component because the "Start reading" CTA pushes to Sign up (the auth
+ * entry point) and it reads `reduceMotion` for the decorative showcase. The route
+ * shell stays a Server Component; this is the single client boundary. `BgDecorations` paints the
  * atmospheric backdrop behind everything.
  *
  * A11y: exactly one `h1` (the hero title, three forced lines via `block` spans);
@@ -217,12 +217,14 @@ export function LandingScreen() {
               Pick your language while you read — switch any time.
             </p>
 
-            {/* Primary CTA — into the reading home. Full-width on mobile. */}
+            {/* Primary CTA — the Landing's single entry into auth: opens Sign up
+                (from there the Log in tab/link reaches /login; a successful
+                sign-up/log-in lands on /library). Full-width on mobile. */}
             <Button
               type="button"
               size="lg"
               rightIcon={<ArrowRightIcon />}
-              onClick={() => router.push(READING_HOME)}
+              onClick={() => router.push(SIGNUP)}
               className="w-full md:w-auto md:self-start"
             >
               Start reading

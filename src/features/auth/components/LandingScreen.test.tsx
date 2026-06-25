@@ -14,8 +14,8 @@ import { LandingScreen } from "./LandingScreen";
  * the informational "Translate to" row + the primary CTA + trust bar). There is
  * NO "Log in" entry on the Landing (product decision), and the "Translate to"
  * row is purely informational (NOT a selectable control — Figma 171:407). The
- * CTA pushes to the reading home. We reset the store between tests and mock the
- * App Router so the CTA push is observable.
+ * "Start reading" CTA opens Sign up (the auth entry point). We reset the store
+ * between tests and mock the App Router so the CTA push is observable.
  */
 
 const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
@@ -98,11 +98,11 @@ describe("LandingScreen — Translate to (informational, not a control)", () => 
 });
 
 describe("LandingScreen — CTA", () => {
-  it("pushes to the reading home when Start reading is clicked", async () => {
+  it("opens Sign up when Start reading is clicked", async () => {
     const user = userEvent.setup();
     render(<LandingScreen />);
     await user.click(screen.getByRole("button", { name: "Start reading" }));
-    expect(pushMock).toHaveBeenCalledWith("/library");
+    expect(pushMock).toHaveBeenCalledWith("/signup");
   });
 });
 
@@ -118,7 +118,7 @@ describe("LandingScreen — keyboard", () => {
     expect(cta).toHaveFocus();
 
     await user.keyboard("{Enter}");
-    expect(pushMock).toHaveBeenCalledWith("/library");
+    expect(pushMock).toHaveBeenCalledWith("/signup");
   });
 });
 

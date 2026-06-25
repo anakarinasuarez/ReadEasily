@@ -14,3 +14,7 @@ export const READING_HOME = "/library";
 
 /** Back target from the auth shell — the marketing landing page. */
 export const LANDING = "/";
+
+/** Sign-up route — the Landing's "Start reading" CTA opens this (the auth entry
+ *  point). From here the Log in tab/link reaches `/login`. */
+export const SIGNUP = "/signup";
