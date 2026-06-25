@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeEach } from "vitest";
 import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { renderWithQuery } from "../../../../tests/utils/query";
+import {
+  usePreferences,
+  DEFAULT_PREFERENCES,
+} from "@/stores/preferences";
 import { ReaderScreen } from "../components/ReaderScreen";
 import type { ReaderSpeech, SpeakOptions } from "../audio/speechController";
 
@@ -31,6 +35,15 @@ function makeFakeSpeech() {
  */
 
 const STORY = "the-clever-crow";
+
+// The Reader now reads/writes the GLOBAL preferences store (Option B): language
+// + voice live there, and autoplay / pronounceOnTap drive behavior. Reset to
+// factory defaults before each test so cases are isolated (mirrors how the
+// ProfileScreen tests drive the store).
+beforeEach(() => {
+  localStorage.clear();
+  usePreferences.setState({ ...DEFAULT_PREFERENCES, _hasHydrated: false });
+});
 
 /** Resolve once the story has loaded (its title is the centered H1). */
 async function waitForStory() {
@@ -318,5 +331,118 @@ describe("ReaderScreen", () => {
     const { container } = renderWithQuery(<ReaderScreen storyId={STORY} />);
     await waitForStory();
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("ReaderScreen — driven by the global preferences store", () => {
+  it("renders the translation in the store's language (FR) on load", async () => {
+    // Source of truth: the store. Setting FR before mount = the Reader opens in
+    // French (no local default override).
+    usePreferences.setState({ translationLang: "FR" });
+    renderWithQuery(<ReaderScreen storyId={STORY} />);
+    await waitForStory();
+
+    expect(
+      await screen.findByText(/Un corbeau a très soif/),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Un cuervo tiene mucha sed/),
+    ).not.toBeInTheDocument();
+  });
+
+  it("changing the language in the Reader writes the store (vice versa)", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ReaderScreen storyId={STORY} />);
+    await waitForStory();
+
+    expect(usePreferences.getState().translationLang).toBe("ES");
+    await user.click(
+      screen.getByRole("button", { name: "Translation language" }),
+    );
+    await user.click(
+      await screen.findByRole("menuitemradio", { name: "Português" }),
+    );
+    expect(usePreferences.getState().translationLang).toBe("PT");
+  });
+
+  it("reflects the store's reading accent (AU) in the voice menu", async () => {
+    const user = userEvent.setup();
+    usePreferences.setState({ readingAccent: "AU" });
+    renderWithQuery(<ReaderScreen storyId={STORY} />);
+    await waitForStory();
+
+    await user.click(screen.getByRole("button", { name: "Audio voice" }));
+    expect(
+      await screen.findByRole("menuitemradio", { name: "Australian English" }),
+    ).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("changing the voice in the Reader writes the store accent (CA)", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ReaderScreen storyId={STORY} />);
+    await waitForStory();
+
+    expect(usePreferences.getState().readingAccent).toBe("US");
+    await user.click(screen.getByRole("button", { name: "Audio voice" }));
+    await user.click(
+      await screen.findByRole("menuitemradio", { name: "Canadian English" }),
+    );
+    expect(usePreferences.getState().readingAccent).toBe("CA");
+  });
+
+  it("autostarts narration when store.autoplay is on and audio is supported", async () => {
+    const { controller, calls } = makeFakeSpeech();
+    usePreferences.setState({ autoplay: true });
+    renderWithQuery(
+      <ReaderScreen storyId={STORY} audioController={controller} audioSupported />,
+    );
+    await waitForStory();
+
+    // The page becoming ready autostarts playback (once) without any user input:
+    // an utterance is queued and the transport flips to Pause.
+    await waitFor(() => expect(calls.length).toBeGreaterThan(0));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Pause" })).toBeInTheDocument(),
+    );
+  });
+
+  it("does NOT autostart when store.autoplay is off (default)", async () => {
+    const { controller, calls } = makeFakeSpeech();
+    renderWithQuery(
+      <ReaderScreen storyId={STORY} audioController={controller} audioSupported />,
+    );
+    await waitForStory();
+
+    // Give any stray effect a chance, then assert the transport stayed inert.
+    expect(screen.getByRole("button", { name: "Play" })).toBeInTheDocument();
+    expect(calls.length).toBe(0);
+  });
+
+  it("speaks a tapped word when store.pronounceOnTap is on (default)", async () => {
+    const user = userEvent.setup();
+    const { controller, calls } = makeFakeSpeech();
+    renderWithQuery(
+      <ReaderScreen storyId={STORY} audioController={controller} audioSupported />,
+    );
+    await waitForStory();
+
+    await user.click(within(readingGroup()).getByRole("button", { name: "sun" }));
+    // The popover still opens AND the word is spoken immediately.
+    await screen.findByRole("dialog", { name: "Sun" });
+    expect(calls.some((c) => c.text === "Sun")).toBe(true);
+  });
+
+  it("only opens the popover (no speech) when store.pronounceOnTap is off", async () => {
+    const user = userEvent.setup();
+    const { controller, calls } = makeFakeSpeech();
+    usePreferences.setState({ pronounceOnTap: false });
+    renderWithQuery(
+      <ReaderScreen storyId={STORY} audioController={controller} audioSupported />,
+    );
+    await waitForStory();
+
+    await user.click(within(readingGroup()).getByRole("button", { name: "sun" }));
+    await screen.findByRole("dialog", { name: "Sun" });
+    expect(calls.length).toBe(0);
   });
 });

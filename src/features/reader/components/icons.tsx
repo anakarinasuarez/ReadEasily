@@ -155,6 +155,70 @@ export function UkFlagIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Australian flag chip for the en-AU voice option. A simplified decorative
+ *  glyph (blue field, Union canton, Commonwealth + Southern-Cross stars). */
+export function AuFlagIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <rect x="2" y="5" width="20" height="14" rx="2" fill="#012169" />
+      <path d="M2 5l9 6M11 5L2 11" stroke="#fff" strokeWidth="1.6" />
+      <path d="M6.5 5v6M2 8h9" stroke="#fff" strokeWidth="2.2" />
+      <path d="M6.5 5v6M2 8h9" stroke="#c8102e" strokeWidth="1.1" />
+      <circle cx="6.5" cy="16" r="1.1" fill="#fff" />
+      <circle cx="16" cy="9" r="0.9" fill="#fff" />
+      <circle cx="18.5" cy="13" r="0.9" fill="#fff" />
+      <circle cx="15" cy="15" r="0.9" fill="#fff" />
+      <circle cx="18" cy="16.5" r="0.9" fill="#fff" />
+      <rect
+        x="2"
+        y="5"
+        width="20"
+        height="14"
+        rx="2"
+        stroke="var(--border-default)"
+        strokeWidth="1"
+      />
+    </svg>
+  );
+}
+
+/** Canadian flag chip for the en-CA voice option. A simplified decorative glyph
+ *  (red bands + a central maple-leaf mark). */
+export function CaFlagIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <rect x="2" y="5" width="20" height="14" rx="2" fill="#fff" />
+      <rect x="2" y="5" width="5" height="14" fill="#d52b1e" />
+      <rect x="17" y="5" width="5" height="14" fill="#d52b1e" />
+      <path
+        d="M12 8l.7 1.6 1.7-.5-.7 1.6 1.3.6-1.3.9.3 1.6-1.6-.7-1.6.7.3-1.6-1.3-.9 1.3-.6-.7-1.6 1.7.5L12 8z"
+        fill="#d52b1e"
+      />
+      <rect
+        x="2"
+        y="5"
+        width="20"
+        height="14"
+        rx="2"
+        stroke="var(--border-default)"
+        strokeWidth="1"
+      />
+    </svg>
+  );
+}
+
 /** Check mark — the selected row in the language / voice dropdown (Figma
  *  1154:3342). 16px, inherits `currentColor` (the row's feedback-info ink). */
 export function CheckIcon(props: SVGProps<SVGSVGElement>) {

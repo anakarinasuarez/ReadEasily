@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PreferencesEffects } from "./PreferencesEffects";
 
 /**
  * App-wide client providers. Only this subtree is a Client Component — the
@@ -29,6 +30,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(makeQueryClient);
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      {/* App-root preference effects: hydrate the persisted store once + reflect
+          reduceMotion onto <html> for the global reduced-motion reset. */}
+      <PreferencesEffects />
+      {children}
+    </QueryClientProvider>
   );
 }

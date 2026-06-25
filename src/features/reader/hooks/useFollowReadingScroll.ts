@@ -31,6 +31,15 @@ function defaultResolveTarget(wordIndex: number): Element | null {
 }
 
 function prefersReducedMotion(): boolean {
+  // The in-app "Reduce motion" toggle (store.reduceMotion) is reflected onto
+  // <html data-reduce-motion="true"> at the app root — honor it alongside the OS
+  // setting so an opted-in user gets an instant (non-smooth) follow-scroll.
+  if (
+    typeof document !== "undefined" &&
+    document.documentElement.getAttribute("data-reduce-motion") === "true"
+  ) {
+    return true;
+  }
   if (typeof window === "undefined" || !window.matchMedia) return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }

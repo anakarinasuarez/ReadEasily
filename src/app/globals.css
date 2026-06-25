@@ -269,3 +269,22 @@ body {
     animation: re-fade-in 200ms ease-out;
   }
 }
+
+/* ----------------------------------------------------------------------------
+ * In-app "Reduce motion" preference (Profile → Settings → store.reduceMotion).
+ * PreferencesEffects reflects the toggle onto <html data-reduce-motion="true">.
+ * This applies the standard reduced-motion reset under that attribute, so the
+ * in-app toggle calms motion app-wide EXACTLY as the OS `prefers-reduced-motion`
+ * setting would — the two pair, they don't replace each other. Components already
+ * keyed to `prefers-reduced-motion` (Tailwind `motion-reduce:` / `motion-safe:`,
+ * the `.re-fade-in` rule above, the Reader's auto-scroll) therefore ALSO respond
+ * to the in-app toggle via this attribute.
+ * -------------------------------------------------------------------------- */
+html[data-reduce-motion="true"] *,
+html[data-reduce-motion="true"] *::before,
+html[data-reduce-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}

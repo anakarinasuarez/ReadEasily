@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/ui/button";
+import { usePreferences } from "@/stores/preferences";
 import { PlayerBar } from "@/components/player-bar";
 import { WordPopover } from "@/components/word-popover";
 import { BgDecorations } from "@/components/bg-decorations";
@@ -16,9 +17,11 @@ import { useFollowReadingScroll } from "../hooks/useFollowReadingScroll";
 import { buildSentences } from "../audio/sentences";
 import { lookupWord } from "../content/lemma";
 import {
-  DEFAULT_LANGUAGE,
-  DEFAULT_VOICE,
   LANGUAGE_LABELS,
+  READER_LANG_TO_STORE,
+  STORE_ACCENT_TO_VOICE,
+  STORE_LANG_TO_READER,
+  VOICE_TO_STORE_ACCENT,
   type Language,
   type VoiceAccent,
 } from "../types";
@@ -102,11 +105,28 @@ export function ReaderScreen({
   audioController,
   audioSupported,
 }: ReaderScreenProps) {
-  // Translation language + audio voice are reader preferences owned here. The
-  // screen is keyed by story id at the route, so these reset per story (fresh
-  // mount) but persist across page turns and same-screen state changes.
-  const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE);
-  const [voice, setVoice] = useState<VoiceAccent>(DEFAULT_VOICE);
+  // Translation language + audio voice are NO LONGER local state — the global
+  // persisted preferences store is the source of truth (Option B). The Reader
+  // reads the store (so a change in Profile is reflected here) and writes it back
+  // through the header dropdowns (so a change here reaches Profile + reloads).
+  // The store holds short codes (ES/FR/PT, US/UK/AU/CA); the Reader speaks in
+  // lowercase sidecar langs + BCP-47 voice tags, so we adapt at the boundary.
+  const translationLang = usePreferences((s) => s.translationLang);
+  const readingAccent = usePreferences((s) => s.readingAccent);
+  const autoplay = usePreferences((s) => s.autoplay);
+  const pronounceOnTap = usePreferences((s) => s.pronounceOnTap);
+  const setPreference = usePreferences((s) => s.setPreference);
+
+  const language: Language = STORE_LANG_TO_READER[translationLang];
+  const voice: VoiceAccent = STORE_ACCENT_TO_VOICE[readingAccent];
+  const setLanguage = useCallback(
+    (next: Language) => setPreference("translationLang", READER_LANG_TO_STORE[next]),
+    [setPreference],
+  );
+  const setVoice = useCallback(
+    (next: VoiceAccent) => setPreference("readingAccent", VOICE_TO_STORE_ACCENT[next]),
+    [setPreference],
+  );
 
   const { data: story, isPending, isError, refetch } = useStory(storyId, language);
   const { data: savedData } = useSaved();
@@ -188,8 +208,28 @@ export function ReaderScreen({
     controller: audioController,
     supported: audioSupported,
   });
-  // Stable ref for the word-activate callback's dep (the hook memoizes pause).
+  // Stable refs for the callbacks below (the hook memoizes these).
   const pauseAudio = audio.pause;
+  const playAudio = audio.play;
+  const pronounceWord = audio.pronounceWord;
+  const audioReady = audio.supported;
+
+  // Autoplay (store preference). When the user has opted into "Autoplay
+  // narration" AND audio is supported, start playback automatically once the
+  // story page is ready — once per page load, not on every state change (the ref
+  // is keyed by story + page index). It deliberately does NOT re-fire when the
+  // user pauses or taps a word: the key is already marked, so we never fight the
+  // user. A page turn marks a new key → narration starts on the new page.
+  const autoStartedKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!autoplay || !audioReady || !currentPage || sentences.length === 0) {
+      return;
+    }
+    const key = `${storyId}:${pageIndex}`;
+    if (autoStartedKeyRef.current === key) return;
+    autoStartedKeyRef.current = key;
+    playAudio();
+  }, [autoplay, audioReady, currentPage, sentences.length, storyId, pageIndex, playAudio]);
 
   // Auto-scroll follow: while playing, keep the spoken sentence in view. Driven
   // by the active sentence's first word index; pauses with the audio and honors
@@ -204,6 +244,13 @@ export function ReaderScreen({
       // Opening a word's meaning pauses story playback so the narration doesn't
       // keep running over the user while they read the popover (stays paused).
       pauseAudio();
+      // "Pronounce on tap" (store preference, default on): speak the tapped word
+      // immediately, IN ADDITION to opening the popover. The popover's Pronounce
+      // button still works when this is off. `pronounceWord` itself stops story
+      // playback first, so the order with `pauseAudio` is harmless.
+      if (pronounceOnTap && audioReady) {
+        pronounceWord(displayWord(info.surface));
+      }
       setHintDismissed(true);
       setSelectedWord({ id: info.id, surface: info.surface });
       // Capture the live word element's rect for desktop anchoring.
@@ -212,7 +259,7 @@ export function ReaderScreen({
       );
       setAnchorRect(el?.getBoundingClientRect() ?? null);
     },
-    [pauseAudio],
+    [pauseAudio, pronounceOnTap, audioReady, pronounceWord],
   );
 
   // Close the popover and return focus to the originating word (the popover

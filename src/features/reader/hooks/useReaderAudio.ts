@@ -54,10 +54,12 @@ export interface UseReaderAudioParams {
   /** Changes when the page turns — resets + stops playback (no audio bleed). */
   resetKey?: string | number;
   /**
-   * Which English accent the spoken voice should match (`en-US` | `en-GB`,
-   * default `en-US`). The hook picks a voice whose lang matches; if none is
-   * installed it falls back to any English voice, then the platform default —
-   * switching never breaks playback.
+   * Which English accent the spoken voice should match — one of the four
+   * BCP-47 tags (`en-US` | `en-GB` | `en-AU` | `en-CA`, default `en-US`),
+   * mirroring the store's US/UK/AU/CA accents. The hook picks a voice whose lang
+   * matches; if none is installed (many platforms ship no en-AU/en-CA voice) it
+   * falls back to any English voice, then the platform default — switching never
+   * breaks playback.
    */
   voiceAccent?: VoiceAccent;
 }
@@ -168,10 +170,11 @@ export function useReaderAudio({
 
   // Pick a voice matching the chosen accent once voices are available (they
   // arrive async via `voiceschanged` on first use). Graceful fallback chain:
-  // exact lang (en-US / en-GB) → same-prefix → any English → platform default
-  // (null). Re-runs when the accent changes, so the header voice pill switches
-  // the voice used for subsequent utterances; if the browser has no en-GB voice,
-  // UK simply falls back to an available English voice rather than breaking.
+  // exact lang (en-US / en-GB / en-AU / en-CA) → same-prefix → any English →
+  // platform default (null). Re-runs when the accent changes, so the header voice
+  // pill switches the voice used for subsequent utterances; if the browser has no
+  // en-AU/en-CA voice (common), it simply falls back to an available English
+  // voice rather than breaking.
   useEffect(() => {
     if (!supported) return;
     const want = voiceAccent.toLowerCase();

@@ -15,6 +15,13 @@
  * "pending translation" note.
  */
 
+import type { Preferences } from "@/stores/preferences";
+
+/** The store's preference value shapes the Reader adapts to (single source of
+ *  truth). Aliased so the mapping tables below read cleanly. */
+type StoreAccent = Preferences["readingAccent"];
+type StoreLang = Preferences["translationLang"];
+
 /** A CEFR level label, e.g. "A1", "B1". */
 export type StoryLevel = string;
 
@@ -38,20 +45,63 @@ export const LANGUAGE_LABELS: Record<Language, string> = {
 /** The default translation language (Spanish), matching the original behaviour. */
 export const DEFAULT_LANGUAGE: Language = "es";
 
-/** The audio voice accent — the BCP-47 lang the TTS engine should match. */
-export type VoiceAccent = "en-US" | "en-GB";
+/**
+ * The audio voice accent — the BCP-47 lang the TTS engine should match. Four
+ * accents, 1:1 with the global preferences store's `readingAccent`
+ * (US/UK/AU/CA): US→en-US, UK→en-GB, AU→en-AU, CA→en-CA.
+ */
+export type VoiceAccent = "en-US" | "en-GB" | "en-AU" | "en-CA";
 
 /** The supported voice accents, in display order. */
-export const VOICE_ACCENTS: readonly VoiceAccent[] = ["en-US", "en-GB"] as const;
+export const VOICE_ACCENTS: readonly VoiceAccent[] = [
+  "en-US",
+  "en-GB",
+  "en-AU",
+  "en-CA",
+] as const;
 
 /** Short code chip + full label for each voice accent (Figma voice dropdown). */
 export const VOICE_LABELS: Record<VoiceAccent, { code: string; name: string }> = {
   "en-US": { code: "US", name: "US English" },
   "en-GB": { code: "UK", name: "UK English" },
+  "en-AU": { code: "AU", name: "Australian English" },
+  "en-CA": { code: "CA", name: "Canadian English" },
 };
 
 /** The default voice accent (US English). */
 export const DEFAULT_VOICE: VoiceAccent = "en-US";
+
+/**
+ * Mappings between the global preferences store's short codes and the Reader's
+ * internal value shapes. The store is the source of truth (US/UK/AU/CA and
+ * ES/FR/PT); the Reader speaks in BCP-47 voice tags + lowercase sidecar langs,
+ * so these adapters keep both directions exact (a rename is a type error here).
+ */
+export const STORE_ACCENT_TO_VOICE: Record<StoreAccent, VoiceAccent> = {
+  US: "en-US",
+  UK: "en-GB",
+  AU: "en-AU",
+  CA: "en-CA",
+};
+
+export const VOICE_TO_STORE_ACCENT: Record<VoiceAccent, StoreAccent> = {
+  "en-US": "US",
+  "en-GB": "UK",
+  "en-AU": "AU",
+  "en-CA": "CA",
+};
+
+export const STORE_LANG_TO_READER: Record<StoreLang, Language> = {
+  ES: "es",
+  FR: "fr",
+  PT: "pt",
+};
+
+export const READER_LANG_TO_STORE: Record<Language, StoreLang> = {
+  es: "ES",
+  fr: "FR",
+  pt: "PT",
+};
 
 /**
  * One glossary sense — the meaning shown in the WordPopover when a word is

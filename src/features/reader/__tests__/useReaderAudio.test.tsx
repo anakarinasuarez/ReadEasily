@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 import { useReaderAudio } from "../hooks/useReaderAudio";
 import { buildSentences } from "../audio/sentences";
 import type { ReaderSpeech, SpeakOptions } from "../audio/speechController";
-import type { StoryPage } from "../types";
+import type { StoryPage, VoiceAccent } from "../types";
 
 /**
  * useReaderAudio with a FAKE controller — never the real speechSynthesis (jsdom
@@ -141,21 +141,23 @@ describe("useReaderAudio", () => {
     expect(calls.length).toBe(0);
   });
 
-  it("picks the voice matching the chosen accent, switching on accent change", () => {
+  it("picks the voice matching the chosen accent across all four, switching on change", () => {
     const enUS = { lang: "en-US", name: "US voice" } as SpeechSynthesisVoice;
     const enGB = { lang: "en-GB", name: "UK voice" } as SpeechSynthesisVoice;
+    const enAU = { lang: "en-AU", name: "AU voice" } as SpeechSynthesisVoice;
+    const enCA = { lang: "en-CA", name: "CA voice" } as SpeechSynthesisVoice;
     const calls: { text: string; options?: SpeakOptions }[] = [];
     const controller: ReaderSpeech = {
       speak: (text, options) => calls.push({ text, options }),
       cancel: vi.fn(),
       pause: vi.fn(),
       resume: vi.fn(),
-      getVoices: () => [enUS, enGB],
+      getVoices: () => [enUS, enGB, enAU, enCA],
       onVoicesChanged: () => () => {},
     };
 
     const { result, rerender } = renderHook(
-      ({ accent }: { accent: "en-US" | "en-GB" }) =>
+      ({ accent }: { accent: VoiceAccent }) =>
         useReaderAudio({
           sentences: SENTENCES,
           controller,
@@ -163,7 +165,7 @@ describe("useReaderAudio", () => {
           resetKey: 0,
           voiceAccent: accent,
         }),
-      { initialProps: { accent: "en-US" } },
+      { initialProps: { accent: "en-US" as VoiceAccent } },
     );
 
     act(() => result.current.play());
@@ -172,9 +174,17 @@ describe("useReaderAudio", () => {
     rerender({ accent: "en-GB" });
     act(() => result.current.restart());
     expect(last(calls).options?.voice?.lang).toBe("en-GB");
+
+    rerender({ accent: "en-AU" });
+    act(() => result.current.restart());
+    expect(last(calls).options?.voice?.lang).toBe("en-AU");
+
+    rerender({ accent: "en-CA" });
+    act(() => result.current.restart());
+    expect(last(calls).options?.voice?.lang).toBe("en-CA");
   });
 
-  it("falls back to any English voice when the requested accent is missing", () => {
+  it("falls back to any English voice when the requested accent (e.g. en-AU) is missing", () => {
     const enUS = { lang: "en-US", name: "US voice" } as SpeechSynthesisVoice;
     const calls: { text: string; options?: SpeakOptions }[] = [];
     const controller: ReaderSpeech = {
@@ -182,7 +192,7 @@ describe("useReaderAudio", () => {
       cancel: vi.fn(),
       pause: vi.fn(),
       resume: vi.fn(),
-      // No en-GB installed → UK should gracefully fall back to the en-US voice.
+      // No en-AU installed (common) → AU should gracefully fall back to en-US.
       getVoices: () => [enUS],
       onVoicesChanged: () => () => {},
     };
@@ -193,7 +203,7 @@ describe("useReaderAudio", () => {
         controller,
         supported: true,
         resetKey: 0,
-        voiceAccent: "en-GB",
+        voiceAccent: "en-AU",
       }),
     );
 

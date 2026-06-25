@@ -1,18 +1,26 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   VOICE_ACCENTS,
   VOICE_LABELS,
   type VoiceAccent,
 } from "../types";
-import { UkFlagIcon, UsFlagIcon } from "./icons";
+import {
+  AuFlagIcon,
+  CaFlagIcon,
+  UkFlagIcon,
+  UsFlagIcon,
+} from "./icons";
 import { ReaderSelectMenu, type ReaderSelectOption } from "./ReaderSelectMenu";
 
 /**
  * VoiceDropdown — the audio voice/accent menu, mirroring LanguageDropdown's
- * visual + a11y. Opens from the header's US/UK pill; two rows (US English / UK
- * English), each with its 2-letter code chip. Selecting a row switches the TTS
- * accent. A thin wrapper over the shared `ReaderSelectMenu`.
+ * visual + a11y. Opens from the header's accent pill; four rows (US / UK / AU /
+ * CA English), each with its 2-letter code chip + a decorative flag. Selecting a
+ * row switches the TTS accent (and, since the Reader is store-driven, persists it
+ * to the global preferences store). A thin wrapper over the shared
+ * `ReaderSelectMenu`.
  */
 export interface VoiceDropdownProps {
   /** The active voice accent (drives the pill label + the check). */
@@ -29,6 +37,14 @@ const OPTIONS: ReaderSelectOption<VoiceAccent>[] = VOICE_ACCENTS.map(
   }),
 );
 
+/** The decorative flag glyph shown in the pill for the active accent. */
+const FLAG_ICONS: Record<VoiceAccent, ReactNode> = {
+  "en-US": <UsFlagIcon />,
+  "en-GB": <UkFlagIcon />,
+  "en-AU": <AuFlagIcon />,
+  "en-CA": <CaFlagIcon />,
+};
+
 export function VoiceDropdown({ value, onChange }: VoiceDropdownProps) {
   return (
     <ReaderSelectMenu
@@ -36,7 +52,7 @@ export function VoiceDropdown({ value, onChange }: VoiceDropdownProps) {
       value={value}
       onChange={onChange}
       label="Audio voice"
-      leadingIcon={value === "en-GB" ? <UkFlagIcon /> : <UsFlagIcon />}
+      leadingIcon={FLAG_ICONS[value]}
       pillText={VOICE_LABELS[value].code}
       align="right"
     />

@@ -31,8 +31,18 @@ export const Closed: Story = {
   render: () => <Controlled initial="en-US" />,
 };
 
-/** Open — the US/UK menu with the active row tinted + checked. The play test
- *  opens the menu and switches the accent to UK English. */
+/** Closed — Australian accent pill (AU), one of the four store-backed accents. */
+export const AustralianAccent: Story = {
+  render: () => <Controlled initial="en-AU" />,
+};
+
+/** Closed — Canadian accent pill (CA). */
+export const CanadianAccent: Story = {
+  render: () => <Controlled initial="en-CA" />,
+};
+
+/** Open — the four-accent menu with the active row tinted + checked. The play
+ *  test opens the menu and switches the accent to UK English. */
 export const Open: Story = {
   render: () => <Controlled initial="en-US" />,
   play: async ({ canvasElement }) => {
