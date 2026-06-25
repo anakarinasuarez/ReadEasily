@@ -19,6 +19,16 @@ function makeQueryClient(): QueryClient {
         // Avoid surprise refetches while developing against mocks.
         refetchOnWindowFocus: false,
         retry: 1,
+        // Always attempt the request instead of pausing when React Query's
+        // onlineManager believes the browser is offline. Our data is same-origin
+        // (MSW today, an HTTP backend later), so "offline pausing" gives no
+        // benefit and can hang a query forever if the manager initialises
+        // offline and never sees an `online` event to resume it.
+        networkMode: "always",
+      },
+      mutations: {
+        // Same rationale as queries — never pause writes on perceived-offline.
+        networkMode: "always",
       },
     },
   });
