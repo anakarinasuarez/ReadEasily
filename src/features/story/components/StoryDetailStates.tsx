@@ -88,7 +88,7 @@ export function StoryDetailError({ onRetry }: StoryDetailErrorProps) {
         className="-ml-[var(--space-md)] self-start"
       >
         <Link
-          href="/"
+          href="/library"
           aria-label="Back to Library"
           className="gap-[var(--space-xs)] no-underline"
         >

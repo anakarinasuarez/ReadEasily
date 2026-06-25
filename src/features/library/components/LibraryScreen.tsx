@@ -30,7 +30,7 @@ import { LibraryIcon, SavedIcon, SearchIcon } from "./icons";
 
 /** Primary nav — Search/Saved/reader routes are forward links (not built yet). */
 const NAV_ITEMS: NavbarItem[] = [
-  { key: "library", label: "Library", icon: <LibraryIcon />, href: "/" },
+  { key: "library", label: "Library", icon: <LibraryIcon />, href: "/library" },
   { key: "search", label: "Search", icon: <SearchIcon />, href: "/search" },
   { key: "saved", label: "Saved", icon: <SavedIcon />, href: "/saved" },
 ];

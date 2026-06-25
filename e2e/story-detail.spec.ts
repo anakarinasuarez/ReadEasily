@@ -16,7 +16,7 @@ test("a catalog card opens Story Detail, then Read & Listen opens the reader", a
   page.on("pageerror", (err) => pageErrors.push(err.message));
 
   // Start on the Library and click a rail card — it now lands on Story Detail.
-  await page.goto("/");
+  await page.goto("/library");
   await page.getByRole("link", { name: /The Tortoise and the Hare/ }).click();
 
   await expect(page).toHaveURL("/story/the-tortoise-and-the-hare");
@@ -32,7 +32,7 @@ test("a catalog card opens Story Detail, then Read & Listen opens the reader", a
 
   // A key-word chip flips in place to reveal its meaning (same-screen morph).
   const keyWords = page.getByRole("region", { name: /key words you/i });
-  const tortoiseChip = keyWords.getByRole("button", { name: "tortoise" });
+  const tortoiseChip = keyWords.getByRole("button", { name: "tortoise", exact: true });
   await tortoiseChip.click();
   await expect(keyWords.getByRole("button", { name: /tortuga/ })).toHaveAttribute(
     "aria-expanded",

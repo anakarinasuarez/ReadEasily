@@ -118,7 +118,7 @@ export const SavedEmpty = forwardRef<HTMLDivElement>(function SavedEmpty(_, ref)
         action={{
           label: "Start reading",
           icon: <ArrowRightIcon />,
-          href: "/",
+          href: "/library",
         }}
       />
     </div>

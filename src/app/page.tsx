@@ -1,11 +1,11 @@
-import { LibraryScreen } from "@/features/library/components";
+import { LandingScreen } from "@/features/auth/components";
 
 /**
- * Home route `/` — the Library landing. This stays a Server Component; the
- * interactive, data-bound screen is the client boundary (LibraryScreen reads
- * the catalog via TanStack Query against the MSW-mocked `/api/library`). The
- * route's only job is to mount it.
+ * Home route `/` — the marketing Landing (welcome / value-prop), the app's
+ * front door in the guest-friendly model. Stays a Server Component; the
+ * interactive screen (language picker, BookShowcase, "Start reading" → /library)
+ * is the client boundary. The reading home (catalog) lives at `/library`.
  */
 export default function Home() {
-  return <LibraryScreen />;
+  return <LandingScreen />;
 }

@@ -46,7 +46,7 @@ import {
 
 /** Primary nav — Library is active here (the breadcrumb-back target). */
 const NAV_ITEMS: NavbarItem[] = [
-  { key: "library", label: "Library", icon: <LibraryIcon />, href: "/" },
+  { key: "library", label: "Library", icon: <LibraryIcon />, href: "/library" },
   { key: "search", label: "Search", icon: <SearchIcon />, href: "/search" },
   { key: "saved", label: "Saved", icon: <SavedIcon />, href: "/saved" },
 ];
@@ -125,7 +125,7 @@ export function StoryDetailScreen({ storyId }: StoryDetailScreenProps) {
               className="-ml-[var(--space-md)] self-start"
             >
               <Link
-                href="/"
+                href="/library"
                 aria-label="Back to Library"
                 className="gap-[var(--space-xs)] no-underline"
               >

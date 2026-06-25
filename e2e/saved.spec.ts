@@ -29,7 +29,7 @@ test("saved screen lists words and removes one", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Back to Library" })).toHaveAttribute(
     "href",
-    "/",
+    "/library",
   );
 
   // The collection paints — a sample of the saved words is visible.

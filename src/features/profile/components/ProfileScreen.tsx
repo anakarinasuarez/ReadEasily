@@ -19,6 +19,8 @@ import {
   useProfileOverrides,
   useHydrateProfileOverrides,
 } from "@/stores/profileOverrides";
+import { useSession } from "@/stores/session";
+import { authClient } from "@/features/auth/api/authClient";
 import { useProfile } from "../hooks/useProfile";
 import type { ProfileData, ProfileStats } from "../types";
 import { ProfileHeader } from "./ProfileHeader";
@@ -66,7 +68,7 @@ import {
 
 /** Primary nav — Profile has NO active destination (avatar opens it instead). */
 const NAV_ITEMS: NavbarItem[] = [
-  { key: "library", label: "Library", icon: <LibraryIcon />, href: "/" },
+  { key: "library", label: "Library", icon: <LibraryIcon />, href: "/library" },
   { key: "search", label: "Search", icon: <SearchIcon />, href: "/search" },
   { key: "saved", label: "Saved", icon: <SavedIcon />, href: "/saved" },
 ];
@@ -89,7 +91,7 @@ function Breadcrumb() {
   return (
     <Button asChild variant="ghost" size="sm" className="-ml-[var(--space-md)]">
       <Link
-        href="/"
+        href="/library"
         aria-label="Back to Library"
         className="gap-[var(--space-xs)] no-underline"
       >
@@ -446,6 +448,7 @@ function ProfileError({ onRetry }: { onRetry: () => void }) {
 
 export function ProfileScreen() {
   const router = useRouter();
+  const signOut = useSession((s) => s.signOut);
   const { data, isPending, isError, refetch } = useProfile();
 
   // Pull the persisted preferences + overrides in after mount (SSR-safe — stores).
@@ -460,7 +463,13 @@ export function ProfileScreen() {
   const effectiveName = displayName ?? data?.user.name;
 
   function handleSignOut() {
-    // TODO(auth): end the session once an auth backend exists. No-op seam now.
+    // Clear the local session immediately and return to the Landing. The
+    // network seam (authClient.signOut) fires in the background — today it's the
+    // mock; later it ends the real Supabase session. Reading stays guest-open,
+    // so there is nothing to gate after sign-out.
+    void authClient.signOut();
+    signOut();
+    router.push("/");
   }
 
   function handleNameChange(name: string) {

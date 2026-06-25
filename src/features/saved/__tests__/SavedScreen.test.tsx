@@ -57,7 +57,7 @@ describe("SavedScreen", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Back to Library" }),
-    ).toHaveAttribute("href", "/");
+    ).toHaveAttribute("href", "/library");
 
     // A sample of the eight words, including a phonetic-only card.
     expect(screen.getByRole("link", { name: "Taught" })).toBeInTheDocument();
@@ -128,7 +128,7 @@ describe("SavedScreen", () => {
     expect(region).toBeInTheDocument();
     expect(
       within(region).getByRole("link", { name: /Start reading/ }),
-    ).toHaveAttribute("href", "/");
+    ).toHaveAttribute("href", "/library");
     // No stat pills in the empty state.
     expect(screen.queryByText("words to review")).not.toBeInTheDocument();
   });

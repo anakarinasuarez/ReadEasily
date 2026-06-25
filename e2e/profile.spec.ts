@@ -18,7 +18,7 @@ test("profile: reached via the navbar avatar, settings persist across reload, de
   page.on("pageerror", (err) => pageErrors.push(err.message));
 
   // 1. From the Library home, the account avatar routes to /profile.
-  await page.goto("/");
+  await page.goto("/library");
   await page
     .getByRole("navigation", { name: "Primary" })
     .getByRole("button", { name: "Account" })
@@ -32,7 +32,7 @@ test("profile: reached via the navbar avatar, settings persist across reload, de
   await expect(page.getByText("Practice sets", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Back to Library" }),
-  ).toHaveAttribute("href", "/");
+  ).toHaveAttribute("href", "/library");
 
   // 3. Change a segmented preference (reading accent → UK) and a toggle
   //    (Autoplay narration → on).

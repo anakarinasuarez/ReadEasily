@@ -59,7 +59,7 @@ describe("StoryDetailScreen", () => {
     // Breadcrumb-back to the Library.
     expect(
       screen.getByRole("link", { name: "Back to Library" }),
-    ).toHaveAttribute("href", "/");
+    ).toHaveAttribute("href", "/library");
   });
 
   it("shows the moral for a fable and hides it for a non-fable", async () => {

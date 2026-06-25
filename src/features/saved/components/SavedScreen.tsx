@@ -38,7 +38,7 @@ import { ChevronLeftIcon, LibraryIcon, SavedIcon, SearchIcon } from "./icons";
 
 /** Primary nav — Saved is the active destination on this screen. */
 const NAV_ITEMS: NavbarItem[] = [
-  { key: "library", label: "Library", icon: <LibraryIcon />, href: "/" },
+  { key: "library", label: "Library", icon: <LibraryIcon />, href: "/library" },
   { key: "search", label: "Search", icon: <SearchIcon />, href: "/search" },
   { key: "saved", label: "Saved", icon: <SavedIcon />, href: "/saved" },
 ];
@@ -162,7 +162,7 @@ function Breadcrumb({ hideOnMobile = false }: { hideOnMobile?: boolean }) {
       className={`-ml-[var(--space-md)] ${hideOnMobile ? "hidden md:inline-flex" : ""}`}
     >
       <Link
-        href="/"
+        href="/library"
         aria-label="Back to Library"
         className="gap-[var(--space-xs)] no-underline"
       >

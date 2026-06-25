@@ -15,7 +15,7 @@ test("library landing renders the catalog and filters by category", async ({
   const pageErrors: string[] = [];
   page.on("pageerror", (err) => pageErrors.push(err.message));
 
-  const response = await page.goto("/");
+  const response = await page.goto("/library");
   expect(response?.ok()).toBe(true);
   await expect(page).toHaveTitle("ReadEasily");
 
