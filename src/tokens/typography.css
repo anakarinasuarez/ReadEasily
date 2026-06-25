@@ -87,6 +87,17 @@
   --text-body-l-weight: var(--font-weight-regular);
   --text-body-l-tracking: 0;
 
+  /* --- Body/M  [C] ----------------------------------------------------- */
+  /* [C] confirmed from Figma "Body/M" (node 171:361): Lora Regular 16 /
+     line-height 24 / letterSpacing 0. The 16/24 step between body/l (20/28)
+     and the smaller UI scale — Landing body paragraph + the SegmentedControl
+     "Translate to" context line. Reading family (Lora), mirrors body/l shape. */
+  --text-body-m-family: var(--font-reading);
+  --text-body-m-size: 16px;
+  --text-body-m-line-height: 24px;
+  --text-body-m-weight: var(--font-weight-regular);
+  --text-body-m-tracking: 0;
+
   /* --- Reading/M  [C] -------------------------------------------------- */
   --text-reading-m-family: var(--font-reading);
   --text-reading-m-size: 17px;

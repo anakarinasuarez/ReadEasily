@@ -92,6 +92,7 @@
   --color-border-default: var(--border-default);
   --color-border-strong: var(--border-strong);
   --color-border-accent: var(--border-accent);
+  --color-border-faint: var(--border-faint);
 
   --color-success: var(--feedback-success);
   --color-success-subtle: var(--feedback-success-subtle);
@@ -143,6 +144,7 @@
   --spacing-3xl: var(--space-3xl);
   --spacing-4xl: var(--space-4xl);
   --spacing-md-plus: var(--space-md-plus);
+  --spacing-lg-plus: var(--space-lg-plus);
   --spacing-3xl-plus: var(--space-3xl-plus);
   --spacing-chip-x: var(--space-chip-x);
   --spacing-chip-y: var(--space-chip-y);
@@ -225,6 +227,8 @@
   --text-title-m--line-height: var(--text-title-m-line-height);
   --text-body-l: var(--text-body-l-size);
   --text-body-l--line-height: var(--text-body-l-line-height);
+  --text-body-m: var(--text-body-m-size);
+  --text-body-m--line-height: var(--text-body-m-line-height);
   --text-reading-m: var(--text-reading-m-size);
   --text-reading-m--line-height: var(--text-reading-m-line-height);
   --text-reading-xl: var(--text-reading-xl-size);

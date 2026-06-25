@@ -53,6 +53,7 @@ stay 1:1-mappable, never silently rounded:
 | Token | Value | Where (≥2 specs) |
 | --- | --- | --- |
 | `--space-md-plus` | 14px | Neutral 14px step (SearchField gap + CategoryCard gap/inset) |
+| `--space-lg-plus` | 22px | Uniform 22px vertical rhythm between lg (16) and xl (24) — Landing hero-left column (node 171:361). [C]. Tailwind `gap-lg-plus` / `p-lg-plus`. |
 | `--space-3xl-plus` | 60px | Generous card inset between 3xl (48) and 4xl (64) — Saved empty-state card padding (node 144:213). Tailwind `p-3xl-plus`. |
 | `--space-chip-x` / `-y` | 14px / 7px | Chip padding |
 | `--radius-card` | 20px | Search field + Search/Saved word cards |
@@ -333,6 +334,40 @@ the existing semantic, so **reuse `--feedback-info` / `bg-info`**. No `--level-*
 group: there is no per-level color evidence in the design. If the design-lead later
 confirms distinct A1…C2 dot colors, add `--level-a1…c2` then (decorative — not
 contrast-gated).
+
+## Landing token gaps (node 171:361)
+
+Tokens only — no component edits. All three values resolved live from the Landing
+node `171:361` (Figma variable defs); Body/M cross-checked against the surfaced
+text style. Three additions for Landing pixel-fidelity:
+
+**Typography (1 new style, `[C]`).** Brings confirmed text styles to **19 of 22**.
+
+| Token | Style | Tailwind | Figma node |
+| --- | --- | --- | --- |
+| `--text-body-m-*` | Lora Regular 16/24, tracking 0 — Landing body paragraph + SegmentedControl "Translate to" context | `text-body-m` | 171:361 ("Body/M") |
+
+Mirrors the `--text-body-l` (20/28) shape; the 16/24 step that was missing between
+body/l and the smaller UI scale. `letterSpacing: 0` confirmed (no %-storage caveat).
+
+**Spacing (1 new named off-scale, `[C]`).** See the off-scale table above —
+`--space-lg-plus` = 22px, the uniform Landing hero-left vertical rhythm between
+lg (16) and xl (24). Mirrors the `--space-md-plus` (14px) precedent. Tailwind
+`gap-lg-plus` / `p-lg-plus`.
+
+**Color (1 new semantic, `[C]` light / `[D]` dark).** Faint warm-tan hairline
+for the trust-bar `·` dot separators.
+
+| Token | Light | Dark | Tailwind |
+| --- | --- | --- | --- |
+| `--border-faint` | `#e8dfd2` | `#34271a` [D] | `border-faint` / `bg-border-faint` |
+
+Distinct from `--border-default` (#f0e2c6) — `--border-faint` is **lighter**, a
+true hairline tint. No existing token equalled #e8dfd2 (dup-grep clean), and it
+sits above ink-100 on the ramp so no primitive matches; shipped as a literal hex.
+**Decorative only** — the dots are `aria-hidden`, so no AA contrast requirement
+applies. Dark counterpart is `[D]` (sits between dark canvas #241a12 and
+border-default #3f2f20); reconcile with Figma dark mode like the rest of the dark block.
 
 ## Tailwind v4 wiring
 

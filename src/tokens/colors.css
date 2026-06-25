@@ -113,6 +113,11 @@
   --border-default: var(--color-ink-100);      /* #f0e2c6 */
   --border-strong: var(--color-ink-200);       /* #e7d6b1 */
   --border-accent: var(--color-terracotta-600);/* #d66c44 */
+  /* [C] faint warm-tan hairline, LIGHTER than border-default (#f0e2c6). Landing
+     trust-bar "·" dot separators (node 171:361). No primitive matches this tint
+     (sits above ink-100 on the ramp), so a literal hex. DECORATIVE only — the
+     dots are aria-hidden, so no AA contrast requirement applies. Dark below [D]. */
+  --border-faint: #e8dfd2;
 
   /* --- Semantic: feedback  ------------------------------------------- */
   --feedback-success: #566f34;                   /* [D-AA] darkened from forest-700 #5e7b3a (3.99:1 on
@@ -246,6 +251,8 @@
   --border-default: #3f2f20; /* [D] */
   --border-strong: #54422f;  /* [D] */
   --border-accent: #d97757;  /* [D] */
+  --border-faint: #34271a;   /* [D] faint hairline between canvas (#241a12) and
+                                border-default — low-contrast decorative separator. */
 
   --feedback-success: #a6bd78;        /* [D] */
   --feedback-success-subtle: #25301c; /* [D] */
