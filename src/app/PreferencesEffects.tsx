@@ -5,16 +5,20 @@ import {
   usePreferences,
   useHydratePreferences,
 } from "@/stores/preferences";
+import { useHydrateProfileOverrides } from "@/stores/profileOverrides";
 
 /**
- * PreferencesEffects — app-root side effects for the global preferences store.
+ * PreferencesEffects — app-root side effects for the global device-local stores.
  * Renders nothing; mounted once inside the client providers so the persisted
- * preferences are live before any feature (Reader, Profile) reads them.
+ * preferences AND profile overrides are live before any feature (Reader,
+ * Profile, every screen's navbar) reads them.
  *
- * Two responsibilities:
- *  1. **Hydrate once.** `useHydratePreferences()` runs the post-mount rehydrate
- *     so localStorage values flow in after the first paint (SSR-safe — the
- *     server and the first client render both use defaults, see the store).
+ * Responsibilities:
+ *  1. **Hydrate once.** `useHydratePreferences()` + `useHydrateProfileOverrides()`
+ *     run the post-mount rehydrate so localStorage values flow in after the
+ *     first paint (SSR-safe — the server and the first client render both use
+ *     defaults, see the stores). The Profile screen also calls the overrides
+ *     hydrate; it is idempotent.
  *  2. **Reflect `reduceMotion` app-wide.** It writes `data-reduce-motion="true"`
  *     onto `<html>` when the in-app toggle is on (removes the attr when off). A
  *     global CSS rule keyed on that attribute applies the standard reduced-motion
@@ -25,6 +29,7 @@ import {
  */
 export function PreferencesEffects() {
   useHydratePreferences();
+  useHydrateProfileOverrides();
   const reduceMotion = usePreferences((s) => s.reduceMotion);
 
   useEffect(() => {

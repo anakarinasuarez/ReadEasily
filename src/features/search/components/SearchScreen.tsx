@@ -4,7 +4,7 @@ import { useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SectionHeader } from "@/components/section-header";
-import { Navbar, type NavbarItem } from "@/components/navbar";
+import { Navbar, useNavbarUser, type NavbarItem } from "@/components/navbar";
 import { EmptyState } from "@/components/empty-state";
 import { SearchField } from "@/ui/search-field";
 import { Button } from "@/ui/button";
@@ -84,6 +84,8 @@ export interface SearchScreenProps {
 
 export function SearchScreen({ initialCategory }: SearchScreenProps) {
   const router = useRouter();
+  // Overlay any device-local profile overrides (name/avatar) onto the base user.
+  const user = useNavbarUser(SCREEN_USER);
   const { data, isPending, isError, refetch } = useSearch();
 
   // Local UI state #1: the active browse view. Seeded from the validated
@@ -175,7 +177,7 @@ export function SearchScreen({ initialCategory }: SearchScreenProps) {
         <Navbar
           items={NAV_ITEMS}
           activeKey="search"
-          user={SCREEN_USER}
+          user={user}
           onAccountClick={() => router.push("/profile")}
         />
       </div>

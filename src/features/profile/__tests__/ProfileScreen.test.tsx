@@ -9,7 +9,7 @@ import {
   usePreferences,
   DEFAULT_PREFERENCES,
 } from "@/stores/preferences";
-import { useProfileAvatar } from "@/stores/profileAvatar";
+import { useProfileOverrides } from "@/stores/profileOverrides";
 import { ProfileScreen } from "../components/ProfileScreen";
 
 /**
@@ -31,7 +31,11 @@ beforeEach(() => {
   // Each test starts from factory preferences + empty storage.
   localStorage.clear();
   usePreferences.setState({ ...DEFAULT_PREFERENCES, _hasHydrated: false });
-  useProfileAvatar.setState({ avatarDataUrl: null, _hasHydrated: false });
+  useProfileOverrides.setState({
+    avatarDataUrl: null,
+    displayName: null,
+    _hasHydrated: false,
+  });
 });
 
 describe("ProfileScreen — header + stats from getProfile", () => {
@@ -193,7 +197,50 @@ describe("ProfileScreen — changing the avatar persists and renders", () => {
       imgs.forEach((img) => expect(img).toHaveAttribute("src", MOCK_DATA_URL));
     });
     // And it persisted to the store immediately.
-    expect(useProfileAvatar.getState().avatarDataUrl).toBe(MOCK_DATA_URL);
+    expect(useProfileOverrides.getState().avatarDataUrl).toBe(MOCK_DATA_URL);
+  });
+});
+
+describe("ProfileScreen — editing the display name persists and propagates", () => {
+  it("reflects the new name in the header h1 AND the navbar avatar, and persists it", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileScreen />);
+
+    // Starts from the server name in both the heading and the navbar avatar.
+    await screen.findByRole("heading", { level: 1, name: "Ana" });
+
+    // Open the inline editor, replace the name, commit with Enter.
+    await user.click(screen.getByRole("button", { name: "Edit name" }));
+    const input = screen.getByRole("textbox", { name: "Your name" });
+    await user.clear(input);
+    await user.type(input, "Ana Lopez{Enter}");
+
+    // Header h1 now shows the override...
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Ana Lopez" }),
+    ).toBeInTheDocument();
+    // ...and so does the navbar account avatar (initials fallback, role=img).
+    const avatars = screen.getAllByRole("img", { name: "Ana Lopez" });
+    expect(avatars.length).toBeGreaterThan(0);
+    // ...and it persisted to the overrides store.
+    expect(useProfileOverrides.getState().displayName).toBe("Ana Lopez");
+  });
+
+  it("clears the override when the name is emptied (falls back to server name)", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileScreen />);
+    await screen.findByRole("heading", { level: 1, name: "Ana" });
+
+    await user.click(screen.getByRole("button", { name: "Edit name" }));
+    const input = screen.getByRole("textbox", { name: "Your name" });
+    await user.clear(input);
+    await user.type(input, "{Enter}");
+
+    // Empty commit clears the override; the heading shows the server name again.
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Ana" }),
+    ).toBeInTheDocument();
+    expect(useProfileOverrides.getState().displayName).toBeNull();
   });
 });
 

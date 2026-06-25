@@ -16,9 +16,9 @@ import {
   type Preferences,
 } from "@/stores/preferences";
 import {
-  useProfileAvatar,
-  useHydrateProfileAvatar,
-} from "@/stores/profileAvatar";
+  useProfileOverrides,
+  useHydrateProfileOverrides,
+} from "@/stores/profileOverrides";
 import { useProfile } from "../hooks/useProfile";
 import type { ProfileData, ProfileStats } from "../types";
 import { ProfileHeader } from "./ProfileHeader";
@@ -448,21 +448,28 @@ export function ProfileScreen() {
   const router = useRouter();
   const { data, isPending, isError, refetch } = useProfile();
 
-  // Pull the persisted preferences + avatar in after mount (SSR-safe — stores).
+  // Pull the persisted preferences + overrides in after mount (SSR-safe — stores).
   useHydratePreferences();
-  useHydrateProfileAvatar();
+  useHydrateProfileOverrides();
 
-  // Local avatar override (device-local, no backend) wins over the server one.
-  const avatarDataUrl = useProfileAvatar((s) => s.avatarDataUrl);
-  const setAvatar = useProfileAvatar((s) => s.setAvatar);
+  // Local overrides (device-local, no backend) win over the server values.
+  const avatarDataUrl = useProfileOverrides((s) => s.avatarDataUrl);
+  const setAvatar = useProfileOverrides((s) => s.setAvatar);
+  const displayName = useProfileOverrides((s) => s.displayName);
   const effectiveAvatar = avatarDataUrl ?? data?.user.avatarSrc;
+  const effectiveName = displayName ?? data?.user.name;
 
   function handleSignOut() {
     // TODO(auth): end the session once an auth backend exists. No-op seam now.
   }
 
+  function handleNameChange(name: string) {
+    // "" / whitespace collapses to null in the setter (clear the override).
+    useProfileOverrides.getState().setDisplayName(name || null);
+  }
+
   const navUser = {
-    name: data?.user.name ?? "You",
+    name: effectiveName ?? "You",
     avatarSrc: effectiveAvatar,
   };
 
@@ -493,9 +500,14 @@ export function ProfileScreen() {
         ) : (
           <>
             <ProfileHeader
-              user={{ ...(data as ProfileData).user, avatarSrc: effectiveAvatar }}
+              user={{
+                ...(data as ProfileData).user,
+                name: effectiveName ?? (data as ProfileData).user.name,
+                avatarSrc: effectiveAvatar,
+              }}
               onSignOut={handleSignOut}
               onAvatarChange={setAvatar}
+              onNameChange={handleNameChange}
             />
             <StatsRow stats={(data as ProfileData).stats} />
           </>

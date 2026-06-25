@@ -96,6 +96,24 @@ export function PencilIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Check — confirm/save the inline name edit. */
+export function CheckIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Glyph {...props}>
+      <path d="m5 12.5 4.5 4.5L19 7" />
+    </Glyph>
+  );
+}
+
+/** Cross — cancel/discard the inline name edit. */
+export function CloseIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Glyph {...props}>
+      <path d="M6 6l12 12M18 6 6 18" />
+    </Glyph>
+  );
+}
+
 /** Door + arrow — Sign out (header button + account row). */
 export function SignOutIcon(props: SVGProps<SVGSVGElement>) {
   return (

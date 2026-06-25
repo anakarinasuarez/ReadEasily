@@ -51,7 +51,12 @@ function getFileInput(container: HTMLElement): HTMLInputElement {
 describe("ProfileHeader — Change photo affordance", () => {
   it("exposes the camera control by its accessible name", () => {
     render(
-      <ProfileHeader user={USER} onSignOut={vi.fn()} onAvatarChange={vi.fn()} />,
+      <ProfileHeader
+        user={USER}
+        onSignOut={vi.fn()}
+        onAvatarChange={vi.fn()}
+        onNameChange={vi.fn()}
+      />,
     );
     expect(
       screen.getByRole("button", { name: "Change photo" }),
@@ -66,6 +71,7 @@ describe("ProfileHeader — Change photo affordance", () => {
         user={USER}
         onSignOut={vi.fn()}
         onAvatarChange={onAvatarChange}
+        onNameChange={vi.fn()}
       />,
     );
 
@@ -85,6 +91,7 @@ describe("ProfileHeader — Change photo affordance", () => {
         user={USER}
         onSignOut={vi.fn()}
         onAvatarChange={onAvatarChange}
+        onNameChange={vi.fn()}
       />,
     );
 
@@ -96,8 +103,126 @@ describe("ProfileHeader — Change photo affordance", () => {
 
   it("has no axe violations", async () => {
     const { container } = render(
-      <ProfileHeader user={USER} onSignOut={vi.fn()} onAvatarChange={vi.fn()} />,
+      <ProfileHeader
+        user={USER}
+        onSignOut={vi.fn()}
+        onAvatarChange={vi.fn()}
+        onNameChange={vi.fn()}
+      />,
     );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("ProfileHeader — inline name editor", () => {
+  function renderHeader(onNameChange = vi.fn()) {
+    return {
+      onNameChange,
+      ...render(
+        <ProfileHeader
+          user={USER}
+          onSignOut={vi.fn()}
+          onAvatarChange={vi.fn()}
+          onNameChange={onNameChange}
+        />,
+      ),
+    };
+  }
+
+  it("swaps the h1 for a focused input when the pencil is clicked", async () => {
+    const user = userEvent.setup();
+    renderHeader();
+
+    await user.click(screen.getByRole("button", { name: "Edit name" }));
+
+    const input = screen.getByRole("textbox", { name: "Your name" });
+    expect(input).toHaveFocus();
+    expect(input).toHaveValue("Ana Lopez");
+    // The static heading is gone while editing.
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+  });
+
+  it("commits a new, trimmed name on Enter and returns to the h1", async () => {
+    const user = userEvent.setup();
+    const { onNameChange } = renderHeader();
+
+    await user.click(screen.getByRole("button", { name: "Edit name" }));
+    const input = screen.getByRole("textbox", { name: "Your name" });
+    await user.clear(input);
+    await user.type(input, "  Bea Ruiz  {Enter}");
+
+    expect(onNameChange).toHaveBeenCalledTimes(1);
+    expect(onNameChange).toHaveBeenCalledWith("Bea Ruiz");
+    // Back to view mode; focus returns to the pencil.
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Ana Lopez" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit name" })).toHaveFocus();
+  });
+
+  it("commits via the Save button", async () => {
+    const user = userEvent.setup();
+    const { onNameChange } = renderHeader();
+
+    await user.click(screen.getByRole("button", { name: "Edit name" }));
+    const input = screen.getByRole("textbox", { name: "Your name" });
+    await user.clear(input);
+    await user.type(input, "Bea Ruiz");
+    await user.click(screen.getByRole("button", { name: "Save name" }));
+
+    expect(onNameChange).toHaveBeenCalledTimes(1);
+    expect(onNameChange).toHaveBeenCalledWith("Bea Ruiz");
+  });
+
+  it("cancels on Escape without calling onNameChange", async () => {
+    const user = userEvent.setup();
+    const { onNameChange } = renderHeader();
+
+    await user.click(screen.getByRole("button", { name: "Edit name" }));
+    const input = screen.getByRole("textbox", { name: "Your name" });
+    await user.clear(input);
+    await user.type(input, "Discarded{Escape}");
+
+    expect(onNameChange).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Ana Lopez" }),
+    ).toBeInTheDocument();
+  });
+
+  it("cancels via the Cancel button without calling onNameChange", async () => {
+    const user = userEvent.setup();
+    const { onNameChange } = renderHeader();
+
+    await user.click(screen.getByRole("button", { name: "Edit name" }));
+    const input = screen.getByRole("textbox", { name: "Your name" });
+    await user.clear(input);
+    await user.type(input, "Discarded");
+    await user.click(screen.getByRole("button", { name: "Cancel editing name" }));
+
+    expect(onNameChange).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Ana Lopez" }),
+    ).toBeInTheDocument();
+  });
+
+  it("emits an empty string when the name is cleared and saved", async () => {
+    const user = userEvent.setup();
+    const { onNameChange } = renderHeader();
+
+    await user.click(screen.getByRole("button", { name: "Edit name" }));
+    const input = screen.getByRole("textbox", { name: "Your name" });
+    await user.clear(input);
+    await user.click(screen.getByRole("button", { name: "Save name" }));
+
+    expect(onNameChange).toHaveBeenCalledTimes(1);
+    expect(onNameChange).toHaveBeenCalledWith("");
+  });
+
+  it("has no axe violations while editing", async () => {
+    const user = userEvent.setup();
+    const { container } = renderHeader();
+
+    await user.click(screen.getByRole("button", { name: "Edit name" }));
     expect(await axe(container)).toHaveNoViolations();
   });
 });

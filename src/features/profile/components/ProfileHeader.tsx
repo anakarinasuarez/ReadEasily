@@ -1,10 +1,16 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/ui/avatar";
 import { Button } from "@/ui/button";
 import type { ProfileUser } from "../types";
-import { CameraIcon, PencilIcon, SignOutIcon } from "./icons";
+import {
+  CameraIcon,
+  CheckIcon,
+  CloseIcon,
+  PencilIcon,
+  SignOutIcon,
+} from "./icons";
 
 /**
  * ProfileHeader — the Profile header card (Figma desktop 149:240 / mobile
@@ -21,9 +27,13 @@ import { CameraIcon, PencilIcon, SignOutIcon } from "./icons";
  * hidden file picker; on pick we downscale the image to a small square data URL
  * (see `fileToAvatarDataUrl`) and emit it via `onAvatarChange` — the screen owns
  * persistence (localStorage, no backend, bytes never leave the device). The
- * name-edit pencil is still a designed-active no-op seam (`TODO(profile-edit)` —
- * no name-edit backend yet). Sign-out is wired to `onSignOut` (the Account
- * section's confirm flow lives in ProfileScreen; the header's button is a direct
+ * name-edit pencil is REAL and local-only too: clicking it swaps the `<h1>` for
+ * an inline input pre-filled with the current name (Enter / Save commits,
+ * Escape / Cancel discards, blur commits); on commit we emit the trimmed value
+ * via `onNameChange` (empty = "clear override") and the screen persists it. This
+ * inline-edit interaction is NOT in Figma — it activates a designed seam under
+ * an agreed pattern. Sign-out is wired to `onSignOut` (the Account section's
+ * confirm flow lives in ProfileScreen; the header's button is a direct
  * affordance mirroring Figma).
  */
 
@@ -108,15 +118,82 @@ export interface ProfileHeaderProps {
   onSignOut: () => void;
   /** Fires with the final (downscaled, local-only) avatar data URL after a pick. */
   onAvatarChange: (dataUrl: string) => void;
+  /**
+   * Fires with the committed (trimmed) display name. An empty string means
+   * "clear the override" (fall back to the server name) — the store nullifies
+   * it. The header owns the edit-mode UI; the screen owns persistence.
+   */
+  onNameChange: (name: string) => void;
 }
 
 export function ProfileHeader({
   user,
   onSignOut,
   onAvatarChange,
+  onNameChange,
 }: ProfileHeaderProps) {
   const joined = formatJoined(user.joinedAt);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Inline name-edit UI state (local to the header). `draft` holds the in-flight
+  // text; `editing` swaps the h1 for the input. Refs drive focus management:
+  // focus moves INTO the input when editing opens and back to the pencil when it
+  // closes (save OR cancel).
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(user.name);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const pencilRef = useRef<HTMLButtonElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const wasEditingRef = useRef(false);
+
+  useEffect(() => {
+    if (editing && !wasEditingRef.current) {
+      // Opening: focus + select so a quick retype replaces the whole name.
+      nameInputRef.current?.focus();
+      nameInputRef.current?.select();
+    } else if (!editing && wasEditingRef.current) {
+      // Closing: return focus to the pencil that opened the editor.
+      pencilRef.current?.focus();
+    }
+    wasEditingRef.current = editing;
+  }, [editing]);
+
+  function openEditor() {
+    setDraft(user.name);
+    setEditing(true);
+  }
+
+  function commitName() {
+    const trimmed = draft.trim();
+    // Empty → clear override (""); non-empty + changed → emit; unchanged → no-op.
+    if (trimmed === "") {
+      onNameChange("");
+    } else if (trimmed !== user.name) {
+      onNameChange(trimmed);
+    }
+    setEditing(false);
+  }
+
+  function cancelEdit() {
+    setEditing(false);
+  }
+
+  function handleNameKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      commitName();
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      cancelEdit();
+    }
+  }
+
+  function handleNameBlur(event: React.FocusEvent<HTMLInputElement>) {
+    // Blur = save — UNLESS focus is moving to the Save/Cancel buttons inside the
+    // editor, in which case their own handlers run (avoids a double-commit).
+    if (editorRef.current?.contains(event.relatedTarget as Node | null)) return;
+    commitName();
+  }
 
   function handleChangePhoto() {
     fileInputRef.current?.click();
@@ -133,10 +210,6 @@ export function ProfileHeader({
       onAvatarChange(dataUrl);
     }
     input.value = "";
-  }
-
-  function handleEditName() {
-    // TODO(profile-edit): open the inline name editor once a backend exists.
   }
 
   return (
@@ -179,19 +252,54 @@ export function ProfileHeader({
 
         {/* Name + meta. */}
         <div className="flex min-w-0 flex-1 flex-col items-center gap-xs md:items-start md:pt-md">
-          <div className="flex items-center gap-sm">
-            <h1 className="font-display font-extrabold text-primary [font-size:var(--text-display-mobile-size)] [line-height:var(--text-display-mobile-line-height)]">
-              {user.name}
-            </h1>
-            <button
-              type="button"
-              aria-label="Edit name"
-              onClick={handleEditName}
-              className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-surface-subtle text-secondary outline-none transition-colors hover:text-primary focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px] [&>svg]:size-[14px]"
+          {editing ? (
+            <div
+              ref={editorRef}
+              className="flex items-center gap-sm"
+              onBlur={handleNameBlur}
             >
-              <PencilIcon />
-            </button>
-          </div>
+              <input
+                ref={nameInputRef}
+                type="text"
+                aria-label="Your name"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={handleNameKeyDown}
+                className="min-w-0 max-w-full rounded-md border border-border-default bg-surface-elevated px-sm py-[2px] font-display font-extrabold text-primary outline-none [font-size:var(--text-display-mobile-size)] [line-height:var(--text-display-mobile-line-height)] focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]"
+              />
+              <button
+                type="button"
+                aria-label="Save name"
+                onClick={commitName}
+                className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-accent-strong text-on-accent outline-none transition-colors hover:bg-accent-hover focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px] [&>svg]:size-[14px]"
+              >
+                <CheckIcon />
+              </button>
+              <button
+                type="button"
+                aria-label="Cancel editing name"
+                onClick={cancelEdit}
+                className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-surface-subtle text-secondary outline-none transition-colors hover:text-primary focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px] [&>svg]:size-[14px]"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-sm">
+              <h1 className="font-display font-extrabold text-primary [font-size:var(--text-display-mobile-size)] [line-height:var(--text-display-mobile-line-height)]">
+                {user.name}
+              </h1>
+              <button
+                ref={pencilRef}
+                type="button"
+                aria-label="Edit name"
+                onClick={openEditor}
+                className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-surface-subtle text-secondary outline-none transition-colors hover:text-primary focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px] [&>svg]:size-[14px]"
+              >
+                <PencilIcon />
+              </button>
+            </div>
+          )}
           <p className="font-ui text-label-m text-muted">
             {user.email}
             {joined ? ` · ${joined}` : ""}

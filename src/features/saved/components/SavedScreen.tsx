@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Navbar, type NavbarItem } from "@/components/navbar";
+import { Navbar, useNavbarUser, type NavbarItem } from "@/components/navbar";
 import { StatPill } from "@/components/stat-pill";
 import { Button } from "@/ui/button";
 import { useSaved } from "../hooks/useSaved";
@@ -177,6 +177,8 @@ function Breadcrumb({ hideOnMobile = false }: { hideOnMobile?: boolean }) {
 
 export function SavedScreen() {
   const router = useRouter();
+  // Overlay any device-local profile overrides (name/avatar) onto the base user.
+  const user = useNavbarUser(SCREEN_USER);
   const { data, isPending, isError, refetch } = useSaved();
   const remove = useRemoveSavedWord();
 
@@ -272,7 +274,7 @@ export function SavedScreen() {
         <Navbar
           items={NAV_ITEMS}
           activeKey="saved"
-          user={SCREEN_USER}
+          user={user}
           onAccountClick={() => router.push("/profile")}
         />
       </div>

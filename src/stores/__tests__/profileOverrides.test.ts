@@ -1,86 +1,129 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import {
-  useProfileAvatar,
-  PROFILE_AVATAR_STORAGE_KEY,
-} from "../profileAvatar";
+  useProfileOverrides,
+  PROFILE_OVERRIDES_STORAGE_KEY,
+} from "../profileOverrides";
 
 /**
- * Store behavior tests — the persisted avatar is local-only state, so it gets
- * tested directly (not only through the screen). We assert the default (null),
- * that setAvatar updates state AND writes through to localStorage, that
- * clearAvatar resets to null, that the persisted slice carries ONLY the value,
- * and that a fresh rehydrate reads the persisted slice back over a fresh null.
+ * Store behavior tests — the persisted profile overrides are local-only state,
+ * so they get tested directly (not only through the screen). We assert the
+ * defaults (both null), that setAvatar updates state AND writes through to
+ * localStorage, that clearAvatar resets to null, that setDisplayName trims and
+ * collapses empties to null, that the persisted slice carries ONLY the values,
+ * and that a fresh rehydrate reads the persisted slice back over fresh nulls.
  */
 
 const DATA_URL = "data:image/jpeg;base64,SGVsbG8=";
 
 /** Read the persisted slice straight out of localStorage. */
 function readPersisted() {
-  const raw = localStorage.getItem(PROFILE_AVATAR_STORAGE_KEY);
+  const raw = localStorage.getItem(PROFILE_OVERRIDES_STORAGE_KEY);
   return raw ? JSON.parse(raw).state : null;
 }
 
 beforeEach(() => {
   // Each test starts from a clean slate: null state + empty storage.
   localStorage.clear();
-  useProfileAvatar.setState({ avatarDataUrl: null, _hasHydrated: false });
-});
-
-describe("profileAvatar store — defaults", () => {
-  it("starts with no avatar override", () => {
-    expect(useProfileAvatar.getState().avatarDataUrl).toBeNull();
+  useProfileOverrides.setState({
+    avatarDataUrl: null,
+    displayName: null,
+    _hasHydrated: false,
   });
 });
 
-describe("profileAvatar store — setAvatar", () => {
+describe("profileOverrides store — defaults", () => {
+  it("starts with no avatar and no name override", () => {
+    expect(useProfileOverrides.getState().avatarDataUrl).toBeNull();
+    expect(useProfileOverrides.getState().displayName).toBeNull();
+  });
+});
+
+describe("profileOverrides store — setAvatar", () => {
   it("updates state with the new data URL", () => {
-    useProfileAvatar.getState().setAvatar(DATA_URL);
-    expect(useProfileAvatar.getState().avatarDataUrl).toBe(DATA_URL);
+    useProfileOverrides.getState().setAvatar(DATA_URL);
+    expect(useProfileOverrides.getState().avatarDataUrl).toBe(DATA_URL);
   });
 
   it("writes the change through to localStorage", () => {
-    useProfileAvatar.getState().setAvatar(DATA_URL);
+    useProfileOverrides.getState().setAvatar(DATA_URL);
     expect(readPersisted()?.avatarDataUrl).toBe(DATA_URL);
   });
 
-  it("persists ONLY the avatar value, never the hydration flag/methods", () => {
-    useProfileAvatar.getState().setAvatar(DATA_URL);
+  it("persists ONLY the override values, never the hydration flag/methods", () => {
+    useProfileOverrides.getState().setAvatar(DATA_URL);
     const persisted = readPersisted();
     expect(persisted).toHaveProperty("avatarDataUrl", DATA_URL);
+    expect(persisted).toHaveProperty("displayName", null);
     expect(persisted).not.toHaveProperty("_hasHydrated");
     expect(persisted).not.toHaveProperty("setAvatar");
   });
 });
 
-describe("profileAvatar store — clearAvatar", () => {
-  it("resets the override back to null and persists the clear", () => {
-    useProfileAvatar.getState().setAvatar(DATA_URL);
-    expect(useProfileAvatar.getState().avatarDataUrl).toBe(DATA_URL);
+describe("profileOverrides store — clearAvatar", () => {
+  it("resets the avatar back to null and persists the clear", () => {
+    useProfileOverrides.getState().setAvatar(DATA_URL);
+    expect(useProfileOverrides.getState().avatarDataUrl).toBe(DATA_URL);
 
-    useProfileAvatar.getState().clearAvatar();
-    expect(useProfileAvatar.getState().avatarDataUrl).toBeNull();
+    useProfileOverrides.getState().clearAvatar();
+    expect(useProfileOverrides.getState().avatarDataUrl).toBeNull();
     expect(readPersisted()?.avatarDataUrl).toBeNull();
   });
 });
 
-describe("profileAvatar store — hydration survives a reload", () => {
-  it("rehydrate() reads the persisted value back over fresh null", async () => {
+describe("profileOverrides store — setDisplayName", () => {
+  it("stores a non-empty name and persists it", () => {
+    useProfileOverrides.getState().setDisplayName("Ana Lopez");
+    expect(useProfileOverrides.getState().displayName).toBe("Ana Lopez");
+    expect(readPersisted()?.displayName).toBe("Ana Lopez");
+  });
+
+  it("trims surrounding whitespace before storing", () => {
+    useProfileOverrides.getState().setDisplayName("  Ana Lopez  ");
+    expect(useProfileOverrides.getState().displayName).toBe("Ana Lopez");
+  });
+
+  it("collapses an empty string to null (fall back to server name)", () => {
+    useProfileOverrides.getState().setDisplayName("Ana");
+    useProfileOverrides.getState().setDisplayName("");
+    expect(useProfileOverrides.getState().displayName).toBeNull();
+  });
+
+  it("collapses a whitespace-only string to null", () => {
+    useProfileOverrides.getState().setDisplayName("Ana");
+    useProfileOverrides.getState().setDisplayName("   ");
+    expect(useProfileOverrides.getState().displayName).toBeNull();
+  });
+
+  it("collapses an explicit null to null", () => {
+    useProfileOverrides.getState().setDisplayName("Ana");
+    useProfileOverrides.getState().setDisplayName(null);
+    expect(useProfileOverrides.getState().displayName).toBeNull();
+  });
+});
+
+describe("profileOverrides store — hydration survives a reload", () => {
+  it("rehydrate() reads the persisted values back over fresh nulls", async () => {
     // Simulate a PRIOR session's persisted slice sitting in localStorage while
     // the in-memory store is still at null (as right after a fresh page load,
     // before mount-time rehydration runs). Writing storage directly — rather
-    // than via setAvatar — avoids the persist middleware re-writing null when we
-    // reset the in-memory state.
+    // than via the setters — avoids the persist middleware re-writing null when
+    // we reset the in-memory state.
     localStorage.setItem(
-      PROFILE_AVATAR_STORAGE_KEY,
-      JSON.stringify({ state: { avatarDataUrl: DATA_URL }, version: 0 }),
+      PROFILE_OVERRIDES_STORAGE_KEY,
+      JSON.stringify({
+        state: { avatarDataUrl: DATA_URL, displayName: "Ana Lopez" },
+        version: 0,
+      }),
     );
-    expect(useProfileAvatar.getState().avatarDataUrl).toBeNull();
-    expect(useProfileAvatar.getState()._hasHydrated).toBe(false);
+    expect(useProfileOverrides.getState().avatarDataUrl).toBeNull();
+    expect(useProfileOverrides.getState().displayName).toBeNull();
+    expect(useProfileOverrides.getState()._hasHydrated).toBe(false);
 
-    await useProfileAvatar.persist.rehydrate();
+    await useProfileOverrides.persist.rehydrate();
 
-    const s = useProfileAvatar.getState();
+    const s = useProfileOverrides.getState();
     expect(s.avatarDataUrl).toBe(DATA_URL);
+    expect(s.displayName).toBe("Ana Lopez");
     expect(s._hasHydrated).toBe(true);
   });
 });

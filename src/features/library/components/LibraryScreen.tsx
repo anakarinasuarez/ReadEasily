@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Navbar, type NavbarItem } from "@/components/navbar";
+import { Navbar, useNavbarUser, type NavbarItem } from "@/components/navbar";
 import { useLibrary } from "../hooks/useLibrary";
 import { CategoryFilter } from "./CategoryFilter";
 import { CategoryRail, RailDivider } from "./CategoryRail";
@@ -73,7 +73,7 @@ export function LibraryScreen() {
     return `Showing ${label}`;
   }, [data, activeCategory]);
 
-  const user = data?.user ?? LOADING_USER;
+  const user = useNavbarUser(data?.user ?? LOADING_USER);
 
   return (
     <main className="flex min-h-full flex-1 flex-col bg-canvas">

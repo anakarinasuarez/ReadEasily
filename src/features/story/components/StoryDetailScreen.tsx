@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Navbar, type NavbarItem } from "@/components/navbar";
+import { Navbar, useNavbarUser, type NavbarItem } from "@/components/navbar";
 import { BgDecorations } from "@/components/bg-decorations";
 import { BookCover } from "@/components/book-card";
 import { MoralCallout } from "@/components/moral-callout";
@@ -93,7 +93,7 @@ export function StoryDetailScreen({ storyId }: StoryDetailScreenProps) {
     });
   };
 
-  const user = LOADING_USER;
+  const user = useNavbarUser(LOADING_USER);
 
   return (
     <main className="relative flex min-h-full flex-1 flex-col bg-canvas">
