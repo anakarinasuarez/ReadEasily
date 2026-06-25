@@ -131,6 +131,13 @@
   --color-settings-plum: var(--settings-plum);
   --color-settings-plum-subtle: var(--settings-plum-subtle);
 
+  /* Decorative info glyph (SavedWordCard / WordPopover globe) -> text-icon-info-decorative.
+     NOTE: --overlay-on-accent*, --veil-reading and --bg-decoration-* are NOT mapped
+     here — like --scrim / --surface-glass-* they are consumed via arbitrary-value
+     classes (bg-[var(--overlay-on-accent…)] / bg-[var(--veil-reading)] /
+     bg-[var(--bg-decoration-warm)]), not a Tailwind theme namespace. */
+  --color-icon-info-decorative: var(--icon-info-decorative);
+
   /* Focus ring */
   --color-focus-ring: var(--focus-ring);
 
@@ -219,6 +226,12 @@
   --text-display-xl--line-height: var(--text-display-xl-line-height);
   --text-display-mobile: var(--text-display-mobile-size);
   --text-display-mobile--line-height: var(--text-display-mobile-line-height);
+  --text-display-m: var(--text-display-m-size);
+  --text-display-m--line-height: var(--text-display-m-line-height);
+  --text-heading-h1: var(--text-heading-h1-size);
+  --text-heading-h1--line-height: var(--text-heading-h1-line-height);
+  --text-heading-h2: var(--text-heading-h2-size);
+  --text-heading-h2--line-height: var(--text-heading-h2-line-height);
   --text-heading-h3: var(--text-heading-h3-size);
   --text-heading-h3--line-height: var(--text-heading-h3-line-height);
   --text-heading-h4: var(--text-heading-h4-size);
@@ -237,6 +250,8 @@
   --text-reading-l--line-height: var(--text-reading-l-line-height);
   --text-title-l: var(--text-title-l-size);
   --text-title-l--line-height: var(--text-title-l-line-height);
+  --text-ui-xl: var(--text-ui-xl-size);
+  --text-ui-xl--line-height: var(--text-ui-xl-line-height);
   --text-ui-l: var(--text-ui-l-size);
   --text-ui-l--line-height: var(--text-ui-l-line-height);
   --text-ui-m: var(--text-ui-m-size);
@@ -247,6 +262,14 @@
   --text-label-s--line-height: var(--text-label-s-line-height);
   --text-caption: var(--text-caption-size);
   --text-caption--line-height: var(--text-caption-line-height);
+}
+
+/* Always reserve the vertical scrollbar's gutter so centered, max-width layouts
+ * don't shift horizontally when navigating between a page that scrolls and one
+ * that doesn't (e.g. Sign up ↔ Log in, which have different heights). Prevents
+ * the "jump to the left" on route changes. */
+html {
+  scrollbar-gutter: stable;
 }
 
 body {

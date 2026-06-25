@@ -202,6 +202,42 @@
   --surface-glass-border: rgba(255, 255, 255, 0.65);
   --surface-glass-blur: 10px;                      /* backdrop-blur radius */
 
+  /* [D-design] On-accent white-wash overlays — decorative chrome on the
+     terracotta WordPopover header (controls sit on --bg-accent-strong). Mirror
+     the --scrim / --surface-glass-* literal-rgba precedent; consumed via
+     arbitrary class `bg-[var(--overlay-on-accent…)]`, NOT @theme. Exact alphas
+     lifted from WordPopover (0.18 / 0.22 / 0.32) so the swap is 1:1. White on
+     terracotta in BOTH modes (the header is accent in light+dark), so these are
+     theme-independent — no dark override. Decorative (not text) → no AA gate. */
+  --overlay-on-accent: rgba(255, 255, 255, 0.22);        /* rest: pronounce chip + close-button bg */
+  --overlay-on-accent-strong: rgba(255, 255, 255, 0.32); /* hover */
+  --overlay-on-accent-weak: rgba(255, 255, 255, 0.18);   /* close-button hover */
+
+  /* [D-design] Reading veil — warm-cream wash over the Reader's illustrated
+     backdrop so the passage stays legible (ReaderScreen). Measured Figma value
+     rgba(255,250,235,0.45). Sits beside --scrim; consumed via arbitrary class
+     `bg-[var(--veil-reading)]`. Dark counterpart [D] below. */
+  --veil-reading: rgba(255, 250, 235, 0.45);
+
+  /* [D] Decorative backdrop tints (BgDecorations atmospheric ellipses). The
+     FINAL tinted color is baked in (color-mix over the primitive 300 step) so
+     the component never reaches into a primitive ramp — it just uses
+     `bg-[var(--bg-decoration-…)]`. Alphas match the current render exactly
+     (warm 40%, cool/leaf 35%). [D] because the underlying *-300 steps are [D].
+     Theme-independent (primitives don't re-point), matching current behavior. */
+  --bg-decoration-warm: color-mix(in srgb, var(--color-terracotta-300) 40%, transparent);
+  --bg-decoration-cool: color-mix(in srgb, var(--color-sky-300) 35%, transparent);
+  --bg-decoration-leaf: color-mix(in srgb, var(--color-forest-300) 35%, transparent);
+
+  /* [D] Decorative info-glyph color — the lighter sky blue for the decorative
+     globe/translation glyph (SavedWordCard, WordPopover). Replaces a direct
+     reach into the --color-sky-500 [D] primitive. NOT --feedback-info (sky-700):
+     that is the AA TEXT info semantic; this is a lighter DECORATIVE glyph with
+     no AA gate, so reusing feedback-info would both darken the glyph and conflate
+     intents. Aliases sky-500; dark brightens for legibility. Mapped to @theme as
+     `text-icon-info-decorative`. */
+  --icon-info-decorative: var(--color-sky-500); /* #5a82a8 */
+
   /* [C] Profile header banner — warm peach hero gradient (Figma node 149:241).
      Not covered by any existing gradient: the navbar glass gradient is
      white-translucent and the EmptyState surface is canvas->subtle paper; this
@@ -272,6 +308,20 @@
   /* [D] warm peach banner deepened for dark surfaces (UNVERIFIED — reconcile w/
      Figma dark). Lower-luminance warm stops so the hero reads on dark canvas. */
   --gradient-profile-banner: linear-gradient(170deg, #5a3322 0%, rgba(120, 64, 44, 0.45) 73%);
+
+  /* [D] Reading veil flips to a warm DARK wash over the illustrated backdrop
+     (a light cream veil would wash out a dark reader). Tracks dark canvas
+     #241a12 at the same 0.45 alpha. UNVERIFIED — reconcile w/ Figma dark. */
+  --veil-reading: rgba(36, 26, 18, 0.45);
+
+  /* [D] decorative info glyph brightens on dark for legibility (sky-300 range),
+     mirroring how --feedback-info brightens. UNVERIFIED — reconcile w/ Figma dark. */
+  --icon-info-decorative: #8aaecb;
+
+  /* NOTE: --overlay-on-accent* and --bg-decoration-* are intentionally NOT
+     overridden here — white-on-accent overlays and the primitive-derived
+     backdrop tints are theme-independent (the accent header is terracotta in
+     both modes; the *-300 primitives don't re-point), matching current render. */
 
   /* --focus-ring inherits border/accent re-point above */
 }

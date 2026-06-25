@@ -59,6 +59,48 @@
   --text-display-mobile-weight: var(--font-weight-extrabold);
   --text-display-mobile-tracking: -0.32px;
 
+  /* --- Display/M  [D] (EmptyState title) ------------------------------- */
+  /* NOT a named Figma style: node 144:213 surfaced only Reading/quote + Title/M,
+     so the 26px title is UNBOUND (the typography-drift issue). Minted from the
+     in-use literal: Baloo 2 / 26 / line-height 1.1 (≈28.6px) / tracking 0.
+     WEIGHT CAVEAT: the audit described this as ExtraBold, but EmptyState renders
+     font-bold (700) and no Display/M style exists in Figma to confirm — minted
+     at the rendered Bold(700) so the swap is non-destructive. Design-lead to
+     confirm the canonical weight (and whether Display/M is a real Figma style). */
+  --text-display-m-family: var(--font-display);
+  --text-display-m-size: 26px;
+  --text-display-m-line-height: 1.1;
+  --text-display-m-weight: var(--font-weight-bold);
+  --text-display-m-tracking: 0;
+
+  /* --- Heading/H1  [D] (word headword / Reader mobile title) ----------- */
+  /* The 30px display headword: PracticeOverlay word + Reader mobile <h1> (which
+     steps up to Display/L on desktop). Minted Baloo 2 ExtraBold 30 / 38 / 0 to
+     match the Reader <h1> render and its responsive pairing with Display/L
+     (ExtraBold). Not surfaced as a named style by the available nodes → [D];
+     the name completes the heading ramp above the confirmed Heading/H2 (28).
+     CAVEAT: PracticeOverlay currently renders SemiBold/leading-none (a fallback
+     to Title/L because no 30px token existed) — binding this token shifts it to
+     ExtraBold/38. Flagged for the builder. Confirm exact Figma style name. */
+  --text-heading-h1-family: var(--font-display);
+  --text-heading-h1-size: 30px;
+  --text-heading-h1-line-height: 38px;
+  --text-heading-h1-weight: var(--font-weight-extrabold);
+  --text-heading-h1-tracking: 0;
+
+  /* --- Heading/H2  [C] (SectionHeader) -------------------------------- */
+  /* [C] confirmed from Figma node 1261:3706: Baloo 2 Bold 28 / line-height 36.
+     letterSpacing -0.5 is a PERCENTAGE (same %-storage as display/l -1.5%,
+     label/m 1%, label/s 4%), so -0.5% × 28px = -0.14px — NOT -0.5px.
+     SectionHeader currently renders tracking-[-0.5px], the px-vs-% misread the
+     README warns about; binding this token corrects it. Do NOT let a regen
+     reintroduce `-0.5px`. */
+  --text-heading-h2-family: var(--font-display);
+  --text-heading-h2-size: 28px;
+  --text-heading-h2-line-height: 36px;
+  --text-heading-h2-weight: var(--font-weight-bold);
+  --text-heading-h2-tracking: -0.14px;
+
   /* --- Heading/H3  [C] ------------------------------------------------- */
   --text-heading-h3-family: var(--font-display);
   --text-heading-h3-size: 22px;
@@ -141,6 +183,16 @@
   --text-title-l-line-height: 29px;
   --text-title-l-weight: var(--font-weight-semibold);
   --text-title-l-tracking: 0;
+
+  /* --- UI/XL  [D] (WordPopover translation) --------------------------- */
+  /* Nunito Bold 20 / 28 / 0 — the popover translation line. Node 1158:4019 did
+     NOT surface a named UI/XL style (the translation is design-lead-measured /
+     unbound), so [D]. Completes the UI ramp above UI/L (16) and UI/M (14). */
+  --text-ui-xl-family: var(--font-ui);
+  --text-ui-xl-size: 20px;
+  --text-ui-xl-line-height: 28px;
+  --text-ui-xl-weight: var(--font-weight-bold);
+  --text-ui-xl-tracking: 0;
 
   /* --- UI/L  [C] (Input value + placeholder) -------------------------- */
   --text-ui-l-family: var(--font-ui);

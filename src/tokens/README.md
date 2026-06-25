@@ -297,6 +297,74 @@ reuse rule as the Saved card shadow; no new token.
 elevation reuse rule). No `--radius-popover` added. Reading card 28 = `--radius-2xl`
 and player top corners 32 = `--radius-xl` already exist (no action).
 
+## Audit gap-fill — decorative semantics + missing type ramp
+
+Tokens only — no component edits (a builder consumes these next). Minted to stop
+components hardcoding rgba / reaching into primitive ramps. Dup-grepped clean
+before minting. All are decorative chrome / glyphs (no AA gate) except the type
+styles, which carry metrics only.
+
+### Decorative color semantics (`colors.css`)
+
+| Token | Light value | Dark | Tag | Consumed via | Replaces (component) |
+| --- | --- | --- | --- | --- | --- |
+| `--overlay-on-accent` | `rgba(255,255,255,0.22)` | — (theme-indep.) | `[D-design]` | `bg-[var(--overlay-on-accent)]` | WordPopover `rgba(255,255,255,0.22)` (rest) |
+| `--overlay-on-accent-strong` | `rgba(255,255,255,0.32)` | — | `[D-design]` | `bg-[var(--overlay-on-accent-strong)]` | WordPopover `…,0.32` (hover) |
+| `--overlay-on-accent-weak` | `rgba(255,255,255,0.18)` | — | `[D-design]` | `bg-[var(--overlay-on-accent-weak)]` | WordPopover `…,0.18` (close hover) |
+| `--veil-reading` | `rgba(255,250,235,0.45)` | `rgba(36,26,18,0.45)` `[D]` | `[D-design]` | `bg-[var(--veil-reading)]` | ReaderScreen:370 |
+| `--bg-decoration-warm` | `color-mix(in srgb, var(--color-terracotta-300) 40%, transparent)` | — (theme-indep.) | `[D]` | `bg-[var(--bg-decoration-warm)]` | BgDecorations `tint(terracotta-300,40)` |
+| `--bg-decoration-cool` | `color-mix(in srgb, var(--color-sky-300) 35%, transparent)` | — | `[D]` | `bg-[var(--bg-decoration-cool)]` | BgDecorations `tint(sky-300,35)` |
+| `--bg-decoration-leaf` | `color-mix(in srgb, var(--color-forest-300) 35%, transparent)` | — | `[D]` | `bg-[var(--bg-decoration-leaf)]` | BgDecorations `tint(forest-300,35)` |
+| `--icon-info-decorative` | `var(--color-sky-500)` (#5a82a8) | `#8aaecb` `[D]` | `[D]` | `text-icon-info-decorative` (@theme) | SavedWordCard:111 + WordPopover:414 `--color-sky-500` |
+
+The overlay/veil/decoration tokens follow the `--scrim` / `--surface-glass-*`
+precedent (literal rgba / baked color-mix, consumed via arbitrary-value classes,
+**not** in `@theme`). Overlay + decoration tints are **theme-independent** (white
+on the always-terracotta accent header; the `*-300` primitives don't re-point),
+so they get no dark override — matching current render. The veil flips to a warm
+dark wash and the decorative glyph brightens in dark (`[D]`, reconcile w/ Figma).
+
+**Item 4 decision — mint, don't reuse.** The decorative globe glyph gets its own
+`--icon-info-decorative` (aliases the lighter sky-500) rather than reusing
+`--feedback-info` (sky-700). `--feedback-info` is the **AA text** info semantic;
+the globe is a lighter **decorative** glyph with no AA gate. Reusing it would both
+darken the glyph (sky-700 vs sky-500) and conflate intents. Builder should use
+`text-icon-info-decorative`. This is the only addition to `@theme` from this pass.
+
+### Type ramp gap-fill (`typography.css`)
+
+Four in-use styles that were raw literals. **None collapse** (sizes 26/30/28/20 are
+all distinct), so all four mint. One confirmed against Figma, three derived.
+
+| Token | Style | Tailwind | Provenance |
+| --- | --- | --- | --- |
+| `--text-display-m-*` | Baloo 2 **Bold** 26 / lh 1.1 / 0 — EmptyState title | `text-display-m` | `[D]` minted from literal — node 144:213 has no named Display/M (title unbound) |
+| `--text-heading-h1-*` | Baloo 2 ExtraBold 30 / 38 / 0 — word headword / Reader mobile `<h1>` | `text-heading-h1` | `[D]` minted from literal (not surfaced); name confirm pending |
+| `--text-heading-h2-*` | Baloo 2 Bold 28 / 36 / **-0.14px** — SectionHeader | `text-heading-h2` | **`[C]` confirmed node 1261:3706** |
+| `--text-ui-xl-*` | Nunito Bold 20 / 28 / 0 — WordPopover translation | `text-ui-xl` | `[D]` — node 1158:4019 has no named UI/XL (measured/unbound) |
+
+**Confirmed vs assumed (Figma reads this pass):**
+- **Heading/H2 — CONFIRMED** (`1261:3706`): `Baloo 2 Bold 28 / lineHeight 36 /
+  letterSpacing -0.5`. The `-0.5` is a **percentage** per this file's documented
+  `letterSpacing` %-storage (label/m `1`→0.13px, display/l `-1.5`→-0.66px), so it
+  resolves to **-0.5% × 28 = -0.14px**, not -0.5px. SectionHeader's current
+  `tracking-[-0.5px]` is the same px-vs-% misread bug — binding `text-heading-h2`
+  corrects it.
+- **Display/M, Heading/H1, UI/XL — ASSUMED** (minted from the in-use literals).
+  The nodes available to the read API did not surface them as named styles
+  (consistent with the documented "9 of 22 won't surface" read-limit). Tagged `[D]`.
+
+**Two render deltas the builder must verify (token = design-system truth, not the
+current literal):**
+1. **Display/M weight** — audit called it ExtraBold; EmptyState renders `font-bold`
+   (700) and no Figma Display/M confirms either way. Minted at the rendered Bold(700)
+   to be non-destructive. Design-lead to confirm canonical weight.
+2. **Heading/H1 on PracticeOverlay** — PracticeOverlay's 30px word currently renders
+   **SemiBold/leading-none** (a fallback to Title/L because no 30px token existed).
+   `--text-heading-h1` is **ExtraBold/38** (matching the Reader `<h1>` and its
+   responsive pairing with Display/L). Binding it shifts PracticeOverlay 600→800 /
+   leading-none→38 — intended (aligns the two consumers), but a visible change.
+
 ## Story Detail token gaps (node 122:136)
 
 Tokens only — no component edits. All values resolved live from the Story Detail
