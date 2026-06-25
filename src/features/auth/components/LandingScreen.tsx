@@ -1,15 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Fragment, useId } from "react";
+import { Fragment } from "react";
 import { Button } from "@/ui/button";
-import { SegmentedControl } from "@/ui/segmented-control";
 import { BgDecorations } from "@/components/bg-decorations";
-import {
-  usePreferences,
-  useHydratePreferences,
-  type Preferences,
-} from "@/stores/preferences";
+import { usePreferences, useHydratePreferences } from "@/stores/preferences";
 import { BrandLogo } from "./brand";
 import { FeatureRow } from "./feature-row";
 import { LandingShowcase, type LandingShowcaseItem } from "./landing-showcase";
@@ -61,14 +56,17 @@ const SHOWCASE_ITEMS: LandingShowcaseItem[] = [
   { coverSrc: "/covers/A-trip-mountains.webp", alt: "A Trip to the Mountains" },
 ];
 
-/** Translation-language options — labels match Figma, values bind the store. */
-const LANGUAGE_OPTIONS: {
-  value: Preferences["translationLang"];
-  label: string;
-}[] = [
-  { value: "ES", label: "Spanish" },
-  { value: "FR", label: "Français" },
-  { value: "PT", label: "Português" },
+/**
+ * Languages shown in the "Translate to" display (Figma 171:407). This is purely
+ * INFORMATIONAL — it advertises the supported languages, it is NOT a selectable
+ * control. Per Figma all three share the same ink; "Spanish" is the only one
+ * with wider horizontal padding (the emphasised item). The real translation
+ * choice lives in the Reader / Profile, not here.
+ */
+const LANGUAGES: { label: string; emphasised: boolean }[] = [
+  { label: "Spanish", emphasised: true },
+  { label: "Français", emphasised: false },
+  { label: "Português", emphasised: false },
 ];
 
 /* Token-bound type ramps reused across the hero copy. */
@@ -111,27 +109,23 @@ const TRUST_FACTS = [
  * with source order logo → eyebrow → h1 → body → showcase → features → translate
  * → helper → CTA (matching the mobile Figma). A trust bar closes the page.
  *
- * Client component because it (a) binds the translation-language SegmentedControl
- * to the persisted preferences store and (b) pushes to the reading home on the
- * CTA. The route shell stays a Server Component; this is the single client
- * boundary. `BgDecorations` paints the atmospheric backdrop behind everything.
+ * Client component because it pushes to the reading home on the CTA and reads
+ * `reduceMotion` for the decorative showcase. The route shell stays a Server
+ * Component; this is the single client boundary. `BgDecorations` paints the
+ * atmospheric backdrop behind everything.
  *
  * A11y: exactly one `h1` (the hero title, three forced lines via `block` spans);
  * the feature rows are `h3`, so a visually-hidden `h2` keeps heading order valid.
- * The language selector is the SegmentedControl radiogroup (labelled by the
- * "Translate to" text). BgDecorations + the LandingShowcase are `aria-hidden`
- * with no tab stops, so the tab order is language options → Start reading.
+ * The "Translate to" row is purely informational text (NOT a control). BgDecorations
+ * + the LandingShowcase are `aria-hidden` with no tab stops, so the only tab stop
+ * in the hero is the Start reading CTA.
  */
 export function LandingScreen() {
   const router = useRouter();
 
-  // Show the user's persisted choices (post-mount; SSR-safe — see the store doc).
+  // Show the user's persisted reduce-motion choice (post-mount; SSR-safe).
   useHydratePreferences();
-  const translationLang = usePreferences((s) => s.translationLang);
   const reduceMotion = usePreferences((s) => s.reduceMotion);
-  const setPreference = usePreferences((s) => s.setPreference);
-
-  const languageLabelId = useId();
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-canvas">
@@ -192,19 +186,24 @@ export function LandingScreen() {
               </ul>
             </div>
 
-            {/* Language selector — bound to the persisted preferences store. */}
+            {/* "Translate to" — informational only (Figma 171:407), NOT a
+                control: a pill listing the supported languages. */}
             <div className="flex flex-wrap items-center gap-[var(--space-md)]">
-              <span id={languageLabelId} className={translateLabelType}>
-                Translate to
-              </span>
-              <SegmentedControl
-                size="lg"
-                options={LANGUAGE_OPTIONS}
-                value={translationLang}
-                onChange={(value) => setPreference("translationLang", value)}
-                tone="info"
-                aria-labelledby={languageLabelId}
-              />
+              <span className={translateLabelType}>Translate to</span>
+              <div className="flex items-start gap-[var(--space-xs)] rounded-pill bg-canvas p-[var(--space-xs)]">
+                {LANGUAGES.map((lang) => (
+                  <span
+                    key={lang.label}
+                    className={`flex items-center justify-center rounded-pill py-[6px] font-display font-semibold text-[length:var(--text-heading-h4-size)] leading-[var(--text-heading-h4-line-height)] text-secondary ${
+                      lang.emphasised
+                        ? "px-[var(--space-md-plus)]"
+                        : "px-[var(--space-sm)]"
+                    }`}
+                  >
+                    {lang.label}
+                  </span>
+                ))}
+              </div>
             </div>
 
             {/* Helper line — quiet muted glyph + Label/M copy. */}

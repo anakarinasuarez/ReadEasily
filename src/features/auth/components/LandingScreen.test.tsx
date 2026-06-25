@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import {
@@ -11,11 +11,11 @@ import { LandingScreen } from "./LandingScreen";
 /**
  * LandingScreen behavior tests. The screen composes the marketing hero
  * (centered BrandLogo + intro + 3 FeatureRows + the decorative LandingShowcase +
- * the language SegmentedControl + the primary CTA + trust bar). There is NO
- * "Log in" entry on the Landing (product decision). It binds the translation
- * language to the persisted preferences store and pushes to the reading home on
- * the CTA. We reset the store between tests and mock the App Router so the CTA
- * push is observable.
+ * the informational "Translate to" row + the primary CTA + trust bar). There is
+ * NO "Log in" entry on the Landing (product decision), and the "Translate to"
+ * row is purely informational (NOT a selectable control — Figma 171:407). The
+ * CTA pushes to the reading home. We reset the store between tests and mock the
+ * App Router so the CTA push is observable.
  */
 
 const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
@@ -79,25 +79,21 @@ describe("LandingScreen — structure & content", () => {
   });
 });
 
-describe("LandingScreen — language selector (preferences binding)", () => {
-  it("is a radiogroup whose checked option reflects the store default (ES)", () => {
+describe("LandingScreen — Translate to (informational, not a control)", () => {
+  it("lists the supported languages as plain text", () => {
     render(<LandingScreen />);
-    const group = screen.getByRole("radiogroup", { name: "Translate to" });
-    expect(within(group).getByRole("radio", { name: "Spanish" })).toBeChecked();
+    expect(screen.getByText("Translate to")).toBeInTheDocument();
+    for (const lang of ["Spanish", "Français", "Português"]) {
+      expect(screen.getByText(lang)).toBeInTheDocument();
+    }
   });
 
-  it("writes the chosen language to the preferences store", async () => {
-    const user = userEvent.setup();
+  it("exposes NO selection control (no radiogroup / radio / button)", () => {
     render(<LandingScreen />);
-    await user.click(screen.getByRole("radio", { name: "Français" }));
-    expect(usePreferences.getState().translationLang).toBe("FR");
-    expect(screen.getByRole("radio", { name: "Français" })).toBeChecked();
-  });
-
-  it("reflects a pre-selected store value (FR) on render", () => {
-    usePreferences.setState({ translationLang: "FR" });
-    render(<LandingScreen />);
-    expect(screen.getByRole("radio", { name: "Français" })).toBeChecked();
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+    // The only button in the hero is the CTA.
+    expect(screen.getAllByRole("button")).toHaveLength(1);
   });
 });
 
@@ -111,16 +107,12 @@ describe("LandingScreen — CTA", () => {
 });
 
 describe("LandingScreen — keyboard", () => {
-  it("tabs language option → Start reading (no Log in) and activates the CTA with Enter", async () => {
+  it("the only hero tab stop is the Start reading CTA (no Log in, no language control)", async () => {
     const user = userEvent.setup();
     render(<LandingScreen />);
 
-    // The SegmentedControl is the first tab stop (roving): the checked Spanish
-    // option. The centered brand and decorative showcase add no tab stops, and
-    // there is no Log in entry.
-    await user.tab();
-    expect(screen.getByRole("radio", { name: "Spanish" })).toHaveFocus();
-
+    // The centered brand, the informational language row, and the decorative
+    // showcase add no tab stops; the first (and only hero) tab stop is the CTA.
     await user.tab();
     const cta = screen.getByRole("button", { name: "Start reading" });
     expect(cta).toHaveFocus();
