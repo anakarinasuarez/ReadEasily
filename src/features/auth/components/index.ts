@@ -1,7 +1,8 @@
 /**
  * Auth feature surface — the reusable composites PLUS the three assembled auth
- * SCREENS (Log-in / Sign-up / Forgot) the App Router routes render.
+ * SCREENS (Landing / Log-in / Sign-up / Forgot) the App Router routes render.
  */
+export { LandingScreen } from "./LandingScreen";
 export { LoginScreen } from "./LoginScreen";
 export { SignupScreen } from "./SignupScreen";
 export { ForgotPasswordScreen } from "./ForgotPasswordScreen";
