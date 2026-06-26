@@ -54,6 +54,7 @@ const SHOWCASE_ITEMS: LandingShowcaseItem[] = [
   { coverSrc: "/covers/the-clever-crow.webp", alt: "The Clever Crow" },
   { coverSrc: "/covers/The-boy-who-cried-wolf.webp", alt: "The Boy Who Cried Wolf" },
   { coverSrc: "/covers/A-trip-mountains.webp", alt: "A Trip to the Mountains" },
+  { coverSrc: "/covers/A-morning-in-the-city.webp", alt: "A Morning in the City" },
 ];
 
 /**

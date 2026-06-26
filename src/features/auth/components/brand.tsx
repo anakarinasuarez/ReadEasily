@@ -72,8 +72,8 @@ const MARK_SIZE: Record<NonNullable<BrandLogoProps["size"]>, string> = {
 
 /** Wordmark type per scale. */
 const WORDMARK_SIZE: Record<NonNullable<BrandLogoProps["size"]>, string> = {
-  md: "text-[14px] leading-[1.4] md:text-[19px]",
-  lg: "text-[length:var(--text-heading-h3-size)] leading-[var(--text-heading-h3-line-height)]",
+  md: "text-[14px] leading-none md:text-[19px]",
+  lg: "text-[length:var(--text-heading-h3-size)] leading-none",
 };
 
 /** Brand mark + "ReadEasily" wordmark. */

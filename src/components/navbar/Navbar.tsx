@@ -137,7 +137,7 @@ function NavbarLogo({ homeHref }: { homeHref: string }) {
       {/* Decorative as a whole; the link's accessible name comes from aria-label. */}
       <span
         aria-hidden="true"
-        className="font-display text-[14px] font-extrabold leading-[1.4] whitespace-nowrap md:text-[19px]"
+        className="font-display text-[14px] font-extrabold leading-none whitespace-nowrap md:text-[19px]"
       >
         <span className="text-primary">Read</span>
         <span className="text-accent-text">Easily</span>
