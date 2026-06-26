@@ -237,7 +237,9 @@ export const Navbar = forwardRef<HTMLElement, NavbarProps>(function Navbar(
     user,
     onNavigate,
     onAccountClick,
-    homeHref = "/",
+    // The brand logo returns to the reading home (Library at /library). `/` is
+    // the marketing Landing, NOT the in-app home — see the route-swap phase.
+    homeHref = "/library",
     className,
     ...rest
   },
