@@ -17,13 +17,16 @@ import { READING_HOME, LANDING } from "../lib/routes";
 
 /* Card typography — Baloo heading + Nunito support copy, all token-bound. */
 const headingType =
-  "font-display text-[length:var(--text-heading-h3-size)] font-bold leading-[var(--text-heading-h3-line-height)] tracking-[var(--text-heading-h3-tracking)] text-primary";
+  "font-display text-[length:var(--text-heading-h2-size)] font-bold leading-[var(--text-heading-h2-line-height)] tracking-[var(--text-heading-h2-tracking)] text-primary";
 const subtitleType =
-  "font-ui text-[length:var(--text-ui-m-size)] leading-[var(--text-ui-m-line-height)] text-muted";
-const footerType =
-  "font-ui text-[length:var(--text-ui-m-size)] leading-[var(--text-ui-m-line-height)] text-muted";
-const linkType =
-  "font-semibold text-accent underline-offset-2 hover:underline rounded-[var(--radius-sm)] outline-none focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]";
+  "font-ui text-[length:var(--text-label-m-size)] font-semibold leading-[var(--text-label-m-line-height)] tracking-[var(--text-label-m-tracking)] text-muted";
+/* Footer "New here? Sign up" — Caption (Nunito Regular 12/16), muted, the WHOLE
+   line is the /signup link (centered). */
+const newHereLinkType =
+  "block text-center font-ui text-[length:var(--text-caption-size)] font-normal leading-[var(--text-caption-line-height)] text-muted underline-offset-2 hover:underline rounded-[var(--radius-sm)] outline-none focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]";
+/* Footer "Forgot password?" — UI/M (Nunito Regular 14/20), accent, right-aligned. */
+const forgotLinkType =
+  "block text-right font-ui text-[length:var(--text-ui-m-size)] font-normal leading-[var(--text-ui-m-line-height)] text-accent underline-offset-2 hover:underline rounded-[var(--radius-sm)] outline-none focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]";
 
 /** Copy for the form-level credential failure (Figma + handoff state matrix). */
 const INVALID_CREDENTIALS = "That email or password doesn't look right.";
@@ -90,15 +93,15 @@ export function LoginScreen() {
   return (
     <AuthLayout onBack={() => router.push(LANDING)}>
       <AuthCard>
-        <div className="flex flex-col gap-[var(--space-lg)]">
+        {/* Flat 18px rhythm: tabs → heading → subtitle → fields → CTA → footer
+            rows are each separated by exactly 18px (Figma card is one column). */}
+        <div className="flex flex-col gap-[18px]">
           <AuthTabs active="login" />
 
-          <div className="flex flex-col gap-[var(--space-xs)]">
-            <h1 className={headingType}>Welcome back</h1>
-            <p className={subtitleType}>
-              Pick up your reading right where you left off.
-            </p>
-          </div>
+          <h1 className={headingType}>Welcome back</h1>
+          <p className={subtitleType}>
+            Pick up your reading right where you left off.
+          </p>
 
           {formError && (
             <div
@@ -113,7 +116,7 @@ export function LoginScreen() {
           <form
             noValidate
             onSubmit={handleSubmit}
-            className="flex flex-col gap-[var(--space-lg)]"
+            className="flex flex-col gap-[18px]"
           >
             <Input
               ref={emailRef}
@@ -153,17 +156,15 @@ export function LoginScreen() {
             </Button>
           </form>
 
-          <div className="flex flex-col items-center gap-[var(--space-xs)] text-center">
-            <p className={footerType}>
-              New here?{" "}
-              <Link href="/signup" className={linkType}>
-                Sign up
-              </Link>
-            </p>
-            <Link href="/forgot" className={linkType}>
-              Forgot password?
-            </Link>
-          </div>
+          {/* Two rows, each a direct child of the 18px column (not a centered
+              stack): "New here? Sign up" is one centered link to /signup; "Forgot
+              password?" is a right-aligned accent link to /forgot. */}
+          <Link href="/signup" className={newHereLinkType}>
+            New here? Sign up
+          </Link>
+          <Link href="/forgot" className={forgotLinkType}>
+            Forgot password?
+          </Link>
         </div>
       </AuthCard>
     </AuthLayout>

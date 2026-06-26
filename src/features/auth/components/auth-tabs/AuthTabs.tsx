@@ -16,9 +16,9 @@ function cx(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");
 }
 
-/** Title/M (Baloo 2 Bold 16/22) — the pill label ramp. */
+/** Heading/H4 (Baloo 2 SemiBold 16/26) — the pill label ramp (Figma 1180:3528). */
 const labelType =
-  "font-display text-[length:var(--text-title-m-size)] font-bold leading-[var(--text-title-m-line-height)] tracking-[var(--text-title-m-tracking)]";
+  "font-display text-[length:var(--text-heading-h4-size)] font-semibold leading-[var(--text-heading-h4-line-height)] tracking-[var(--text-heading-h4-tracking)]";
 
 const tabBase = cx(
   "inline-flex min-h-[44px] items-center justify-center rounded-pill no-underline",
@@ -30,8 +30,8 @@ const tabBase = cx(
 
 /** Active = solid terracotta fill + on-accent label. */
 const tabActive = "bg-accent-strong text-on-accent";
-/** Inactive = transparent over the track, primary ink, subtle hover. */
-const tabInactive = "bg-transparent text-primary hover:text-accent-text";
+/** Inactive = transparent over the track, secondary ink (no hover recolor). */
+const tabInactive = "bg-transparent text-secondary";
 
 /**
  * AuthTabs — the "Sign up / Log in" pill pair at the top of the AuthCard
@@ -45,7 +45,7 @@ const tabInactive = "bg-transparent text-primary hover:text-accent-text";
  * with a screen reader and keyboard without any roving-tabindex machinery.
  *
  * Tokens: track `bg-surface-subtle`, active `bg-accent-strong` + `text-on-accent`,
- * inactive `text-primary` / `text-accent` (hover), pill radius, Title/M ramp.
+ * inactive `text-secondary` (no hover recolor), pill radius, Heading/H4 ramp.
  */
 export function AuthTabs({
   active,

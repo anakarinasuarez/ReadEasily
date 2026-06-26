@@ -14,9 +14,9 @@ import { LANDING } from "../lib/routes";
 
 /* Card typography — shared with the other auth screens, all token-bound. */
 const headingType =
-  "font-display text-[length:var(--text-heading-h3-size)] font-bold leading-[var(--text-heading-h3-line-height)] tracking-[var(--text-heading-h3-tracking)] text-primary";
+  "font-display text-[length:var(--text-heading-h2-size)] font-bold leading-[var(--text-heading-h2-line-height)] tracking-[var(--text-heading-h2-tracking)] text-primary";
 const subtitleType =
-  "font-ui text-[length:var(--text-ui-m-size)] leading-[var(--text-ui-m-line-height)] text-muted";
+  "font-ui text-[length:var(--text-label-m-size)] font-semibold leading-[var(--text-label-m-line-height)] tracking-[var(--text-label-m-tracking)] text-muted";
 const backLinkType =
   "font-ui text-[length:var(--text-ui-m-size)] leading-[var(--text-ui-m-line-height)] text-muted underline-offset-2 hover:underline hover:text-primary rounded-[var(--radius-sm)] outline-none focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]";
 
@@ -98,18 +98,18 @@ export function ForgotPasswordScreen() {
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col gap-[var(--space-lg)]">
-            <div className="flex flex-col gap-[var(--space-xs)]">
-              <h1 className={headingType}>Reset your password</h1>
-              <p className={subtitleType}>
-                Enter your email and we&apos;ll send you a reset link.
-              </p>
-            </div>
+          // Flat 18px rhythm: heading → subtitle → field → CTA → back link are
+          // each separated by exactly 18px (Figma card is one column).
+          <div className="flex flex-col gap-[18px]">
+            <h1 className={headingType}>Reset your password</h1>
+            <p className={subtitleType}>
+              Enter your email and we&apos;ll send you a reset link.
+            </p>
 
             <form
               noValidate
               onSubmit={handleSubmit}
-              className="flex flex-col gap-[var(--space-lg)]"
+              className="flex flex-col gap-[18px]"
             >
               <Input
                 ref={emailRef}
@@ -134,7 +134,7 @@ export function ForgotPasswordScreen() {
               </Button>
             </form>
 
-            <Link href="/login" className={`text-center ${backLinkType}`}>
+            <Link href="/login" className={backLinkType}>
               Back to log in
             </Link>
           </div>

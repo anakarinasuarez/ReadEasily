@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { useSession, type SessionUser } from "@/stores/session";
@@ -36,11 +36,11 @@ describe("LoginScreen — render", () => {
     ).toBeInTheDocument();
     // Layout's breadcrumb-back affordance is present.
     expect(screen.getAllByRole("button", { name: "Back" }).length).toBeGreaterThan(0);
-    // The screen-specific footer links (scoped so they don't collide with the
-    // AuthTabs "Sign up" / "Log in" tab links).
-    const newHere = screen.getByText(/New here\?/);
+    // The screen-specific footer links. Row 1 is the WHOLE-line /signup link
+    // ("New here? Sign up", distinct from the AuthTabs "Sign up" tab); row 2 is
+    // the right-aligned /forgot link.
     expect(
-      within(newHere).getByRole("link", { name: "Sign up" }),
+      screen.getByRole("link", { name: "New here? Sign up" }),
     ).toHaveAttribute("href", "/signup");
     expect(
       screen.getByRole("link", { name: "Forgot password?" }),

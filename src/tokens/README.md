@@ -31,7 +31,7 @@ Figma: `--text-<style>-family / -size / -weight / -line-height / -tracking`.
 
 ```
 text/      primary  secondary  muted  accent  on-accent
-bg/        canvas  subtle  elevated  accent  accent-hover  accent-strong  accent-subtle  accent-panel
+bg/        canvas  subtle  elevated  accent  accent-hover  accent-strong  accent-subtle
 border/    default  strong  accent
 feedback/  success  success-subtle  info  info-subtle
            warning  warning-solid  warning-subtle  danger  danger-subtle
@@ -152,25 +152,31 @@ because the raw values fail WCAG AA at the sizes the components use:
   on canvas and passes for the 2px input error border. Flagged for the
   design-lead to push the AA value back into the Figma variable.
 
-#### Auth marketing-panel surface ([D-AA], node 542:649)
+#### Auth marketing-panel inks ([D-design], node 542:649)
 
-The auth marketing panel is filled with `--bg-accent` (#d66c44) in Figma, but its
-body/bullet text fails WCAG AA there:
+PRODUCT DECISION: the auth marketing panel is **LITERAL Figma** — filled with bright
+`--bg-accent` (#d66c44), a two-tone headline, and white/off-white small copy — **even
+though the small panel text fails WCAG AA 4.5:1**:
 
-| Text on #d66c44 | Ratio | Verdict (16px body needs 4.5:1) |
+| Text on #d66c44 | Ratio | Verdict |
 | --- | --- | --- |
-| Figma `rgba(250,245,238,0.8)` off-white | **2.58:1** | fails |
-| solid white `--text-on-accent` | **3.45:1** | fails (large-text 3:1 only) |
-| solid white on terracotta-650 #c0703f | 3.73:1 | fails |
-| solid white on terracotta-700 #b35029 | **5.13:1** | **passes** |
+| Figma `rgba(250,245,238,0.8)` off-white (bullets) | **2.58:1** | fails 4.5:1 |
+| solid white `--text-on-accent` (small copy) | **3.45:1** | fails 4.5:1 (clears large-text 3:1) |
+| headline inks `--text-primary` / `--text-on-accent` (56px large text) | ≥3:1 | **passes** (large-text bar) |
 
-Fix is **not** lowering opacity — it is darkening the *surface* to the lightest
-ramp step where solid white clears AA: **terracotta-700**. Published as
-**`--bg-accent-panel`**, a semantic alias of `--bg-accent-strong` (no new hex), so
-it carries the right value in both modes — light #b35029 + white = 5.13:1; dark
-#e58a5e + dark-ink `--text-on-accent` = 6.38:1. Pair the panel with
-`--text-on-accent`. Tailwind: `bg-accent-panel`. Locked by `contrast.test.ts`.
-Flagged for the design-lead to darken the panel fill in the Figma source.
+The panel is **decorative marketing**, so the small-copy AA miss is an accepted
+exception (documented in `AuthLayout.tsx`); only the large headline is contrast-gated
+and both inks clear the 3:1 large-text bar. The **form card itself stays AA-compliant**.
+This **retires** the earlier surface-darkening approach (`--bg-accent-panel`, a
+`--bg-accent-strong` alias) — we do NOT darken the panel and do NOT recolor the text.
+
+The two off-white Figma inks ship as theme-independent literals, consumed via
+arbitrary-value classes (not `@theme`), mirroring `--overlay-on-accent` / `--scrim`:
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--text-on-panel-muted` | `rgba(250,245,238,0.8)` | bullets + the 6px dot marker |
+| `--text-on-panel-quote` | `rgba(250,245,238,0.35)` | the footer attribution quote |
 
 ### Screen-spec reconciliation (Search / Saved / Profile)
 

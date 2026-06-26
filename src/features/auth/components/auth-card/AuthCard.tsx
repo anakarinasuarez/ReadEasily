@@ -21,14 +21,16 @@ function cx(...parts: Array<string | false | null | undefined>): string {
  * Forgot.
  *
  * Tokens: `bg-surface-elevated`, `rounded-[var(--radius-xl)]` (32),
- * `shadow-lg`, spacing scale for the inset.
+ * `shadow-lg`. Padding is Figma-exact `pt-28 px-40 pb-32` at ALL breakpoints — 28
+ * and 40 are off-scale arbitrary px (the accepted decorative-geometry pattern);
+ * the bottom inset is the on-scale `--space-2xl` (32).
  */
 export function AuthCard({ children, className }: AuthCardProps) {
   return (
     <div
       className={cx(
         "bg-surface-elevated rounded-[var(--radius-xl)] shadow-lg",
-        "p-[var(--space-2xl)] md:p-[var(--space-3xl)]",
+        "pt-[28px] px-[40px] pb-[var(--space-2xl)]",
         className,
       )}
     >

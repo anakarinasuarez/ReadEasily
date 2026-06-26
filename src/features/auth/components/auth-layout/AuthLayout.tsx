@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { IconButton } from "@/ui/icon-button";
 import { BrandLogo } from "../brand";
-import { ChevronLeftIcon, CheckIcon } from "../icons";
+import { ChevronLeftIcon } from "../icons";
 
 export interface AuthLayoutProps {
   /**
@@ -16,71 +16,91 @@ export interface AuthLayoutProps {
 
 /* ---------------------------------------------------------------------------
  * Fixed marketing copy — shared verbatim across Log-in / Sign-up / Forgot so
- * the persistent panel never shifts between the three auth screens.
+ * the persistent panel never shifts between the three auth screens. Verbatim
+ * from Figma node 542:649.
  * ------------------------------------------------------------------------- */
 const EYEBROW = "THE SMARTER WAY TO LEARN ENGLISH";
-const HEADLINE = "Read your way to fluent English.";
-const SUB =
-  "Stop struggling with drills and flashcards. Learn English through illustrated stories that stick.";
+const SUB_LINE_1 = "Stop struggling with drills and flashcards.";
+const SUB_LINE_2 = "Learn English through illustrated stories that stick.";
 const BULLETS = [
-  "Listen to every story in a clear native voice",
-  "Tap any word for an instant translation",
-  "Save words and practice them later",
-  "Read at your own pace, one story at a time",
+  "Expand your vocabulary 3x faster, in real context",
+  "Train your ear with native-speaker audio narration",
+  "Never forget words with smart spaced-repetition cards",
+  "Build daily reading habits with streaks and progress",
 ];
-const ATTRIBUTION = "Illustrated short stories · real, everyday English.";
+const QUOTE_LINE_1 =
+  "“To have another language is to possess a second soul.”";
+const QUOTE_LINE_2 = "— Charlemagne";
 
-/** Eyebrow ramp — Meta (Baloo 2 Bold 13/18), uppercase + tracked. */
+/* ---------------------------------------------------------------------------
+ * Type ramps (all token-bound).
+ * ------------------------------------------------------------------------- */
+/** Eyebrow — "Body/M-strong" (Lora SemiBold 16/24), no tracking. Mobile 12/24. */
 const eyebrowType =
-  "font-display text-[length:var(--text-meta-size)] font-bold uppercase leading-[var(--text-meta-line-height)] tracking-[0.12em]";
+  "font-reading font-semibold text-on-accent text-[12px] leading-[24px] md:text-[length:var(--text-body-m-size)] md:leading-[var(--text-body-m-line-height)]";
 
 /**
- * Decorative baked book illustration — low-opacity, `aria-hidden`. A simple
- * token-bound mark (open pages) that adds warmth to the panel without competing
- * with the copy. Kept inline (not a one-off primitive) since it is purely panel
- * ornament.
+ * Headline — Baloo 2 ExtraBold (Display/XL 56/64/-1.12 desktop, Display/Mobile
+ * 32/40/-0.32 mobile). Two-tone with a line break.
  */
-function PanelDecoration() {
+const headlineType =
+  "font-display font-extrabold text-[length:var(--text-display-mobile-size)] leading-[var(--text-display-mobile-line-height)] tracking-[var(--text-display-mobile-tracking)] md:text-[length:var(--text-display-xl-size)] md:leading-[var(--text-display-xl-line-height)] md:tracking-[var(--text-display-xl-tracking)]";
+
+/**
+ * Sub-copy — Lora Regular. MOBILE band: white (text-on-accent) 16/24 (Body/M).
+ * DESKTOP: cocoa (text-primary) 20/28 (Body/L).
+ */
+const subType =
+  "font-reading font-normal text-on-accent text-[length:var(--text-body-m-size)] leading-[var(--text-body-m-line-height)] md:text-primary md:text-[length:var(--text-body-l-size)] md:leading-[var(--text-body-l-line-height)]";
+
+/** Bullet text — Lora Regular 16/24 (Body/M) in the off-white panel ink. */
+const bulletType =
+  "font-reading font-normal text-[length:var(--text-body-m-size)] leading-[var(--text-body-m-line-height)] text-[var(--text-on-panel-muted)]";
+
+/** Footer quote — Lora SemiBold 16/24 in the 35% off-white panel ink. */
+const quoteType =
+  "font-reading font-semibold text-[length:var(--text-body-m-size)] leading-[var(--text-body-m-line-height)] text-[var(--text-on-panel-quote)]";
+
+/**
+ * Two-tone marketing headline (Figma 542:656). Line 1 "Read your way", line 2
+ * "to fluent English." — the inks alternate primary/on-accent. A trailing space
+ * after "way" keeps the accessible text reading "Read your way to fluent
+ * English." across the line break.
+ */
+function PanelHeadline() {
   return (
-    <svg
-      aria-hidden="true"
-      focusable="false"
-      viewBox="0 0 200 200"
-      className="pointer-events-none absolute -right-6 bottom-0 h-[260px] w-[260px] text-on-accent opacity-[0.08]"
-      fill="none"
-    >
-      <path
-        d="M100 50c-14-9-31-12-50-9a6 6 0 0 0-5 6v88a6 6 0 0 0 7 6c17-3 33 0 48 9 15-9 31-12 48-9a6 6 0 0 0 7-6V47a6 6 0 0 0-5-6c-19-3-36 0-50 9Z"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path d="M100 50v100" stroke="currentColor" strokeWidth="4" />
-      <path
-        d="M58 74c12-2 24-1 33 4M58 94c12-2 24-1 33 4M142 74c-12-2-24-1-33 4M142 94c-12-2-24-1-33 4"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-    </svg>
+    <p className={headlineType}>
+      <span className="block">
+        <span className="text-primary">Read your </span>
+        <span className="text-on-accent">way </span>
+      </span>
+      <span className="block">
+        <span className="text-on-accent">to fluent</span>
+        <span className="text-primary"> English.</span>
+      </span>
+    </p>
   );
 }
 
-/** Ghost text "‹ Back" for the desktop panel — white/on-accent over terracotta. */
+/**
+ * Ghost "‹ Back" for the desktop panel — white/on-accent over terracotta, pinned
+ * top-left over the panel so it never displaces the eyebrow (Figma F2).
+ */
 function PanelBack({ onBack }: { onBack: () => void }) {
   return (
     <button
       type="button"
       onClick={onBack}
       className={[
-        "inline-flex items-center gap-[var(--space-xs)] rounded-pill",
-        "px-[var(--space-md)] py-[var(--space-sm)]",
-        "font-display text-[length:var(--text-title-m-size)] font-bold leading-[var(--text-title-m-line-height)]",
+        "absolute left-[32px] top-[32px] z-10 hidden md:inline-flex",
+        "items-center gap-[var(--space-xs)] rounded-pill px-[var(--space-lg)] py-[var(--space-md)]",
+        "font-display text-[length:var(--text-heading-h4-size)] font-semibold leading-[var(--text-heading-h4-line-height)]",
         "text-on-accent transition-colors duration-200 ease-out motion-reduce:transition-none",
         "hover:bg-[color-mix(in_srgb,var(--text-on-accent)_14%,transparent)]",
         "outline-none focus-visible:[outline:2px_solid_var(--text-on-accent)] focus-visible:[outline-offset:2px]",
       ].join(" ")}
     >
-      <span aria-hidden="true" className="inline-flex size-[18px] [&>svg]:size-full">
+      <span aria-hidden="true" className="inline-flex size-[16px] [&>svg]:size-full">
         <ChevronLeftIcon />
       </span>
       Back
@@ -90,33 +110,37 @@ function PanelBack({ onBack }: { onBack: () => void }) {
 
 /**
  * AuthLayout — the split shell shared by Log-in / Sign-up / Forgot (Figma
- * 79:139 desktop, 829:839 mobile).
+ * 542:649 desktop, mobile band variant).
  *
- * Desktop (≥md): two columns. LEFT is the persistent marketing panel (~640px,
- * `bg-accent-panel`, all copy in solid `text-on-accent`) with a 4px accent bar,
- * a low-opacity decorative book, the eyebrow/headline/sub, four bullets and a
- * footer attribution; a ghost "‹ Back" sits top-left over the panel. RIGHT holds
- * the BrandLogo top-left and the `children` card slot.
+ * Desktop (≥md): two columns. LEFT is the persistent marketing panel
+ * (`bg-accent` #d66c44, full-bleed) with a faint book illustration behind the
+ * copy, a content column pinned at left 84 / top 160 (eyebrow → two-tone
+ * headline → sub → divider+bullets) and a footer attribution quote near the
+ * panel bottom; a ghost "‹ Back" sits top-left over the panel. RIGHT centers the
+ * BrandLogo above the 480px card and the `children` card slot.
  *
- * Mobile (<md): the SAME panel collapses to a compact rounded band (eyebrow +
- * headline + sub only); a header row carries a back chevron IconButton + the
- * logo; the card fills the width below. This is a responsive variant of one
- * component, not a separate build.
+ * Mobile (<md): the panel collapses to a compact rounded band (eyebrow +
+ * headline + white sub only); a stacked header carries a back chevron
+ * IconButton on row 1 and the logo on row 2; the card fills the width below.
+ * This is a responsive variant of one component, not a separate build.
  *
- * A11y: a real landmark structure — `<header>` (mobile), `<aside>`
- * (complementary panel), `<main>` (the form). The panel's headline is styled
- * copy (a `<p>`, not a heading) so the form card inside `children` owns the page
- * heading and there is no duplicate-/competing-heading. The decorative book and
- * accent bar are `aria-hidden`. Back renders only when `onBack` is supplied.
+ * A11y: real landmarks — `<header>` (mobile), `<aside>` (complementary panel),
+ * `<main>` (the form). The panel headline is styled copy (`<p>`s, not headings)
+ * so the form card inside `children` owns the page heading. The illustration,
+ * accent bar and decorative inks are `aria-hidden`. Back renders only when
+ * `onBack` is supplied.
  *
- * Tokens (incl. the two new ones): panel `bg-accent-panel` + `text-on-accent`;
- * card radius `--radius-xl`; spacing scale throughout.
+ * PRODUCT/AA NOTE: the panel is LITERAL Figma — bright `--bg-accent` with
+ * white/off-white SMALL copy that fails AA 4.5:1. This is an accepted exception:
+ * the panel is decorative marketing (only the large headline is contrast-gated,
+ * and both inks clear the 3:1 large-text bar). The form card stays AA-compliant.
+ * Do NOT darken the panel or recolor the small text to "fix" contrast.
  */
 export function AuthLayout({ onBack, children }: AuthLayoutProps) {
   return (
     <div className="flex min-h-dvh flex-col bg-canvas md:flex-row">
-      {/* MOBILE header row — back chevron + logo (hidden from md up). */}
-      <header className="flex items-center gap-[var(--space-sm)] px-[var(--space-lg)] pt-[var(--space-lg)] md:hidden">
+      {/* MOBILE header — STACK: back chevron (row 1) + logo (row 2). md:hidden. */}
+      <header className="flex flex-col items-start gap-[var(--space-sm)] px-[var(--space-lg)] pt-[var(--space-lg)] md:hidden">
         {onBack && (
           <IconButton
             variant="ghost"
@@ -132,66 +156,79 @@ export function AuthLayout({ onBack, children }: AuthLayoutProps) {
       <aside
         aria-label="Why ReadEasily"
         className={[
-          "relative isolate overflow-hidden bg-accent-panel text-on-accent",
-          // Mobile: rounded band with margin; desktop: full-bleed fixed column.
-          "mx-[var(--space-lg)] mt-[var(--space-lg)] rounded-[var(--radius-xl)] px-[var(--space-xl)] py-[var(--space-xl)]",
-          "md:mx-0 md:mt-0 md:w-[640px] md:shrink-0 md:rounded-none",
-          "md:flex md:flex-col md:px-[var(--space-3xl-plus)] md:py-[var(--space-3xl)]",
+          "relative isolate overflow-hidden bg-accent",
+          // Mobile: rounded band with margin + inset padding.
+          "mx-[var(--space-lg)] mt-[var(--space-lg)] rounded-[var(--radius-sm)] px-[20px] py-[var(--space-xl)]",
+          // Desktop: full-bleed fixed column, flex-col so the copy sits up top
+          // (Figma insets) and the quote anchors to the bottom via mt-auto —
+          // robust at any viewport height (no clipped quote on short screens).
+          "md:mx-0 md:mt-0 md:w-[640px] md:shrink-0 md:rounded-none md:p-0 md:flex md:flex-col",
         ].join(" ")}
       >
-        {/* 4px accent bar (decorative). */}
+        {/* Full-bleed decorative illustration BEHIND the copy. */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- decorative, fixed asset, no layout/LCP benefit from next/image */}
+        <img
+          src="/auth/marketing-panel.jpg"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 size-full object-cover opacity-10 md:opacity-[0.08]"
+        />
+
+        {/* 4px full-height accent bar on the far left (effectively invisible). */}
         <span
           aria-hidden="true"
-          className="absolute left-0 top-0 hidden h-full w-[4px] bg-accent-strong md:block"
+          className="absolute left-0 top-0 hidden h-full w-[4px] bg-accent md:block"
         />
-        <PanelDecoration />
 
-        {/* Desktop back, over the panel. */}
-        {onBack && (
-          <div className="mb-[var(--space-2xl)] hidden md:block">
-            <PanelBack onBack={onBack} />
-          </div>
-        )}
+        {/* Desktop back, pinned over the panel (does not displace the eyebrow). */}
+        {onBack && <PanelBack onBack={onBack} />}
 
-        <div className="relative md:my-auto md:max-w-[420px]">
+        {/* Content column — flow; desktop adds the Figma left/top insets. */}
+        <div className="relative flex flex-col gap-[24px] md:w-[473px] md:pl-[84px] md:pt-[160px]">
           <p className={eyebrowType}>{EYEBROW}</p>
-          <p className="mt-[var(--space-md)] font-display text-[length:var(--text-display-mobile-size)] font-extrabold leading-[var(--text-display-mobile-line-height)] tracking-[var(--text-display-mobile-tracking)] md:text-[length:var(--text-display-l-size)] md:leading-[var(--text-display-l-line-height)] md:tracking-[var(--text-display-l-tracking)]">
-            {HEADLINE}
-          </p>
-          <p className="mt-[var(--space-md)] font-ui text-[length:var(--text-ui-l-size)] leading-[var(--text-ui-l-line-height)] text-on-accent">
-            {SUB}
+          <PanelHeadline />
+          <p className={subType}>
+            {SUB_LINE_1}
+            <br />
+            {SUB_LINE_2}
           </p>
 
-          {/* Bullets + attribution — desktop only (the mobile band stays compact). */}
-          <ul className="mt-[var(--space-2xl)] hidden list-none flex-col gap-[var(--space-md)] p-0 md:flex">
-            {BULLETS.map((bullet) => (
-              <li key={bullet} className="flex items-start gap-[var(--space-sm)]">
-                <span
-                  aria-hidden="true"
-                  className="mt-[2px] inline-flex size-[20px] shrink-0 items-center justify-center [&>svg]:size-full"
-                >
-                  <CheckIcon />
-                </span>
-                <span className="font-ui text-[length:var(--text-ui-l-size)] leading-[var(--text-ui-l-line-height)]">
-                  {bullet}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {/* Divider + bullets — desktop only (the mobile band stays compact). */}
+          <div className="hidden flex-col gap-[36px] md:flex">
+            <span
+              aria-hidden="true"
+              className="h-[2px] w-[83px] bg-surface-subtle"
+            />
+            <ul className="flex list-none flex-col gap-[24px] p-0">
+              {BULLETS.map((bullet) => (
+                <li key={bullet} className="flex items-center gap-[12px]">
+                  <span
+                    aria-hidden="true"
+                    className="size-[6px] shrink-0 rounded-full bg-[var(--text-on-panel-muted)]"
+                  />
+                  <span className={bulletType}>{bullet}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <p className="mt-[var(--space-2xl)] hidden font-ui text-[length:var(--text-ui-m-size)] leading-[var(--text-ui-m-line-height)] text-on-accent md:block">
-          {ATTRIBUTION}
+        {/* Footer attribution quote — desktop only, anchored to the panel bottom
+            (mt-auto) so it's always visible regardless of viewport height. */}
+        <p className={`hidden md:block md:mt-auto md:pb-[48px] md:pl-[61px] ${quoteType}`}>
+          {QUOTE_LINE_1}
+          <br />
+          {QUOTE_LINE_2}
         </p>
       </aside>
 
-      {/* RIGHT column — logo (desktop) + the card slot. */}
-      <main className="flex flex-1 flex-col px-[var(--space-lg)] py-[var(--space-xl)] md:px-[var(--space-3xl)] md:py-[var(--space-2xl)]">
-        <div className="mb-[var(--space-2xl)] hidden md:block">
-          <BrandLogo />
-        </div>
-        <div className="flex w-full flex-1 items-center justify-center">
-          <div className="w-full max-w-[440px]">{children}</div>
+      {/* RIGHT column — centered logo above the 480px card slot. */}
+      <main className="flex flex-1 flex-col items-center justify-center px-[var(--space-lg)] py-[var(--space-xl)] md:px-[var(--space-3xl)] md:py-[var(--space-2xl)]">
+        <div className="w-full max-w-[480px]">
+          <div className="mb-[var(--space-2xl)] hidden justify-center md:flex">
+            <BrandLogo />
+          </div>
+          {children}
         </div>
       </main>
     </div>

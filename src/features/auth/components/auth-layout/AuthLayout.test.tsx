@@ -31,19 +31,42 @@ describe("AuthLayout — structure", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows the fixed marketing headline (styled copy, not a heading)", () => {
+  it("shows the two-tone marketing headline as styled copy, not a heading", () => {
+    render(
+      <AuthLayout>
+        <Card />
+      </AuthLayout>,
+    );
+    // The headline is split into two-tone spans across a line break, so assert
+    // its pieces rather than one node.
+    expect(screen.getByText(/Read your/)).toBeInTheDocument();
+    expect(screen.getByText(/English\./)).toBeInTheDocument();
+    // The ONLY heading is the form card's — the panel copy is styled <p>s.
+    const headings = screen.getAllByRole("heading");
+    expect(headings).toHaveLength(1);
+    expect(headings[0]).toHaveTextContent("Create your account");
+  });
+
+  it("renders the four marketing bullets verbatim", () => {
     render(
       <AuthLayout>
         <Card />
       </AuthLayout>,
     );
     expect(
-      screen.getByText("Read your way to fluent English."),
+      screen.getByText("Expand your vocabulary 3x faster, in real context"),
     ).toBeInTheDocument();
-    // It must NOT be a heading — that role belongs to the form card.
     expect(
-      screen.queryByRole("heading", { name: "Read your way to fluent English." }),
-    ).not.toBeInTheDocument();
+      screen.getByText("Train your ear with native-speaker audio narration"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Never forget words with smart spaced-repetition cards",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Build daily reading habits with streaks and progress"),
+    ).toBeInTheDocument();
   });
 });
 

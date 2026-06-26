@@ -78,10 +78,11 @@ const generalPairs: Array<[string, string, string]> = [
   // Saved "practice sets" numeral renders on the elevated card surface, NOT on
   // warning-subtle — guard the AA-safe warning token there (raw #e0a838 fails).
   ["warning numeral on elevated", "--feedback-warning", "--bg-elevated"],
-  // Auth marketing panel (Figma 542:649): bullets/body render white on the AA-safe
-  // panel surface (terracotta-700), NOT the off-white-on-#d66c44 that fails (2.58:1).
-  // Guards that the panel surface stays dark enough for solid white body text.
-  ["marketing panel bullet", "--text-on-accent", "--bg-accent-panel"],
+  // NOTE: the auth marketing panel is intentionally NOT gated here. Per the product
+  // decision it is LITERAL Figma — small off-white copy on bright --bg-accent (#d66c44)
+  // that fails AA 4.5:1 by design. It is decorative marketing (only the large headline
+  // needs 3:1, which it clears); the form card stays AA-compliant. The retired
+  // --bg-accent-panel surface-darkening pair was removed with that decision.
 ];
 
 describe("token contrast (WCAG AA, light mode)", () => {

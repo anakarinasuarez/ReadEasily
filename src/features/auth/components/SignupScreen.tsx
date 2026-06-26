@@ -21,13 +21,15 @@ import { READING_HOME, LANDING } from "../lib/routes";
 
 /* Card typography — shared with the other auth screens, all token-bound. */
 const headingType =
-  "font-display text-[length:var(--text-heading-h3-size)] font-bold leading-[var(--text-heading-h3-line-height)] tracking-[var(--text-heading-h3-tracking)] text-primary";
+  "font-display text-[length:var(--text-heading-h2-size)] font-bold leading-[var(--text-heading-h2-line-height)] tracking-[var(--text-heading-h2-tracking)] text-primary";
 const subtitleType =
-  "font-ui text-[length:var(--text-ui-m-size)] leading-[var(--text-ui-m-line-height)] text-muted";
+  "font-ui text-[length:var(--text-label-m-size)] font-semibold leading-[var(--text-label-m-line-height)] tracking-[var(--text-label-m-tracking)] text-muted";
+/* Footer base — Nunito Regular 13px, muted (label-m geometry, regular weight). */
 const footerType =
-  "font-ui text-[length:var(--text-ui-m-size)] leading-[var(--text-ui-m-line-height)] text-muted";
+  "font-ui text-[length:var(--text-label-m-size)] font-normal leading-[var(--text-label-m-line-height)] text-muted";
+/* Footer link — Baloo SemiBold, accent. */
 const linkType =
-  "font-semibold text-accent underline-offset-2 hover:underline rounded-[var(--radius-sm)] outline-none focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]";
+  "font-display font-semibold text-accent underline-offset-2 hover:underline rounded-[var(--radius-sm)] outline-none focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]";
 
 /**
  * SignupScreen — the "Create your account" auth screen (Figma 79:139), mounted
@@ -109,15 +111,15 @@ export function SignupScreen() {
   return (
     <AuthLayout onBack={() => router.push(LANDING)}>
       <AuthCard>
-        <div className="flex flex-col gap-[var(--space-lg)]">
+        {/* Flat 18px rhythm: tabs → heading → subtitle → fields → CTA → footer
+            are each separated by exactly 18px (Figma card is one column). */}
+        <div className="flex flex-col gap-[18px]">
           <AuthTabs active="signup" />
 
-          <div className="flex flex-col gap-[var(--space-xs)]">
-            <h1 className={headingType}>Create your account</h1>
-            <p className={subtitleType}>
-              Track your progress and save words as you read.
-            </p>
-          </div>
+          <h1 className={headingType}>Create your account</h1>
+          <p className={subtitleType}>
+            Track your progress and save words as you read.
+          </p>
 
           {formError && (
             <div
@@ -132,7 +134,7 @@ export function SignupScreen() {
           <form
             noValidate
             onSubmit={handleSubmit}
-            className="flex flex-col gap-[var(--space-lg)]"
+            className="flex flex-col gap-[18px]"
           >
             <Input
               ref={nameRef}
