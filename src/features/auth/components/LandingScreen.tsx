@@ -196,7 +196,7 @@ export function LandingScreen() {
                     key={lang.label}
                     className={`flex items-center justify-center rounded-pill py-[6px] font-display font-semibold text-[length:var(--text-heading-h4-size)] leading-[var(--text-heading-h4-line-height)] ${
                       lang.emphasised
-                        ? "bg-elevated px-[var(--space-md-plus)] text-primary shadow-feature-icon"
+                        ? "px-[var(--space-md-plus)] text-primary"
                         : "px-[var(--space-sm)] text-muted"
                     }`}
                   >
