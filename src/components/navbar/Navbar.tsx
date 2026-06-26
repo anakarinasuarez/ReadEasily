@@ -1,8 +1,13 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, useRef, useState } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { Avatar } from "@/ui/avatar";
+import { AccountMenu } from "@/components/account-menu";
+import { useSaved } from "@/features/saved/hooks/useSaved";
+import { authClient } from "@/features/auth/api/authClient";
+import { useSession } from "@/stores/session";
 
 /**
  * Navbar — the floating, glass-effect primary navigation pill.
@@ -60,9 +65,15 @@ export interface NavbarProps extends Omit<HTMLAttributes<HTMLElement>, "onSelect
    * call `onNavigate(key)`; otherwise they render as `<a href>` links.
    */
   onNavigate?: (key: string) => void;
-  /** Click handler for the account button (e.g. open the account menu). */
+  /**
+   * "View profile" handler. The avatar now OPENS the account popover
+   * (`<AccountMenu>`); this fires from the popover's identity header row →
+   * navigate to /profile. Kept named `onAccountClick` so existing screens pass
+   * it unchanged (they already supply `() => router.push("/profile")`).
+   */
   onAccountClick?: () => void;
-  /** Logo link target (home / Library). Default "/". */
+  /** Logo link target (the reading home — Library). Default "/library" ("/" is
+   *  the marketing Landing, not the in-app home). */
   homeHref?: string;
 }
 
@@ -245,6 +256,34 @@ export const Navbar = forwardRef<HTMLElement, NavbarProps>(function Navbar(
   },
   ref,
 ) {
+  // The avatar opens a focus-managed account popover (Figma "Overlay/UserCard").
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountTriggerRef = useRef<HTMLButtonElement>(null);
+  const router = useRouter();
+
+  // AccountMenu data sourced app-globally so EVERY screen's navbar gets it for
+  // free (the screens only ever pass `onAccountClick`):
+  //  • identity name/avatar — the `user` prop (already merged with the device
+  //    profile overrides upstream via `useNavbarUser`);
+  //  • email — the persisted session (a guest has none → the email line is
+  //    omitted, and Sign out is hidden: nothing to sign out of);
+  //  • words — the live Saved list length (shared Query cache with the Saved
+  //    screen, so it can't drift); finished — 0 until a progress store exists.
+  const sessionEmail = useSession((s) => s.user?.email);
+  const isGuest = useSession((s) => s.user === null);
+  const sessionSignOut = useSession((s) => s.signOut);
+  const saved = useSaved();
+  const wordsSaved = saved.data?.words.length ?? 0;
+
+  // Sign out — mirrors ProfileScreen: fire the (mock today) network call, clear
+  // the local session, return to the landing.
+  function handleSignOut() {
+    void authClient.signOut();
+    sessionSignOut();
+    setAccountOpen(false);
+    router.push("/");
+  }
+
   return (
     <nav
       ref={ref}
@@ -275,14 +314,31 @@ export const Navbar = forwardRef<HTMLElement, NavbarProps>(function Navbar(
         ))}
       </ul>
 
-      <button
-        type="button"
-        aria-label="Account"
-        onClick={onAccountClick}
-        className={cx("inline-flex shrink-0 items-center rounded-pill", focusRing)}
-      >
-        <Avatar size="md" src={user.avatarSrc} name={user.name} />
-      </button>
+      <div className="relative shrink-0">
+        <button
+          ref={accountTriggerRef}
+          type="button"
+          aria-label="Account"
+          aria-haspopup="dialog"
+          aria-expanded={accountOpen}
+          onClick={() => setAccountOpen((open) => !open)}
+          className={cx("inline-flex shrink-0 items-center rounded-pill", focusRing)}
+        >
+          <Avatar size="md" src={user.avatarSrc} name={user.name} />
+        </button>
+        <AccountMenu
+          open={accountOpen}
+          onClose={() => setAccountOpen(false)}
+          identity={{ name: user.name, avatarSrc: user.avatarSrc, email: sessionEmail }}
+          stats={{ words: wordsSaved, finished: 0 }}
+          onViewProfile={() => {
+            setAccountOpen(false);
+            onAccountClick?.();
+          }}
+          onSignOut={isGuest ? undefined : handleSignOut}
+          triggerRef={accountTriggerRef}
+        />
+      </div>
     </nav>
   );
 });

@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Navbar, type NavbarItem } from "./Navbar";
+
+// The navbar's account popover reads the saved-word count via TanStack Query, so
+// every story needs a client in context. (next/navigation is auto-mocked by
+// @storybook/nextjs-vite, and the session/preferences stores need no provider.)
+const queryClient = new QueryClient();
 
 /* ---- Nav glyphs (consumer-provided icons; the navbar owns only the Logo). --- */
 function HomeIcon() {
@@ -57,11 +63,13 @@ const meta = {
   args: { items, user, activeKey: "library" },
   decorators: [
     (Story) => (
-      <div className="bg-canvas p-[var(--space-xl)]">
-        <div className="mx-auto max-w-[820px]">
-          <Story />
+      <QueryClientProvider client={queryClient}>
+        <div className="bg-canvas p-[var(--space-xl)]">
+          <div className="mx-auto max-w-[820px]">
+            <Story />
+          </div>
         </div>
-      </div>
+      </QueryClientProvider>
     ),
   ],
 } satisfies Meta<typeof Navbar>;

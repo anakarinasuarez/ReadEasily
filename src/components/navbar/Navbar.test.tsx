@@ -1,8 +1,18 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, it, expect, vi } from "vitest";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
+import { renderWithQuery } from "../../../tests/utils/query";
 import { Navbar, type NavbarItem } from "./Navbar";
+
+// The navbar now opens an account popover whose Sign out routes via the App
+// Router; mock it so the component renders without a mounted router in jsdom.
+const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock, prefetch: vi.fn() }),
+}));
+
+beforeEach(() => pushMock.mockClear());
 
 function Icon() {
   return (
@@ -22,14 +32,14 @@ const user = { name: "Karina Aguilar" };
 
 describe("Navbar", () => {
   it("renders a primary landmark", () => {
-    render(<Navbar items={items} user={user} activeKey="library" />);
+    renderWithQuery(<Navbar items={items} user={user} activeKey="library" />);
     expect(
       screen.getByRole("navigation", { name: "Primary" }),
     ).toBeInTheDocument();
   });
 
   it("renders each item as a link with its href by default", () => {
-    render(<Navbar items={items} user={user} activeKey="library" />);
+    renderWithQuery(<Navbar items={items} user={user} activeKey="library" />);
     expect(screen.getByRole("link", { name: "Library" })).toHaveAttribute(
       "href",
       "/library",
@@ -45,7 +55,7 @@ describe("Navbar", () => {
   });
 
   it("marks only the active item with aria-current=page", () => {
-    render(<Navbar items={items} user={user} activeKey="search" />);
+    renderWithQuery(<Navbar items={items} user={user} activeKey="search" />);
     expect(screen.getByRole("link", { name: "Search" })).toHaveAttribute(
       "aria-current",
       "page",
@@ -56,7 +66,7 @@ describe("Navbar", () => {
   });
 
   it("gives every item a stable accessible name (survives the mobile label collapse)", () => {
-    render(<Navbar items={items} user={user} activeKey="library" />);
+    renderWithQuery(<Navbar items={items} user={user} activeKey="library" />);
     // Inactive items hide their label text below `md`; aria-label keeps the
     // accessible name regardless of viewport (jsdom can't evaluate the query).
     for (const item of items) {
@@ -68,7 +78,7 @@ describe("Navbar", () => {
 
   it("renders items as buttons and fires onNavigate when onNavigate is given", async () => {
     const onNavigate = vi.fn();
-    render(
+    renderWithQuery(
       <Navbar
         items={items}
         user={user}
@@ -82,9 +92,16 @@ describe("Navbar", () => {
     expect(onNavigate).toHaveBeenCalledWith("search");
   });
 
-  it("exposes a labelled account button driven by the user", async () => {
+  it("exposes the account avatar as a dialog trigger (haspopup + expanded)", () => {
+    renderWithQuery(<Navbar items={items} user={user} activeKey="library" />);
+    const account = screen.getByRole("button", { name: "Account" });
+    expect(account).toHaveAttribute("aria-haspopup", "dialog");
+    expect(account).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("opens the account popover on avatar click; its View profile fires onAccountClick", async () => {
     const onAccountClick = vi.fn();
-    render(
+    renderWithQuery(
       <Navbar
         items={items}
         user={user}
@@ -93,12 +110,23 @@ describe("Navbar", () => {
       />,
     );
     const account = screen.getByRole("button", { name: "Account" });
+    // No dialog until the avatar is pressed.
+    expect(screen.queryByRole("dialog", { name: "Account" })).toBeNull();
+
     await userEvent.click(account);
+    expect(account).toHaveAttribute("aria-expanded", "true");
+    const dialog = screen.getByRole("dialog", { name: "Account" });
+    expect(dialog).toBeInTheDocument();
+
+    // The popover's identity header row is the new /profile entry.
+    await userEvent.click(
+      screen.getByRole("button", { name: "View profile, Karina Aguilar" }),
+    );
     expect(onAccountClick).toHaveBeenCalledTimes(1);
   });
 
   it("links the logo to the home target", () => {
-    render(
+    renderWithQuery(
       <Navbar
         items={items}
         user={user}
@@ -112,7 +140,7 @@ describe("Navbar", () => {
   });
 
   it("renders the badge count on an item", () => {
-    render(
+    renderWithQuery(
       <Navbar
         items={items.map((i) =>
           i.key === "saved" ? { ...i, badge: 3 } : i,
@@ -125,7 +153,7 @@ describe("Navbar", () => {
   });
 
   it("has no axe violations", async () => {
-    const { container } = render(
+    const { container } = renderWithQuery(
       <Navbar items={items} user={user} activeKey="library" />,
     );
     expect(await axe(container)).toHaveNoViolations();

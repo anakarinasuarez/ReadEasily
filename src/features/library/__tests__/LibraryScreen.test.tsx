@@ -64,7 +64,12 @@ describe("LibraryScreen", () => {
     renderWithQuery(<LibraryScreen />);
     await waitForLoaded();
 
+    // The avatar now opens the account popover; its "View profile" header row is
+    // the /profile entry (the avatar itself no longer navigates directly).
     await user.click(screen.getByRole("button", { name: "Account" }));
+    await user.click(
+      await screen.findByRole("button", { name: /^View profile,/ }),
+    );
     expect(pushMock).toHaveBeenCalledWith("/profile");
   });
 

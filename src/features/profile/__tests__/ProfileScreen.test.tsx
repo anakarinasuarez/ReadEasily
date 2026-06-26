@@ -250,7 +250,12 @@ describe("ProfileScreen — navigation contract", () => {
     renderWithQuery(<ProfileScreen />);
     await screen.findByText("Words saved");
 
+    // The avatar opens the account popover; its "View profile" header row routes
+    // to /profile.
     await user.click(screen.getByRole("button", { name: "Account" }));
+    await user.click(
+      await screen.findByRole("button", { name: /^View profile,/ }),
+    );
     expect(pushMock).toHaveBeenCalledWith("/profile");
   });
 });
