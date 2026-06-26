@@ -795,12 +795,90 @@ const savedWordsSeed: SavedWord[] = [
   },
 ];
 
-/** Live, mutable working copy the handlers read/mutate. */
-let savedWords: SavedWord[] = [...savedWordsSeed];
+/* ---------------------------------------------------------------------------
+ * Saved-words persistence.
+ *
+ * The live list is in-memory, but in a REAL browser (dev / Playwright e2e) it is
+ * also mirrored to localStorage: read on init, written on every mutation
+ * (DELETE / POST / PATCH). This is the BUG-3 fix — without it a full page reload
+ * re-ran this module and re-seeded the list, so a removed card reappeared.
+ *
+ * Under the UNIT runner (node / jsdom) persistence is OFF: `activeStorage()`
+ * returns null when `NODE_ENV === "test"`, so handlers stay purely in-memory and
+ * `resetSavedWords()` (called from tests/setup.ts `afterEach`) restores the seed
+ * — nothing leaks between tests. The `__setSavedStorageForTest` seam lets the
+ * dedicated persistence test opt a single storage in (and back out) to exercise
+ * the reload-survives-delete path without affecting any other test.
+ * ------------------------------------------------------------------------- */
 
-/** Restore the seed list — call between test files so removals don't leak. */
+/** localStorage key for the persisted saved-words list. */
+const SAVED_STORAGE_KEY = "readeasily-saved-mock";
+
+/** Test override for the persistence storage. `undefined` = use the default
+ *  (browser-only) gate; an explicit value (incl. `null`) forces it. */
+let savedStorageOverride: Storage | null | undefined;
+
+/**
+ * Test seam: force the storage the saved mock persists to (e.g. a fresh
+ * localStorage) so the reload-survives-delete behavior can be exercised under the
+ * runner. Pass `undefined` to restore the default browser-only gate.
+ */
+export function __setSavedStorageForTest(
+  storage: Storage | null | undefined,
+): void {
+  savedStorageOverride = storage;
+}
+
+/** The Storage the handlers persist to: the override when set, else the real
+ *  browser localStorage in dev/e2e, else null (unit runner → in-memory only). */
+function activeStorage(): Storage | null {
+  if (savedStorageOverride !== undefined) return savedStorageOverride;
+  if (process.env.NODE_ENV === "test") return null;
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+/** Read the persisted list from a storage, or null if absent/unreadable. */
+function readPersistedSaved(storage: Storage | null): SavedWord[] | null {
+  if (!storage) return null;
+  try {
+    const raw = storage.getItem(SAVED_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SavedWord[];
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Mirror the current list to the active storage (best-effort). */
+function persistSaved(): void {
+  const storage = activeStorage();
+  if (!storage) return;
+  try {
+    storage.setItem(SAVED_STORAGE_KEY, JSON.stringify(savedWords));
+  } catch {
+    /* ignore quota / serialization errors — the in-memory list is authoritative */
+  }
+}
+
+/** Live, mutable working copy the handlers read/mutate. Seeded from the persisted
+ *  list when one exists (browser reload), else from the module seed. */
+let savedWords: SavedWord[] =
+  readPersistedSaved(activeStorage()) ?? [...savedWordsSeed];
+
+/**
+ * Restore the list as a fresh module load would — from the persisted storage if
+ * one is active (a "reload" in the persistence test / browser), else the seed.
+ * Called between test files so removals don't leak; with persistence off (the
+ * default under the runner) this always restores the seed.
+ */
 export function resetSavedWords(): void {
-  savedWords = [...savedWordsSeed];
+  savedWords = readPersistedSaved(activeStorage()) ?? [...savedWordsSeed];
 }
 
 /** Shape the current words into the `SavedData` contract (stats derived). */
@@ -906,6 +984,7 @@ export const handlers = [
     if (savedWords.length === before) {
       return new HttpResponse(null, { status: 404 });
     }
+    persistSaved();
     return new HttpResponse(null, { status: 204 });
   }),
 
@@ -925,6 +1004,7 @@ export const handlers = [
       sentencesReady: body.sentencesReady ?? savedWords[index].sentencesReady,
     };
     savedWords = savedWords.map((w, i) => (i === index ? updated : w));
+    persistSaved();
     return HttpResponse.json(updated, { status: 200 });
   }),
 
@@ -982,6 +1062,7 @@ export const handlers = [
       savedAt: body.savedAt,
     };
     savedWords = [created, ...savedWords];
+    persistSaved();
     return HttpResponse.json(created, { status: 201 });
   }),
 

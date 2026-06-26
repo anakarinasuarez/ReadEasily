@@ -34,12 +34,14 @@ export interface SavedGridProps {
   exitingId?: string | null;
   /** Fired by a card's audio button. */
   onListen: (word: SavedWord) => void;
+  /** Fired by a card's Review/Practice button — opens the Practice overlay. */
+  onPractice: (word: SavedWord) => void;
   /** Fired by a card's remove button; `index` positions the next focus target. */
   onRemove: (word: SavedWord, index: number) => void;
 }
 
 export const SavedGrid = forwardRef<HTMLUListElement, SavedGridProps>(
-  function SavedGrid({ words, exitingId, onListen, onRemove }, ref) {
+  function SavedGrid({ words, exitingId, onListen, onPractice, onRemove }, ref) {
     return (
       <ul
         ref={ref}
@@ -63,6 +65,7 @@ export const SavedGrid = forwardRef<HTMLUListElement, SavedGridProps>(
               sentencesReady={word.sentencesReady}
               wordHref={`/story/${word.sourceStoryId}`}
               onListen={() => onListen(word)}
+              onPractice={() => onPractice(word)}
               onRemove={() => onRemove(word, index)}
             />
           </li>

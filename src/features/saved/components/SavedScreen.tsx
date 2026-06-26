@@ -6,6 +6,14 @@ import { useRouter } from "next/navigation";
 import { Navbar, useNavbarUser, type NavbarItem } from "@/components/navbar";
 import { StatPill } from "@/components/stat-pill";
 import { Button } from "@/ui/button";
+import { usePreferences } from "@/stores/preferences";
+import { speakWord } from "@/lib/audio/speakWord";
+import { PracticeOverlay } from "@/features/practice/components";
+import {
+  STORE_ACCENT_TO_VOICE,
+  STORE_LANG_TO_READER,
+} from "@/features/reader/types";
+import type { ReaderSpeech } from "@/features/reader/audio/speechController";
 import { useSaved } from "../hooks/useSaved";
 import { useRemoveSavedWord } from "../hooks/useRemoveSavedWord";
 import type { SavedStats, SavedWord } from "../types";
@@ -175,12 +183,34 @@ function Breadcrumb({ hideOnMobile = false }: { hideOnMobile?: boolean }) {
   );
 }
 
-export function SavedScreen() {
+export interface SavedScreenProps {
+  /**
+   * Test seam: inject a fake TTS controller (+ force support) so the listen
+   * button's audio — and the Practice overlay's audio — can be exercised in
+   * jsdom, which has no `speechSynthesis`. Omitted in the app (real Web Speech
+   * via feature-detection).
+   */
+  audioController?: ReaderSpeech;
+  audioSupported?: boolean;
+}
+
+export function SavedScreen({
+  audioController,
+  audioSupported,
+}: SavedScreenProps = {}) {
   const router = useRouter();
   // Overlay any device-local profile overrides (name/avatar) onto the base user.
   const user = useNavbarUser(SCREEN_USER);
   const { data, isPending, isError, refetch } = useSaved();
   const remove = useRemoveSavedWord();
+
+  // Reading prefs drive the spoken accent (Listen) and the Practice overlay's
+  // language + voice — the SAME global store the Reader reads, so a change in
+  // Profile/Reader is reflected here.
+  const readingAccent = usePreferences((s) => s.readingAccent);
+  const translationLang = usePreferences((s) => s.translationLang);
+  const voice = STORE_ACCENT_TO_VOICE[readingAccent];
+  const language = STORE_LANG_TO_READER[translationLang];
 
   // Memoised so the focus effect's `[words]` dep only changes when the list
   // actually does (a new `[]` literal each render would re-run it pointlessly).
@@ -189,6 +219,10 @@ export function SavedScreen() {
 
   // The card currently animating out (drives the exit transition in SavedGrid).
   const [exitingId, setExitingId] = useState<string | null>(null);
+  // The word the Practice overlay is open for (null = closed). Kept whole so the
+  // overlay gets its word/translation/phonetic/provenance, and its id restores
+  // focus to the originating card on close.
+  const [practiceTarget, setPracticeTarget] = useState<SavedWord | null>(null);
   // Polite announcement for removals.
   const [announcement, setAnnouncement] = useState("");
 
@@ -231,10 +265,30 @@ export function SavedScreen() {
   }, [words]);
 
   function handleListen(word: SavedWord) {
-    // TODO(audio): speak `word.word` here once an audio backend exists. The seam
-    // keeps the word in hand so wiring it later is a one-liner; no backend is
-    // invented now.
-    void word;
+    // Pronounce the word via the SAME Web Speech path the Reader uses, in the
+    // user's reading accent. A graceful no-op where speech is unsupported.
+    speakWord(word.word, {
+      voiceAccent: voice,
+      controller: audioController,
+      supported: audioSupported,
+    });
+  }
+
+  function handlePractice(word: SavedWord) {
+    setPracticeTarget(word);
+  }
+
+  // Close the Practice overlay and return focus to the card's word link (the
+  // dialog traps focus; restoring it to the originating card is the screen's job).
+  function closePractice() {
+    const id = practiceTarget?.id;
+    setPracticeTarget(null);
+    if (id == null) return;
+    requestAnimationFrame(() => {
+      listRef.current
+        ?.querySelector<HTMLElement>(`li[data-word-id="${id}"] a`)
+        ?.focus();
+    });
   }
 
   function handleRemove(word: SavedWord, index: number) {
@@ -311,12 +365,35 @@ export function SavedScreen() {
                 words={words}
                 exitingId={exitingId}
                 onListen={handleListen}
+                onPractice={handlePractice}
                 onRemove={handleRemove}
               />
             )}
           </>
         )}
       </div>
+
+      {/* Practice overlay — opened from a card's Review/Practice action for that
+          word, in the active reading language + voice. Closing returns focus to
+          the originating card's word link. Mounted only when a target is set;
+          Radix keeps the rest of the screen inert while open. */}
+      {practiceTarget && (
+        <PracticeOverlay
+          open
+          onOpenChange={(next) => {
+            if (!next) closePractice();
+          }}
+          word={practiceTarget.word}
+          translation={practiceTarget.translation}
+          phonetic={practiceTarget.phonetic}
+          language={language}
+          voice={voice}
+          sourceStoryId={practiceTarget.sourceStoryId}
+          sourceStoryTitle={practiceTarget.sourceStoryTitle}
+          audioController={audioController}
+          audioSupported={audioSupported}
+        />
+      )}
     </main>
   );
 }

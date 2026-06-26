@@ -6,7 +6,26 @@ import { axe } from "jest-axe";
 import { server } from "../../../../tests/mocks/server";
 import { renderWithQuery } from "../../../../tests/utils/query";
 import { deriveSavedStats, type SavedData, type SavedWord } from "../types";
+import type {
+  ReaderSpeech,
+  SpeakOptions,
+} from "@/features/reader/audio/speechController";
 import { SavedScreen } from "../components/SavedScreen";
+
+/** A fake TTS controller: records `speak` calls so the Listen seam can be
+ *  asserted in jsdom (which has no `speechSynthesis`). */
+function makeFakeSpeech() {
+  const calls: { text: string; options?: SpeakOptions }[] = [];
+  const controller: ReaderSpeech = {
+    speak: (text, options) => calls.push({ text, options }),
+    cancel: () => {},
+    pause: () => {},
+    resume: () => {},
+    getVoices: () => [],
+    onVoicesChanged: () => () => {},
+  };
+  return { controller, calls };
+}
 
 // The screen routes the navbar account avatar via the App Router; mock it so
 // the component renders without a mounted router in jsdom.
@@ -114,6 +133,39 @@ describe("SavedScreen", () => {
 
     // The removal is announced politely.
     expect(screen.getByText(/Removed Path\. 7 words saved\./)).toBeInTheDocument();
+  });
+
+  it("speaks the word through the audio seam when its Listen button is pressed", async () => {
+    const { controller, calls } = makeFakeSpeech();
+    const user = userEvent.setup();
+    renderWithQuery(<SavedScreen audioController={controller} audioSupported />);
+    await waitForLoaded();
+
+    await user.click(
+      screen.getByRole("button", { name: "Listen to Path" }),
+    );
+
+    // The card's word is spoken once, in the reading accent's voice.
+    expect(calls).toHaveLength(1);
+    expect(calls[0].text).toBe("Path");
+  });
+
+  it("opens the Practice overlay for a word when its action is pressed", async () => {
+    const { controller } = makeFakeSpeech();
+    const user = userEvent.setup();
+    renderWithQuery(<SavedScreen audioController={controller} audioSupported />);
+    await waitForLoaded();
+
+    // "Path" has ready sentences, so its action reads "Review Path".
+    await user.click(screen.getByRole("button", { name: "Review Path" }));
+
+    // The Practice dialog opens, titled by the word, and loads its sentences.
+    const dialog = await screen.findByRole("dialog", { name: "Path" });
+    expect(
+      await within(dialog).findByRole("list", {
+        name: "Practice sentences for Path",
+      }),
+    ).toBeInTheDocument();
   });
 
   it("shows the EmptyState (CTA → Library home) when there are no saved words", async () => {
