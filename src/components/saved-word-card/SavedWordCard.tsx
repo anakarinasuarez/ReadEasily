@@ -217,9 +217,9 @@ export const SavedWordCard = forwardRef<HTMLElement, SavedWordCardProps>(
         {actionContent}
       </a>
     ) : (
-      // TODO(practice): wire to the Practice feature once that screen exists.
-      // No route is invented here — without `practiceHref`/`onPractice` this is
-      // a real, focusable no-op control that announces its accessible name.
+      // Fires `onPractice` — the host (SavedScreen) opens the Practice overlay
+      // for this word. With neither `practiceHref` nor `onPractice` it degrades
+      // to a focusable control that just announces its accessible name.
       <button
         type="button"
         aria-label={actionName}

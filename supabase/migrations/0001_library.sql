@@ -39,7 +39,7 @@ create table if not exists public.books (
   level_label text,                                  -- human label, e.g. 'Elementary' (featured)
   minutes     int  not null check (minutes > 0),
   words       int  check (words is null or words >= 0),
-  cover_src   text not null,                         -- Storage URL (placeholder SVG today)
+  cover_src   text not null,                         -- Storage URL (optimized WebP today)
   category    text not null references public.categories (id) on delete restrict,
   teaser      text,                                  -- featured hook copy
   badge_label text,                                  -- featured pill, e.g. "Editor's pick"

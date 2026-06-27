@@ -14,7 +14,7 @@ design system** into a **tested Next.js app**. The Figma file is the source of t
 - Read design via the Figma MCP (`get_variable_defs`, `get_design_context`, `get_screenshot`). Load schemas with ToolSearch first.
 
 ## Stack
-- **Installed:** Next.js 15 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS v4 · ESLint.
+- **Installed:** Next.js 16 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS v4 · ESLint.
 - **Add per phase:** Radix UI (accessible primitives) · Storybook · Vitest + React Testing Library · Playwright (e2e) · @axe-core / jest-axe · next-intl · TanStack Query · Zustand · MSW.
 
 ## Architecture (feature-sliced + colocation)

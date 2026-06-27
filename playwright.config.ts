@@ -18,6 +18,9 @@ export default defineConfig({
   use: {
     baseURL,
     trace: "on-first-retry",
+    // Honor reduced-motion so motion-driven components are deterministic in e2e
+    // (the auto-rotating BookShowcase hero pauses) — removes timing flakes.
+    contextOptions: { reducedMotion: "reduce" },
   },
   projects: [
     {

@@ -945,12 +945,6 @@ export const handlers = [
     return HttpResponse.json({ status: "ok" });
   }),
 
-  // Reference demo endpoint, consumed by the Query+MSW proof component/test.
-  // Safe to delete once real feature handlers land.
-  http.get("/api/demo/greeting", () => {
-    return HttpResponse.json({ message: "Hello from MSW" });
-  }),
-
   // Library landing — the catalog `getLibrary()` consumes.
   http.get("/api/library", () => {
     return HttpResponse.json(libraryData);
