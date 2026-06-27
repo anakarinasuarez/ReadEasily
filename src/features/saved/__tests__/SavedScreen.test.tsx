@@ -79,21 +79,21 @@ describe("SavedScreen", () => {
     ).toHaveAttribute("href", "/library");
 
     // A sample of the eight words, including a phonetic-only card.
-    expect(screen.getByRole("link", { name: "Taught" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Bright" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Slow" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Phone" })).toBeInTheDocument();
 
     // The word link is origin-aware: it points at its source story's detail
     // screen (catalog cards land on Story Detail first).
     expect(screen.getByRole("link", { name: "Path" })).toHaveAttribute(
       "href",
-      "/story/the-ant-and-the-grasshopper",
+      "/story/a-trip-to-the-mountains",
     );
 
-    // Derived stat pills: 8 words to review, 2 practice sets.
+    // Derived stat pills: 8 words to review, 3 practice sets.
     expect(screen.getByText("words to review")).toBeInTheDocument();
     expect(screen.getByText("8")).toBeInTheDocument();
     expect(screen.getByText("practice sets")).toBeInTheDocument();
-    expect(screen.getByText("2")).toBeInTheDocument();
+    expect(screen.getByText("3")).toBeInTheDocument();
   });
 
   it("removes a word optimistically, preserves the rest, updates the count, and moves focus", async () => {
@@ -119,16 +119,16 @@ describe("SavedScreen", () => {
     await waitFor(() => {
       expect(screen.queryByRole("link", { name: "Path" })).not.toBeInTheDocument();
     });
-    expect(screen.getByRole("link", { name: "Taught" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Bright" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Slow" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Phone" })).toBeInTheDocument();
 
-    // Counts re-derive: 7 words to review, 1 practice set.
+    // Counts re-derive: 7 words to review, 2 practice sets (Path was a set).
     expect(screen.getByText("7")).toBeInTheDocument();
-    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
 
     // Focus moved to the next card's word link.
     await waitFor(() => {
-      expect(screen.getByRole("link", { name: "Taught" })).toHaveFocus();
+      expect(screen.getByRole("link", { name: "Slow" })).toHaveFocus();
     });
 
     // The removal is announced politely.

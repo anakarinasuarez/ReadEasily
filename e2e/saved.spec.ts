@@ -34,7 +34,7 @@ test("saved screen lists words and removes one", async ({ page }) => {
 
   // The collection paints — a sample of the saved words is visible.
   await expect(page.getByRole("link", { name: "Path" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Taught" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Slow" })).toBeVisible();
 
   // Stat pills.
   await expect(page.getByText("words to review")).toBeVisible();
@@ -44,13 +44,13 @@ test("saved screen lists words and removes one", async ({ page }) => {
   // screen (catalog cards land on Story Detail first).
   await expect(page.getByRole("link", { name: "Path" })).toHaveAttribute(
     "href",
-    "/story/the-ant-and-the-grasshopper",
+    "/story/a-trip-to-the-mountains",
   );
 
   // Remove "Path": its card animates out and disappears; the rest remain.
   await page.getByRole("button", { name: "Remove Path from saved" }).click();
   await expect(page.getByRole("link", { name: "Path" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Taught" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Slow" })).toBeVisible();
 
   expect(pageErrors).toEqual([]);
 });

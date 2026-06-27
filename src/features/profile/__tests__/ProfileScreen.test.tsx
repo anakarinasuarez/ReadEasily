@@ -58,7 +58,7 @@ describe("ProfileScreen — header + stats from getProfile", () => {
     expect(await screen.findByText("Words saved")).toBeInTheDocument();
     expect(screen.getByText("8")).toBeInTheDocument(); // wordsSaved
     expect(screen.getByText("Practice sets")).toBeInTheDocument();
-    expect(screen.getByText("2")).toBeInTheDocument(); // practiceSets
+    expect(screen.getByText("3")).toBeInTheDocument(); // practiceSets
     expect(screen.getByText("In progress")).toBeInTheDocument();
     expect(screen.getByText("Finished")).toBeInTheDocument();
   });
