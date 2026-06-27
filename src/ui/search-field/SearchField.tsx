@@ -1,4 +1,5 @@
 import { forwardRef, useId, useRef } from "react";
+import { cx } from "@/lib/utils/cx";
 import type { ComponentPropsWithoutRef, Ref } from "react";
 import { IconButton } from "../icon-button";
 
@@ -43,10 +44,6 @@ export interface SearchFieldProps
    */
   onClear?: () => void;
   className?: string;
-}
-
-function cx(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(" ");
 }
 
 /** Merge the forwarded ref with the internal one (needed to refocus on clear). */

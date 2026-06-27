@@ -1,4 +1,5 @@
 import * as React from "react";
+import { cx } from "@/lib/utils/cx";
 
 /**
  * stat-display family — shared internal.
@@ -20,10 +21,6 @@ import * as React from "react";
 
 /** Shared tone vocabulary for the stat-display family. Matches the Figma StatTile `tone` variant (Accent / Warning / Info / Success). */
 export type StatTone = "accent" | "warning" | "info" | "success";
-
-function cx(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(" ");
-}
 
 export interface StatNumberProps {
   /** The numeral to display. */

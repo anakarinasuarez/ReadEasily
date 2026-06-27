@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
+import { cx } from "@/lib/utils/cx";
 import type { AnchorHTMLAttributes, MouseEvent } from "react";
 import { BookCover } from "./BookCover";
 
@@ -49,10 +50,6 @@ export interface BookCardProps
    * only when the cover art conveys something the title does not.
    */
   coverAlt?: string;
-}
-
-function cx(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(" ");
 }
 
 /** Shared geometry for the cover frame within the card. */

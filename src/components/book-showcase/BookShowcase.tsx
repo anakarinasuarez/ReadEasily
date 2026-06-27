@@ -8,6 +8,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { cx } from "@/lib/utils/cx";
 import type { HTMLAttributes, KeyboardEvent, SVGProps } from "react";
 import { BookCover } from "@/components/book-card";
 
@@ -105,10 +106,6 @@ export interface BookShowcaseProps
    */
   decorative?: boolean;
   className?: string;
-}
-
-function cx(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(" ");
 }
 
 /**

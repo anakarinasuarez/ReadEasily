@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cx } from "@/lib/utils/cx";
 
 export type AuthTab = "login" | "signup";
 
@@ -9,11 +10,6 @@ export interface AuthTabsProps {
   loginHref?: string;
   /** Destination for the "Sign up" tab. @default "/signup" */
   signupHref?: string;
-}
-
-/** Join class fragments, dropping falsy ones. */
-function cx(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(" ");
 }
 
 /** Heading/H4 (Baloo 2 SemiBold 16/26) — the pill label ramp (Figma 1180:3528). */

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { cx } from "@/lib/utils/cx";
 import { Toggle } from "@/ui/toggle";
 import { Badge, type BadgeTone } from "@/ui/badge";
 
@@ -95,10 +96,6 @@ export type SettingsRowProps =
   | SettingsRowNavProps
   | SettingsRowBadgeProps
   | SettingsRowCustomProps;
-
-function cx(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(" ");
-}
 
 /** Tile bg + glyph color per tone — all token-bound (no hardcoded values). */
 const TILE_TONE: Record<SettingsRowTone, string> = {

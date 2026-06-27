@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { cx } from "@/lib/utils/cx";
 import type { HTMLAttributes, ReactNode } from "react";
 
 /**
@@ -45,10 +46,6 @@ type AddAffordanceProps =
   | { onAdd: () => void; addLabel: string };
 
 export type BadgeProps = BadgeBaseProps & AddAffordanceProps;
-
-function cx(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(" ");
-}
 
 /** bg + text (+ border for neutral) per tone — all token-bound. */
 const toneContainer: Record<BadgeTone, string> = {

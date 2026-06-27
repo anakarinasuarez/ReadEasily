@@ -1,4 +1,5 @@
 import * as React from "react";
+import { cx } from "@/lib/utils/cx";
 import { StatNumber, type StatTone } from "@/components/stat-display";
 
 /**
@@ -29,10 +30,6 @@ export interface StatTileProps
   value: string | number;
   /** The caption beneath the numeral (Label/M, muted). */
   label: string;
-}
-
-function cx(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(" ");
 }
 
 /**

@@ -1,15 +1,11 @@
 import type { ReactNode } from "react";
+import { cx } from "@/lib/utils/cx";
 
 export interface AuthCardProps {
   /** The form (tabs + fields + CTA) the card frames. */
   children: ReactNode;
   /** Extra classes merged onto the card container. */
   className?: string;
-}
-
-/** Join class fragments, dropping falsy ones. */
-function cx(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(" ");
 }
 
 /**

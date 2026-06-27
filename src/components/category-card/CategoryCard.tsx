@@ -1,4 +1,5 @@
 import * as React from "react";
+import { cx } from "@/lib/utils/cx";
 
 /**
  * CategoryCard — the Search screen's category entry card. 1:1 with the Figma
@@ -40,10 +41,6 @@ export interface CategoryCardProps
   selected?: boolean;
   /** Destination of the filtered Search view this card navigates to. */
   href: string;
-}
-
-function cx(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(" ");
 }
 
 /* --- glyphs (decorative; 22px, currentColor so they flip fg→on-accent) ----- */

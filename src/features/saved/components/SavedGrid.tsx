@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
+import { cx } from "@/lib/utils/cx";
 import { SavedWordCard } from "@/components/saved-word-card";
 import type { SavedWord } from "../types";
 
@@ -22,10 +23,6 @@ import type { SavedWord } from "../types";
  * The ref forwards to the `<ul>` so the screen can query a focus target by
  * `data-word-id`.
  */
-
-function cx(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(" ");
-}
 
 export interface SavedGridProps {
   /** Words to render, in display order (newest first). */

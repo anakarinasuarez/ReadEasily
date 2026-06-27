@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { cx } from "@/lib/utils/cx";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 /**
@@ -69,10 +70,6 @@ function usePrefersReducedMotion(): boolean {
     () => window.matchMedia?.(REDUCED_MOTION_QUERY).matches ?? false,
     () => false,
   );
-}
-
-function cx(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(" ");
 }
 
 export function LandingShowcase({

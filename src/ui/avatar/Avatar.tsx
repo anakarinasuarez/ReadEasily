@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useEffect, useState } from "react";
+import { cx } from "@/lib/utils/cx";
 import type { HTMLAttributes } from "react";
 
 /**
@@ -31,10 +32,6 @@ export type AvatarProps = Omit<HTMLAttributes<HTMLSpanElement>, "children"> & {
    *  source for the derived initials. */
   name: string;
 };
-
-function cx(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(" ");
-}
 
 /** Diameter per size — real design values. xl=120px is the Profile header
  *  avatar (Figma 149:242). */

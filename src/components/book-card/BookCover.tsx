@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { cx } from "@/lib/utils/cx";
 import { forwardRef, useEffect, useState } from "react";
 import type { HTMLAttributes } from "react";
 
@@ -28,10 +29,6 @@ export interface BookCoverProps
   alt: string;
   /** Forwarded to `next/image` — eager-load above-the-fold heroes. */
   priority?: boolean;
-}
-
-function cx(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(" ");
 }
 
 /** Real design footprints per size. */

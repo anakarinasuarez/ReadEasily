@@ -1,4 +1,5 @@
 import { forwardRef, useId } from "react";
+import { cx } from "@/lib/utils/cx";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 /**
@@ -29,10 +30,6 @@ export interface InputProps
   trailingIcon?: ReactNode;
   /** When set, renders the field in its error state and shows this caption below. */
   errorMessage?: string;
-}
-
-function cx(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(" ");
 }
 
 /** Label/M — Nunito SemiBold 13/18, +1 tracking. */

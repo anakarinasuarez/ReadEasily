@@ -3,7 +3,9 @@
 import { forwardRef, useCallback, useRef, useState } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { Avatar } from "@/ui/avatar";
+import { Logo } from "@/ui/logo";
 import { AccountMenu, type AccountLang } from "@/components/account-menu";
+import { cx } from "@/lib/utils/cx";
 
 /**
  * Navbar — the floating, glass-effect primary navigation pill.
@@ -116,49 +118,15 @@ export interface NavbarProps extends Omit<HTMLAttributes<HTMLElement>, "onSelect
   homeHref?: string;
 }
 
-/** Join class fragments, dropping falsy ones. */
-function cx(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(" ");
-}
-
 /** Keyboard-only, AA-visible 2px focus ring (design law — shared with IconButton). */
 const focusRing =
   "outline-none focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:[outline-offset:2px]";
 
 /**
- * Open-book brand mark. Token-bound fills (accent for depth) with low-opacity
- * page curves. Sized via className so the Logo can scale down on mobile; the
- * ~13° tilt is applied by the wrapper, not here.
+ * Logo: the shared `<Logo>` mark + wordmark, anchored left, links home. The
+ * link's `aria-label` is the sole accessible name (the Logo internals are
+ * aria-hidden).
  */
-function BookMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 40 32"
-      fill="none"
-      aria-hidden="true"
-      focusable="false"
-      className={className}
-    >
-      <path
-        d="M3 5.5C7.8 4 12.4 4.3 17 6.6c1.1.5 1.8 1.6 1.8 2.8V28c0 .9-1 1.5-1.9 1.1-4.3-2.1-8.6-2.4-13.1-1.1C2.9 28.3 2 27.6 2 26.6V7.4C2 6.5 2.2 5.8 3 5.5Z"
-        fill="var(--bg-accent)"
-      />
-      <path
-        d="M37 5.5C32.2 4 27.6 4.3 23 6.6c-1.1.5-1.8 1.6-1.8 2.8V28c0 .9 1 1.5 1.9 1.1 4.3-2.1 8.6-2.4 13.1-1.1.9.3 1.8-.4 1.8-1.4V7.4C38 6.5 37.8 5.8 37 5.5Z"
-        fill="var(--bg-accent-strong)"
-      />
-      <path
-        d="M6.5 10.5c2.9 0 5.7.6 8.3 1.8M6.5 15c2.9 0 5.7.6 8.3 1.8M33.5 10.5c-2.9 0-5.7.6-8.3 1.8M33.5 15c-2.9 0-5.7.6-8.3 1.8"
-        stroke="var(--text-on-accent)"
-        strokeWidth="1.1"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-    </svg>
-  );
-}
-
-/** Logo: book mark + wordmark, anchored left, links home. */
 function NavbarLogo({ homeHref }: { homeHref: string }) {
   return (
     <a
@@ -170,17 +138,7 @@ function NavbarLogo({ homeHref }: { homeHref: string }) {
         focusRing,
       )}
     >
-      <span className="inline-flex rotate-[13deg]">
-        <BookMark className="block h-[29px] w-[33px] md:h-[32px] md:w-[40px]" />
-      </span>
-      {/* Decorative as a whole; the link's accessible name comes from aria-label. */}
-      <span
-        aria-hidden="true"
-        className="font-display text-[14px] font-extrabold leading-none whitespace-nowrap md:text-[19px]"
-      >
-        <span className="text-primary">Read</span>
-        <span className="text-accent-text">Easily</span>
-      </span>
+      <Logo size="md" />
     </a>
   );
 }

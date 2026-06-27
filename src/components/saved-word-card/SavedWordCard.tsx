@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
+import { cx } from "@/lib/utils/cx";
 import type { HTMLAttributes } from "react";
 import { IconButton } from "@/ui/icon-button";
 
@@ -51,10 +52,6 @@ export interface SavedWordCardProps
   /** When set, the Review/Practice action is a link to this destination. */
   practiceHref?: string;
   className?: string;
-}
-
-function cx(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(" ");
 }
 
 const focusRing = cx(
