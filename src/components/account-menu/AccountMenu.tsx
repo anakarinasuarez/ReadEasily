@@ -20,10 +20,6 @@ import {
   SegmentedControl,
   type SegmentedOption,
 } from "../../ui/segmented-control";
-import {
-  usePreferences,
-  type Preferences,
-} from "../../stores/preferences";
 
 /**
  * AccountMenu — the navbar avatar's account popover (Figma "Overlay / UserCard"
@@ -35,12 +31,12 @@ import {
  * Reader's WordPopover. Over a dim scrim; outside-click (scrim) and Esc both
  * close; Tab is trapped; Esc returns focus to the trigger avatar.
  *
- * PRESENTATIONAL for its data + most actions: identity + stats come in as props
- * and View-profile / Sign-out are callbacks the consumer (the Navbar) owns. The
- * ONE thing it reads/writes itself is the global translation-language preference
- * (`usePreferences`) — the same store the Profile screen edits, so the two stay
- * in sync automatically (the spec's "stays in sync with Profile via the shared
- * store").
+ * PURELY PRESENTATIONAL — a `src/components` composite that depends only on `ui`
+ * primitives, never on `@/features/*` or `@/stores/*`. Identity, stats and the
+ * current translation language come in as props; View-profile, Sign-out and the
+ * language change are callbacks the consumer (the Navbar's wiring layer) owns.
+ * Keeping the popover in sync with the Profile screen via the shared preferences
+ * store is the wiring layer's job (see `useNavbarAccount`), not this component's.
  *
  * Rendering: the scrim + panel are PORTALED to <body> so the glass navbar's
  * `backdrop-filter` (which would make it a containing block for our `fixed`
@@ -71,6 +67,14 @@ export interface AccountStats {
   finished: number;
 }
 
+/**
+ * The translation languages offered by the quick-switch. Mirrors the
+ * preferences store's `translationLang` union; the union is restated here so the
+ * presentational component stays decoupled from the store (the wiring layer maps
+ * one onto the other, and the assignment is checked at that seam).
+ */
+export type AccountLang = "ES" | "FR" | "PT";
+
 export interface AccountMenuProps {
   /** Controlled open state. When false the component renders nothing. */
   open: boolean;
@@ -80,6 +84,10 @@ export interface AccountMenuProps {
   identity: AccountIdentity;
   /** The two stat tiles. */
   stats: AccountStats;
+  /** The currently-selected translation language (drives the quick-switch). */
+  translationLang: AccountLang;
+  /** Fired when the language quick-switch changes — the wiring writes the store. */
+  onTranslationLangChange: (lang: AccountLang) => void;
   /** Fired by the identity header row → navigate to /profile. */
   onViewProfile: () => void;
   /**
@@ -104,7 +112,7 @@ function cn(...parts: Array<string | false | null | undefined>): string {
 }
 
 /** ES / FR / PT — mirrors the Profile control + the `translationLang` union. */
-const LANG_OPTIONS: SegmentedOption<Preferences["translationLang"]>[] = [
+const LANG_OPTIONS: SegmentedOption<AccountLang>[] = [
   { value: "ES", label: "ES" },
   { value: "FR", label: "FR" },
   { value: "PT", label: "PT" },
@@ -214,6 +222,8 @@ export const AccountMenu = forwardRef<HTMLDivElement, AccountMenuProps>(
       onClose,
       identity,
       stats,
+      translationLang,
+      onTranslationLangChange,
       onViewProfile,
       onSignOut,
       triggerRef,
@@ -226,11 +236,6 @@ export const AccountMenu = forwardRef<HTMLDivElement, AccountMenuProps>(
 
     const viewProfileRef = useRef<HTMLButtonElement>(null);
     const labelId = useId();
-
-    // Language preference — read + write the SAME global store the Profile
-    // screen edits, so a change here shows there and vice-versa.
-    const translationLang = usePreferences((s) => s.translationLang);
-    const setPreference = usePreferences((s) => s.setPreference);
 
     // Desktop anchor coordinates, measured from the trigger. The panel is
     // PORTALED to <body> (the glass navbar's `backdrop-filter` would otherwise
@@ -400,7 +405,7 @@ export const AccountMenu = forwardRef<HTMLDivElement, AccountMenuProps>(
             <SegmentedControl
               options={LANG_OPTIONS}
               value={translationLang}
-              onChange={(value) => setPreference("translationLang", value)}
+              onChange={onTranslationLangChange}
               tone="info"
               aria-labelledby={labelId}
               className="w-full"

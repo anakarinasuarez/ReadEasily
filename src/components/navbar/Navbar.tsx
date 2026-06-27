@@ -1,13 +1,9 @@
 "use client";
 
-import { forwardRef, useRef, useState } from "react";
+import { forwardRef, useCallback, useRef, useState } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { Avatar } from "@/ui/avatar";
-import { AccountMenu } from "@/components/account-menu";
-import { useSaved } from "@/features/saved/hooks/useSaved";
-import { authClient } from "@/features/auth/api/authClient";
-import { useSession } from "@/stores/session";
+import { AccountMenu, type AccountLang } from "@/components/account-menu";
 
 /**
  * Navbar — the floating, glass-effect primary navigation pill.
@@ -31,6 +27,15 @@ import { useSession } from "@/stores/session";
  * Theme-agnostic: reads only semantic tokens (incl. the glass surface tokens),
  * never light/dark. Nav activation animates color over 300ms ease-out and
  * honours `prefers-reduced-motion`.
+ *
+ * PURELY PRESENTATIONAL — a `src/components` composite that depends only on `ui`
+ * primitives + the AccountMenu composite, never on `@/features/*` or
+ * `@/stores/*`. The account popover's DATA (email, saved-word count, language)
+ * and SIDE-EFFECTS (sign-out, language change, profile navigation) all arrive as
+ * the `account` prop + callbacks; the wiring lives in `useNavbarAccount`
+ * (src/hooks), which the screens use. The popover open-state is optionally
+ * controlled (`accountOpen` / `onAccountOpenChange`) so the wiring can gate the
+ * saved-count fetch on the popover actually being open.
  */
 
 export interface NavbarItem {
@@ -53,6 +58,29 @@ export interface NavbarUser {
   avatarSrc?: string;
 }
 
+/**
+ * The account popover's data + side-effects, supplied by the wiring layer
+ * (`useNavbarAccount`). All optional so the Navbar renders standalone (Storybook
+ * / unit tests) with inert defaults — a guest with a zero count.
+ */
+export interface NavbarAccount {
+  /** Email shown under the name; omitted for a guest → no email line. */
+  email?: string;
+  /** Saved-word count for the "words" stat tile. Default 0. */
+  wordsSaved?: number;
+  /** Stories finished — 0 until a progress store exists. Default 0. */
+  finished?: number;
+  /** Current translation language for the quick-switch. Default "ES". */
+  translationLang?: AccountLang;
+  /** Language quick-switch handler (the wiring writes the shared store). */
+  onTranslationLangChange?: (lang: AccountLang) => void;
+  /**
+   * Sign-out handler. When omitted (a guest with no session) the popover hides
+   * its Sign-out section entirely — there is nothing to sign out of.
+   */
+  onSignOut?: () => void;
+}
+
 export interface NavbarProps extends Omit<HTMLAttributes<HTMLElement>, "onSelect"> {
   /** Nav items, in order (Library / Search / Saved). */
   items: NavbarItem[];
@@ -72,6 +100,17 @@ export interface NavbarProps extends Omit<HTMLAttributes<HTMLElement>, "onSelect
    * it unchanged (they already supply `() => router.push("/profile")`).
    */
   onAccountClick?: () => void;
+  /** The account popover's data + side-effects (from `useNavbarAccount`). */
+  account?: NavbarAccount;
+  /**
+   * Controlled popover open-state. When provided the Navbar is controlled and
+   * the wiring owns the flag (so it can gate the saved-count fetch on it); when
+   * omitted the Navbar manages the open-state internally.
+   */
+  accountOpen?: boolean;
+  /** Fired whenever the popover open-state changes (open on avatar click, close
+   *  on Esc / scrim / View-profile / Sign-out). */
+  onAccountOpenChange?: (open: boolean) => void;
   /** Logo link target (the reading home — Library). Default "/library" ("/" is
    *  the marketing Landing, not the in-app home). */
   homeHref?: string;
@@ -248,6 +287,9 @@ export const Navbar = forwardRef<HTMLElement, NavbarProps>(function Navbar(
     user,
     onNavigate,
     onAccountClick,
+    account,
+    accountOpen: controlledOpen,
+    onAccountOpenChange,
     // The brand logo returns to the reading home (Library at /library). `/` is
     // the marketing Landing, NOT the in-app home — see the route-swap phase.
     homeHref = "/library",
@@ -257,32 +299,26 @@ export const Navbar = forwardRef<HTMLElement, NavbarProps>(function Navbar(
   ref,
 ) {
   // The avatar opens a focus-managed account popover (Figma "Overlay/UserCard").
-  const [accountOpen, setAccountOpen] = useState(false);
+  // Open-state is OPTIONALLY CONTROLLED: when the wiring passes `accountOpen` it
+  // owns the flag (and gates the saved-count fetch on it); otherwise the Navbar
+  // keeps it internally so it still works standalone.
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen != null;
+  const accountOpen = isControlled ? controlledOpen : internalOpen;
   const accountTriggerRef = useRef<HTMLButtonElement>(null);
-  const router = useRouter();
 
-  // AccountMenu data sourced app-globally so EVERY screen's navbar gets it for
-  // free (the screens only ever pass `onAccountClick`):
-  //  • identity name/avatar — the `user` prop (already merged with the device
-  //    profile overrides upstream via `useNavbarUser`);
-  //  • email — the persisted session (a guest has none → the email line is
-  //    omitted, and Sign out is hidden: nothing to sign out of);
-  //  • words — the live Saved list length (shared Query cache with the Saved
-  //    screen, so it can't drift); finished — 0 until a progress store exists.
-  const sessionEmail = useSession((s) => s.user?.email);
-  const isGuest = useSession((s) => s.user === null);
-  const sessionSignOut = useSession((s) => s.signOut);
-  const saved = useSaved();
-  const wordsSaved = saved.data?.words.length ?? 0;
+  const setAccountOpen = useCallback(
+    (next: boolean) => {
+      if (!isControlled) setInternalOpen(next);
+      onAccountOpenChange?.(next);
+    },
+    [isControlled, onAccountOpenChange],
+  );
 
-  // Sign out — mirrors ProfileScreen: fire the (mock today) network call, clear
-  // the local session, return to the landing.
-  function handleSignOut() {
-    void authClient.signOut();
-    sessionSignOut();
-    setAccountOpen(false);
-    router.push("/");
-  }
+  // All account-popover data + side-effects arrive via the `account` prop (from
+  // `useNavbarAccount`); a standalone Navbar (Storybook / unit tests) gets inert
+  // defaults — a guest with a zero count and no sign-out.
+  const onSignOut = account?.onSignOut;
 
   return (
     <nav
@@ -321,7 +357,7 @@ export const Navbar = forwardRef<HTMLElement, NavbarProps>(function Navbar(
           aria-label="Account"
           aria-haspopup="dialog"
           aria-expanded={accountOpen}
-          onClick={() => setAccountOpen((open) => !open)}
+          onClick={() => setAccountOpen(!accountOpen)}
           className={cx("inline-flex shrink-0 items-center rounded-pill", focusRing)}
         >
           <Avatar size="md" src={user.avatarSrc} name={user.name} />
@@ -329,13 +365,24 @@ export const Navbar = forwardRef<HTMLElement, NavbarProps>(function Navbar(
         <AccountMenu
           open={accountOpen}
           onClose={() => setAccountOpen(false)}
-          identity={{ name: user.name, avatarSrc: user.avatarSrc, email: sessionEmail }}
-          stats={{ words: wordsSaved, finished: 0 }}
+          identity={{ name: user.name, avatarSrc: user.avatarSrc, email: account?.email }}
+          stats={{ words: account?.wordsSaved ?? 0, finished: account?.finished ?? 0 }}
+          translationLang={account?.translationLang ?? "ES"}
+          onTranslationLangChange={(lang) =>
+            account?.onTranslationLangChange?.(lang)
+          }
           onViewProfile={() => {
             setAccountOpen(false);
             onAccountClick?.();
           }}
-          onSignOut={isGuest ? undefined : handleSignOut}
+          onSignOut={
+            onSignOut
+              ? () => {
+                  setAccountOpen(false);
+                  onSignOut();
+                }
+              : undefined
+          }
           triggerRef={accountTriggerRef}
         />
       </div>

@@ -1,18 +1,16 @@
-import { beforeEach, describe, it, expect, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { useState } from "react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { renderWithQuery } from "../../../tests/utils/query";
-import { Navbar, type NavbarItem } from "./Navbar";
+import { Navbar, type NavbarItem, type NavbarAccount } from "./Navbar";
 
-// The navbar now opens an account popover whose Sign out routes via the App
-// Router; mock it so the component renders without a mounted router in jsdom.
-const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: pushMock, prefetch: vi.fn() }),
-}));
-
-beforeEach(() => pushMock.mockClear());
+/**
+ * Behavior tests for the Navbar. It is PURELY PRESENTATIONAL — no Query, store
+ * or router dependencies — so these render it directly. The account popover's
+ * data + side-effects arrive as the `account` prop + callbacks (wired in the app
+ * by `useNavbarAccount`).
+ */
 
 function Icon() {
   return (
@@ -32,14 +30,14 @@ const user = { name: "Karina Aguilar" };
 
 describe("Navbar", () => {
   it("renders a primary landmark", () => {
-    renderWithQuery(<Navbar items={items} user={user} activeKey="library" />);
+    render(<Navbar items={items} user={user} activeKey="library" />);
     expect(
       screen.getByRole("navigation", { name: "Primary" }),
     ).toBeInTheDocument();
   });
 
   it("renders each item as a link with its href by default", () => {
-    renderWithQuery(<Navbar items={items} user={user} activeKey="library" />);
+    render(<Navbar items={items} user={user} activeKey="library" />);
     expect(screen.getByRole("link", { name: "Library" })).toHaveAttribute(
       "href",
       "/library",
@@ -55,7 +53,7 @@ describe("Navbar", () => {
   });
 
   it("marks only the active item with aria-current=page", () => {
-    renderWithQuery(<Navbar items={items} user={user} activeKey="search" />);
+    render(<Navbar items={items} user={user} activeKey="search" />);
     expect(screen.getByRole("link", { name: "Search" })).toHaveAttribute(
       "aria-current",
       "page",
@@ -66,7 +64,7 @@ describe("Navbar", () => {
   });
 
   it("gives every item a stable accessible name (survives the mobile label collapse)", () => {
-    renderWithQuery(<Navbar items={items} user={user} activeKey="library" />);
+    render(<Navbar items={items} user={user} activeKey="library" />);
     // Inactive items hide their label text below `md`; aria-label keeps the
     // accessible name regardless of viewport (jsdom can't evaluate the query).
     for (const item of items) {
@@ -78,7 +76,7 @@ describe("Navbar", () => {
 
   it("renders items as buttons and fires onNavigate when onNavigate is given", async () => {
     const onNavigate = vi.fn();
-    renderWithQuery(
+    render(
       <Navbar
         items={items}
         user={user}
@@ -93,7 +91,7 @@ describe("Navbar", () => {
   });
 
   it("exposes the account avatar as a dialog trigger (haspopup + expanded)", () => {
-    renderWithQuery(<Navbar items={items} user={user} activeKey="library" />);
+    render(<Navbar items={items} user={user} activeKey="library" />);
     const account = screen.getByRole("button", { name: "Account" });
     expect(account).toHaveAttribute("aria-haspopup", "dialog");
     expect(account).toHaveAttribute("aria-expanded", "false");
@@ -101,7 +99,7 @@ describe("Navbar", () => {
 
   it("opens the account popover on avatar click; its View profile fires onAccountClick", async () => {
     const onAccountClick = vi.fn();
-    renderWithQuery(
+    render(
       <Navbar
         items={items}
         user={user}
@@ -125,8 +123,84 @@ describe("Navbar", () => {
     expect(onAccountClick).toHaveBeenCalledTimes(1);
   });
 
+  it("renders the account data (email + saved count) from the account prop", async () => {
+    const account: NavbarAccount = {
+      email: "karina@example.com",
+      wordsSaved: 24,
+      finished: 3,
+      onSignOut: () => {},
+    };
+    render(
+      <Navbar items={items} user={user} activeKey="library" account={account} />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Account" }));
+    const dialog = screen.getByRole("dialog", { name: "Account" });
+    expect(within(dialog).getByText("karina@example.com")).toBeInTheDocument();
+    expect(within(dialog).getByText("24")).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole("button", { name: "Sign out" }),
+    ).toBeInTheDocument();
+  });
+
+  it("calls onSignOut (and closes the popover) when Sign out is pressed", async () => {
+    const onSignOut = vi.fn();
+    render(
+      <Navbar
+        items={items}
+        user={user}
+        activeKey="library"
+        account={{ email: "k@e.com", wordsSaved: 0, onSignOut }}
+      />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Account" }));
+    await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    expect(onSignOut).toHaveBeenCalledTimes(1);
+    // The popover closes after sign-out.
+    expect(screen.queryByRole("dialog", { name: "Account" })).toBeNull();
+  });
+
+  it("hides Sign out for a guest (no onSignOut on the account prop)", async () => {
+    render(
+      <Navbar
+        items={items}
+        user={user}
+        activeKey="library"
+        account={{ wordsSaved: 0 }}
+      />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Account" }));
+    expect(
+      screen.queryByRole("button", { name: "Sign out" }),
+    ).toBeNull();
+  });
+
+  it("supports a controlled open-state (reports changes via onAccountOpenChange)", async () => {
+    function Controlled() {
+      const [open, setOpen] = useState(false);
+      return (
+        <Navbar
+          items={items}
+          user={user}
+          activeKey="library"
+          accountOpen={open}
+          onAccountOpenChange={setOpen}
+        />
+      );
+    }
+    render(<Controlled />);
+    const account = screen.getByRole("button", { name: "Account" });
+    expect(account).toHaveAttribute("aria-expanded", "false");
+    // Opening flows through the controlled state → dialog appears.
+    await userEvent.click(account);
+    expect(account).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("dialog", { name: "Account" })).toBeInTheDocument();
+    // Esc closes via onAccountOpenChange(false).
+    await userEvent.keyboard("{Escape}");
+    expect(account).toHaveAttribute("aria-expanded", "false");
+  });
+
   it("links the logo to the home target", () => {
-    renderWithQuery(
+    render(
       <Navbar
         items={items}
         user={user}
@@ -140,7 +214,7 @@ describe("Navbar", () => {
   });
 
   it("renders the badge count on an item", () => {
-    renderWithQuery(
+    render(
       <Navbar
         items={items.map((i) =>
           i.key === "saved" ? { ...i, badge: 3 } : i,
@@ -153,7 +227,7 @@ describe("Navbar", () => {
   });
 
   it("has no axe violations", async () => {
-    const { container } = renderWithQuery(
+    const { container } = render(
       <Navbar items={items} user={user} activeKey="library" />,
     );
     expect(await axe(container)).toHaveNoViolations();

@@ -1,39 +1,41 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { useRef, useState } from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { AccountMenu } from "./AccountMenu";
-import { usePreferences, DEFAULT_PREFERENCES } from "../../stores/preferences";
+import { AccountMenu, type AccountLang } from "./AccountMenu";
 
 /**
- * Behavior tests for the account popover. The language pills bind to the global
- * `usePreferences` store (the same one Profile edits), so each test resets it to
- * the factory default first and asserts on the real store after a change.
+ * Behavior tests for the account popover. It is PURELY PRESENTATIONAL: the
+ * current language is a controlled prop and changes are reported via
+ * `onTranslationLangChange` (the app's `useNavbarAccount` wiring binds that to
+ * the shared preferences store). The Harness holds the language in local state
+ * so the controlled value reflects after a change, mirroring real usage.
  */
-
-beforeEach(() => {
-  usePreferences.setState({ ...DEFAULT_PREFERENCES });
-});
 
 /** Renders the menu with a real trigger button (for focus-return assertions). */
 function Harness(props: {
   onClose?: () => void;
   onViewProfile?: () => void;
   onSignOut?: () => void;
+  onLangChange?: (lang: AccountLang) => void;
   email?: string;
   withSignOut?: boolean;
   startOpen?: boolean;
+  initialLang?: AccountLang;
 }) {
   const {
     onClose = () => {},
     onViewProfile = () => {},
     onSignOut,
+    onLangChange,
     email = "karina@example.com",
     withSignOut = true,
     startOpen = true,
+    initialLang = "ES",
   } = props;
   const [open, setOpen] = useState(startOpen);
+  const [lang, setLang] = useState<AccountLang>(initialLang);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   return (
@@ -54,6 +56,11 @@ function Harness(props: {
         }}
         identity={{ name: "Karina Aguilar", email }}
         stats={{ words: 24, finished: 3 }}
+        translationLang={lang}
+        onTranslationLangChange={(next) => {
+          setLang(next);
+          onLangChange?.(next);
+        }}
         onViewProfile={onViewProfile}
         onSignOut={withSignOut ? (onSignOut ?? (() => {})) : undefined}
         triggerRef={triggerRef}
@@ -109,11 +116,15 @@ describe("AccountMenu", () => {
     expect(onViewProfile).toHaveBeenCalledTimes(1);
   });
 
-  it("writes the chosen language to the shared preferences store", async () => {
-    render(<Harness />);
-    expect(usePreferences.getState().translationLang).toBe("ES");
+  it("reports the chosen language and reflects it in the controlled value", async () => {
+    const onLangChange = vi.fn();
+    render(<Harness onLangChange={onLangChange} />);
+    expect(screen.getByRole("radio", { name: "ES" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
     await userEvent.click(screen.getByRole("radio", { name: "FR" }));
-    expect(usePreferences.getState().translationLang).toBe("FR");
+    expect(onLangChange).toHaveBeenCalledWith("FR");
     expect(screen.getByRole("radio", { name: "FR" })).toHaveAttribute(
       "aria-checked",
       "true",

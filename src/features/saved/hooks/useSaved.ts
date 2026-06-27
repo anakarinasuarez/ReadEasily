@@ -11,10 +11,21 @@ import type { SavedData } from "../types";
  *
  * Today MSW answers the request (dev + tests); swapping in Supabase is a change
  * inside `getSaved`, invisible here — see `../api/getSaved.ts`.
+ *
+ * `enabled` (default true) lets a caller defer the fetch until it's actually
+ * needed. The navbar account popover passes `enabled: popoverOpen` so the
+ * saved-word count is fetched only when the popover opens — not eagerly on every
+ * screen that renders the navbar.
  */
-export function useSaved() {
+export interface UseSavedOptions {
+  /** Run the query only when true (default true). */
+  enabled?: boolean;
+}
+
+export function useSaved(options: UseSavedOptions = {}) {
   return useQuery<SavedData>({
     queryKey: savedQueryKey,
     queryFn: getSaved,
+    enabled: options.enabled ?? true,
   });
 }

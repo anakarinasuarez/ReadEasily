@@ -25,7 +25,7 @@ import {
   type Language,
   type VoiceAccent,
 } from "../types";
-import type { ReaderSpeech } from "../audio/speechController";
+import type { ReaderSpeech } from "@/lib/audio/speechController";
 import { ReadingCard } from "./ReadingCard";
 import { ReaderToggles } from "./ReaderToggles";
 import { ReaderError, ReaderSkeleton } from "./ReaderStates";

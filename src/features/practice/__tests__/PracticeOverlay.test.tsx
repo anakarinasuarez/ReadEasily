@@ -7,7 +7,7 @@ import { getSaved } from "@/features/saved/api/getSaved";
 import type {
   ReaderSpeech,
   SpeakOptions,
-} from "@/features/reader/audio/speechController";
+} from "@/lib/audio/speechController";
 import { ReaderScreen } from "@/features/reader/components/ReaderScreen";
 import { PracticeOverlay } from "../components/PracticeOverlay";
 

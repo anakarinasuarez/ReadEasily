@@ -15,8 +15,8 @@ import { persist, createJSONStorage } from "zustand/middleware";
  *
  * Lives in `src/stores/` (not inside `features/profile/`) to match the
  * `usePreferences` precedent: it's a device-local, app-global slice that other
- * surfaces (the cross-screen navbar avatar + name, via `useNavbarUser`) read the
- * SAME way.
+ * surfaces (the cross-screen navbar avatar + name, via `useNavbarAccount`) read
+ * the SAME way.
  *
  * SSR-safe hydration — identical to `usePreferences` (see that store for the
  * full rationale): `skipHydration: true` so creation ALWAYS starts from the

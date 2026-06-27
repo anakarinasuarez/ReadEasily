@@ -9,7 +9,7 @@ import { deriveSavedStats, type SavedData, type SavedWord } from "../types";
 import type {
   ReaderSpeech,
   SpeakOptions,
-} from "@/features/reader/audio/speechController";
+} from "@/lib/audio/speechController";
 import { SavedScreen } from "../components/SavedScreen";
 
 /** A fake TTS controller: records `speak` calls so the Listen seam can be

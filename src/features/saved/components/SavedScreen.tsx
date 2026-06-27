@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Navbar, useNavbarUser, type NavbarItem } from "@/components/navbar";
+import { Navbar, type NavbarItem } from "@/components/navbar";
+import { useNavbarAccount } from "@/hooks/useNavbarAccount";
 import { StatPill } from "@/components/stat-pill";
 import { Button } from "@/ui/button";
 import { usePreferences } from "@/stores/preferences";
@@ -13,7 +13,7 @@ import {
   STORE_ACCENT_TO_VOICE,
   STORE_LANG_TO_READER,
 } from "@/features/reader/types";
-import type { ReaderSpeech } from "@/features/reader/audio/speechController";
+import type { ReaderSpeech } from "@/lib/audio/speechController";
 import { useSaved } from "../hooks/useSaved";
 import { useRemoveSavedWord } from "../hooks/useRemoveSavedWord";
 import type { SavedStats, SavedWord } from "../types";
@@ -198,9 +198,8 @@ export function SavedScreen({
   audioController,
   audioSupported,
 }: SavedScreenProps = {}) {
-  const router = useRouter();
-  // Overlay any device-local profile overrides (name/avatar) onto the base user.
-  const user = useNavbarUser(SCREEN_USER);
+  // Navbar account wiring (identity + overrides, gated saved count, sign-out).
+  const navbar = useNavbarAccount(SCREEN_USER);
   const { data, isPending, isError, refetch } = useSaved();
   const remove = useRemoveSavedWord();
 
@@ -325,12 +324,7 @@ export function SavedScreen({
       {/* Sticky navbar — consistent with Library/Search. The back affordance is
           NOT in this row; it scrolls with the content. */}
       <div className="sticky top-0 z-50 mx-auto w-full max-w-7xl px-lg pt-lg">
-        <Navbar
-          items={NAV_ITEMS}
-          activeKey="saved"
-          user={user}
-          onAccountClick={() => router.push("/profile")}
-        />
+        <Navbar items={NAV_ITEMS} activeKey="saved" {...navbar} />
       </div>
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-start gap-2xl px-lg py-2xl">

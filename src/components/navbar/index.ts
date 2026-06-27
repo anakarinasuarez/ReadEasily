@@ -1,3 +1,7 @@
 export { Navbar } from "./Navbar";
-export type { NavbarProps, NavbarItem, NavbarUser } from "./Navbar";
-export { useNavbarUser } from "./useNavbarUser";
+export type {
+  NavbarProps,
+  NavbarItem,
+  NavbarUser,
+  NavbarAccount,
+} from "./Navbar";

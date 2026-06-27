@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Navbar, type NavbarItem } from "@/components/navbar";
+import { useNavbarAccount } from "@/hooks/useNavbarAccount";
 import { BgDecorations } from "@/components/bg-decorations";
 import { StatTile } from "@/components/stat-tile";
 import { SettingsRow } from "@/components/settings-row";
@@ -462,6 +463,13 @@ export function ProfileScreen() {
   const effectiveAvatar = avatarDataUrl ?? data?.user.avatarSrc;
   const effectiveName = displayName ?? data?.user.name;
 
+  // Navbar account wiring — the hook re-applies the same device overrides onto
+  // the base server identity, so the navbar avatar matches the header.
+  const navbar = useNavbarAccount({
+    name: data?.user.name ?? "You",
+    avatarSrc: data?.user.avatarSrc,
+  });
+
   function handleSignOut() {
     // Clear the local session immediately and return to the Landing. The
     // network seam (authClient.signOut) fires in the background — today it's the
@@ -477,11 +485,6 @@ export function ProfileScreen() {
     useProfileOverrides.getState().setDisplayName(name || null);
   }
 
-  const navUser = {
-    name: effectiveName ?? "You",
-    avatarSrc: effectiveAvatar,
-  };
-
   return (
     <main className="relative flex min-h-full flex-1 flex-col bg-canvas">
       <BgDecorations fixed />
@@ -489,11 +492,7 @@ export function ProfileScreen() {
       {/* Sticky navbar — Profile has NO active item; the account avatar opens
           this very screen (and does so from every other screen too). */}
       <div className="sticky top-0 z-50 mx-auto w-full max-w-7xl px-lg pt-lg">
-        <Navbar
-          items={NAV_ITEMS}
-          user={navUser}
-          onAccountClick={() => router.push("/profile")}
-        />
+        <Navbar items={NAV_ITEMS} {...navbar} />
       </div>
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-start gap-2xl px-lg py-2xl">

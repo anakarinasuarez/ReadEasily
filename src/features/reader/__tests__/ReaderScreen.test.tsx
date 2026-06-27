@@ -8,7 +8,7 @@ import {
   DEFAULT_PREFERENCES,
 } from "@/stores/preferences";
 import { ReaderScreen } from "../components/ReaderScreen";
-import type { ReaderSpeech, SpeakOptions } from "../audio/speechController";
+import type { ReaderSpeech, SpeakOptions } from "@/lib/audio/speechController";
 
 /** A fake TTS controller: records `speak` calls so the test can drive the
  *  per-sentence transport (and the auto-scroll that rides on it) in jsdom. */

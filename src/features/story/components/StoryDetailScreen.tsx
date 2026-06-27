@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Navbar, useNavbarUser, type NavbarItem } from "@/components/navbar";
+import { Navbar, type NavbarItem } from "@/components/navbar";
+import { useNavbarAccount } from "@/hooks/useNavbarAccount";
 import { BgDecorations } from "@/components/bg-decorations";
 import { BookCover } from "@/components/book-card";
 import { MoralCallout } from "@/components/moral-callout";
@@ -70,7 +70,6 @@ export interface StoryDetailScreenProps {
 }
 
 export function StoryDetailScreen({ storyId }: StoryDetailScreenProps) {
-  const router = useRouter();
   const { data, isPending, isError, refetch } = useStoryDetail(storyId);
   const { data: savedData } = useSaved();
   const save = useSaveWord();
@@ -93,7 +92,7 @@ export function StoryDetailScreen({ storyId }: StoryDetailScreenProps) {
     });
   };
 
-  const user = useNavbarUser(LOADING_USER);
+  const navbar = useNavbarAccount(LOADING_USER);
 
   return (
     <main className="relative flex min-h-full flex-1 flex-col bg-canvas">
@@ -102,12 +101,7 @@ export function StoryDetailScreen({ storyId }: StoryDetailScreenProps) {
 
       {/* Floating navbar — sticky so it stays in view; Library is active. */}
       <div className="sticky top-0 z-50 mx-auto w-full max-w-7xl px-lg pt-lg">
-        <Navbar
-          items={NAV_ITEMS}
-          activeKey="library"
-          user={user}
-          onAccountClick={() => router.push("/profile")}
-        />
+        <Navbar items={NAV_ITEMS} activeKey="library" {...navbar} />
       </div>
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-lg py-2xl">

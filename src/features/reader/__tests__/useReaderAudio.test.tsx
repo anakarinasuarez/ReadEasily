@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { useReaderAudio } from "../hooks/useReaderAudio";
 import { buildSentences } from "../audio/sentences";
-import type { ReaderSpeech, SpeakOptions } from "../audio/speechController";
+import type { ReaderSpeech, SpeakOptions } from "@/lib/audio/speechController";
 import type { StoryPage, VoiceAccent } from "../types";
 
 /**

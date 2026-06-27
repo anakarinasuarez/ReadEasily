@@ -1,13 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useRef, useState } from "react";
-import { AccountMenu } from "./AccountMenu";
+import { AccountMenu, type AccountLang } from "./AccountMenu";
 import { Avatar } from "../../ui/avatar";
 
 /**
  * AccountMenu stories. The popover anchors to a trigger, so each story renders a
  * mock navbar-avatar button inside a `relative` box (as the real Navbar does)
- * and toggles `open`. The language pills bind to the global preferences store,
- * so flipping ES/FR/PT in one story persists to the others.
+ * and toggles `open`. The component is purely presentational: the language is a
+ * controlled prop, so the `Harness` holds it in local state (in the app the
+ * `useNavbarAccount` wiring binds it to the shared preferences store).
  */
 const meta = {
   title: "Components/AccountMenu",
@@ -20,6 +21,8 @@ const meta = {
     onClose: () => {},
     identity: { name: "Karina Aguilar" },
     stats: { words: 0, finished: 0 },
+    translationLang: "ES",
+    onTranslationLangChange: () => {},
     onViewProfile: () => {},
   },
 } satisfies Meta<typeof AccountMenu>;
@@ -41,6 +44,7 @@ function Harness({
   finished?: number;
 }) {
   const [open, setOpen] = useState(true);
+  const [lang, setLang] = useState<AccountLang>("ES");
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   return (
@@ -62,6 +66,8 @@ function Harness({
           onClose={() => setOpen(false)}
           identity={{ name: "Karina Aguilar", avatarSrc, email }}
           stats={{ words, finished }}
+          translationLang={lang}
+          onTranslationLangChange={setLang}
           onViewProfile={() => console.log("view profile")}
           onSignOut={withSignOut ? () => console.log("sign out") : undefined}
           triggerRef={triggerRef}

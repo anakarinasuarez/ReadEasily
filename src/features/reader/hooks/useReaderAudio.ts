@@ -13,7 +13,7 @@ import {
   createWebSpeechController,
   isSpeechSupported,
   type ReaderSpeech,
-} from "../audio/speechController";
+} from "@/lib/audio/speechController";
 import type { ReaderSentence } from "../audio/sentences";
 import { DEFAULT_VOICE, type VoiceAccent } from "../types";
 

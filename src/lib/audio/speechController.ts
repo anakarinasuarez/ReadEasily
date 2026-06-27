@@ -1,11 +1,11 @@
 /**
- * ReaderSpeech — the injectable text-to-speech seam for the Reader.
+ * ReaderSpeech — the injectable text-to-speech seam (base audio layer).
  *
- * The Reader never touches `window.speechSynthesis` directly. It talks to this
+ * Nothing in the app touches `window.speechSynthesis` directly. It talks to this
  * thin interface, and the real implementation (`createWebSpeechController`) is
  * the only place the Web Speech API is referenced. Why the indirection:
  *
- *  1. **Testability.** jsdom has no `speechSynthesis`. The hook accepts a
+ *  1. **Testability.** jsdom has no `speechSynthesis`. Consumers accept a
  *     `ReaderSpeech`, so tests inject a fake that records `speak` calls and lets
  *     them fire `onStart` / `onEnd` synchronously — no real audio, no flakiness.
  *  2. **Feature-detection.** `isSpeechSupported()` is the one gate; where it's
@@ -14,10 +14,26 @@
  *     pause-after-15s GC bug, voice list arriving async via `voiceschanged`,
  *     unreliable word `onboundary`) are contained here, behind a clean surface.
  *
+ * Layer: this is `src/lib` — the feature-agnostic base. The Reader feature
+ * (`useReaderAudio`) and the Saved screen (`speakWord`) both depend on it; it
+ * depends on nothing above it. The Reader layers its store-mapping vocabulary
+ * (`VOICE_LABELS`, `STORE_ACCENT_TO_VOICE`, …) on top of the `VoiceAccent` type
+ * defined here.
+ *
  * This module is pure (no React) and SSR-safe: `createWebSpeechController()` can
  * be called during a server render — every method guards `typeof window` and
  * only touches the API lazily when actually invoked on the client.
  */
+
+/**
+ * The audio voice accent — the BCP-47 lang the TTS engine should match. Four
+ * accents (US/UK/AU/CA): US→en-US, UK→en-GB, AU→en-AU, CA→en-CA. The Reader
+ * maps the preferences store's short codes onto these (see reader/types).
+ */
+export type VoiceAccent = "en-US" | "en-GB" | "en-AU" | "en-CA";
+
+/** The default voice accent (US English). */
+export const DEFAULT_VOICE: VoiceAccent = "en-US";
 
 /** Per-utterance options. Callbacks fire as the platform reports progress. */
 export interface SpeakOptions {
@@ -36,7 +52,7 @@ export interface SpeakOptions {
   onError?: () => void;
 }
 
-/** The TTS surface the Reader depends on. */
+/** The TTS surface consumers depend on. */
 export interface ReaderSpeech {
   /** Queue/speak one utterance of `text` with the given options. */
   speak(text: string, options?: SpeakOptions): void;

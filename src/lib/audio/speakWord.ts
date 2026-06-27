@@ -19,9 +19,10 @@
 import {
   createWebSpeechController,
   isSpeechSupported,
+  DEFAULT_VOICE,
   type ReaderSpeech,
-} from "@/features/reader/audio/speechController";
-import { DEFAULT_VOICE, type VoiceAccent } from "@/features/reader/types";
+  type VoiceAccent,
+} from "./speechController";
 
 /**
  * Pick a voice for the accent from the controller's voice list. Mirrors the

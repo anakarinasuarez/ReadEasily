@@ -2,9 +2,9 @@
 
 import { useId, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { SectionHeader } from "@/components/section-header";
-import { Navbar, useNavbarUser, type NavbarItem } from "@/components/navbar";
+import { Navbar, type NavbarItem } from "@/components/navbar";
+import { useNavbarAccount } from "@/hooks/useNavbarAccount";
 import { EmptyState } from "@/components/empty-state";
 import { SearchField } from "@/ui/search-field";
 import { Button } from "@/ui/button";
@@ -83,9 +83,8 @@ export interface SearchScreenProps {
 }
 
 export function SearchScreen({ initialCategory }: SearchScreenProps) {
-  const router = useRouter();
-  // Overlay any device-local profile overrides (name/avatar) onto the base user.
-  const user = useNavbarUser(SCREEN_USER);
+  // Navbar account wiring (identity + overrides, gated saved count, sign-out).
+  const navbar = useNavbarAccount(SCREEN_USER);
   const { data, isPending, isError, refetch } = useSearch();
 
   // Local UI state #1: the active browse view. Seeded from the validated
@@ -174,12 +173,7 @@ export function SearchScreen({ initialCategory }: SearchScreenProps) {
       {/* Sticky navbar — matches the Library screen (consistent across screens).
           The back affordance is NOT in this row; it scrolls with the content. */}
       <div className="sticky top-0 z-50 mx-auto w-full max-w-7xl px-lg pt-lg">
-        <Navbar
-          items={NAV_ITEMS}
-          activeKey="search"
-          user={user}
-          onAccountClick={() => router.push("/profile")}
-        />
+        <Navbar items={NAV_ITEMS} activeKey="search" {...navbar} />
       </div>
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-start gap-2xl px-lg py-2xl">

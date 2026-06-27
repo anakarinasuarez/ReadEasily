@@ -21,7 +21,7 @@ import {
   createWebSpeechController,
   isSpeechSupported,
   type ReaderSpeech,
-} from "@/features/reader/audio/speechController";
+} from "@/lib/audio/speechController";
 import {
   DEFAULT_VOICE,
   LANGUAGE_LABELS,

@@ -28,6 +28,8 @@ figma.connect(
           email: "karina@example.com",
         }}
         stats={{ words: 0, finished: 0 }}
+        translationLang="ES"
+        onTranslationLangChange={() => {}}
         onViewProfile={() => {}}
         onSignOut={() => {}}
       />

@@ -16,6 +16,12 @@
  */
 
 import type { Preferences } from "@/stores/preferences";
+import { DEFAULT_VOICE, type VoiceAccent } from "@/lib/audio/speechController";
+
+// The accent vocabulary lives in the feature-agnostic base layer (the TTS seam
+// is `src/lib/audio`). The Reader re-exports it so its public contract is
+// unchanged, and layers its store-mapping tables (below) on top.
+export { DEFAULT_VOICE, type VoiceAccent };
 
 /** The store's preference value shapes the Reader adapts to (single source of
  *  truth). Aliased so the mapping tables below read cleanly. */
@@ -45,13 +51,6 @@ export const LANGUAGE_LABELS: Record<Language, string> = {
 /** The default translation language (Spanish), matching the original behaviour. */
 export const DEFAULT_LANGUAGE: Language = "es";
 
-/**
- * The audio voice accent — the BCP-47 lang the TTS engine should match. Four
- * accents, 1:1 with the global preferences store's `readingAccent`
- * (US/UK/AU/CA): US→en-US, UK→en-GB, AU→en-AU, CA→en-CA.
- */
-export type VoiceAccent = "en-US" | "en-GB" | "en-AU" | "en-CA";
-
 /** The supported voice accents, in display order. */
 export const VOICE_ACCENTS: readonly VoiceAccent[] = [
   "en-US",
@@ -67,9 +66,6 @@ export const VOICE_LABELS: Record<VoiceAccent, { code: string; name: string }> =
   "en-AU": { code: "AU", name: "Australian English" },
   "en-CA": { code: "CA", name: "Canadian English" },
 };
-
-/** The default voice accent (US English). */
-export const DEFAULT_VOICE: VoiceAccent = "en-US";
 
 /**
  * Mappings between the global preferences store's short codes and the Reader's

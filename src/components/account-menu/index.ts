@@ -3,4 +3,5 @@ export type {
   AccountMenuProps,
   AccountIdentity,
   AccountStats,
+  AccountLang,
 } from "./AccountMenu";
