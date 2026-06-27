@@ -17,11 +17,16 @@ test("profile: reached via the navbar avatar, settings persist across reload, de
   const pageErrors: string[] = [];
   page.on("pageerror", (err) => pageErrors.push(err.message));
 
-  // 1. From the Library home, the account avatar routes to /profile.
+  // 1. From the Library home, the account avatar opens the account popover, and
+  //    its "View profile" row routes to /profile.
   await page.goto("/library");
   await page
     .getByRole("navigation", { name: "Primary" })
     .getByRole("button", { name: "Account" })
+    .click();
+  await page
+    .getByRole("dialog", { name: "Account" })
+    .getByRole("button", { name: /View profile/ })
     .click();
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page).toHaveTitle("ReadEasily");
