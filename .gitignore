@@ -48,3 +48,6 @@ next-env.d.ts
 
 *storybook.log
 storybook-static
+
+# agent git worktrees (transient)
+.claude/worktrees/
