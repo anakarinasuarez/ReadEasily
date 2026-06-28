@@ -20,9 +20,15 @@ import type { SavedWord } from "@/features/saved/types";
 export async function getPracticeSentences(
   word: string,
   nonce = 0,
+  translation?: string,
 ): Promise<PracticeResponse> {
+  const params = new URLSearchParams({ nonce: String(nonce) });
+  // The word's gloss in the active language — lets the offline template
+  // fallback render a real translation line (ignored when a precomputed
+  // sample backs the word).
+  if (translation) params.set("t", translation);
   const res = await fetch(
-    `/api/practice/${encodeURIComponent(word)}?nonce=${encodeURIComponent(String(nonce))}`,
+    `/api/practice/${encodeURIComponent(word)}?${params.toString()}`,
   );
   if (!res.ok) {
     throw new Error(

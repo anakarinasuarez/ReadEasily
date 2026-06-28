@@ -1,3 +1,3 @@
-export { StoryDetailScreen } from "./StoryDetailScreen";
-export type { StoryDetailScreenProps } from "./StoryDetailScreen";
+export { StoryDetailContent } from "./StoryDetailContent";
+export type { StoryDetailContentProps } from "./StoryDetailContent";
 export { StoryDetailError, StoryDetailSkeleton } from "./StoryDetailStates";

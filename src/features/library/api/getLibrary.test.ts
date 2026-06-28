@@ -18,9 +18,10 @@ describe("getLibrary", () => {
     const centre = data.featured[Math.floor(data.featured.length / 2)];
     expect(centre.title).toBe("The Ant and the Grasshopper");
     expect(centre.level).toBe("A2");
-    // Every featured story routes to /read/${id} and carries a per-story eyebrow.
+    // Every featured story opens Story Detail (/story/${id}) and carries a
+    // per-story eyebrow.
     for (const story of data.featured) {
-      expect(story.href).toBe(`/read/${story.id}`);
+      expect(story.href).toBe(`/story/${story.id}`);
       expect(story.eyebrow).toBeTruthy();
     }
     // Only the centre is an editor's pick (badge is optional).

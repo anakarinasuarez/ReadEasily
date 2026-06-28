@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { LoginScreen } from "@/features/auth/components";
+
+export const metadata: Metadata = {
+  title: "Log in",
+  // Auth utility route — no SEO value.
+  robots: { index: false, follow: false },
+};
 
 /**
  * Login route `/login` — the "Welcome back" auth screen. Stays a Server

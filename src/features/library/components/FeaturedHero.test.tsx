@@ -28,7 +28,7 @@ const FEATURED: FeaturedBook[] = [
     words: 540,
     coverSrc: "/covers/A-trip-mountains.webp",
     category: "travel",
-    href: "/read/a-trip-to-the-mountains",
+    href: "/story/a-trip-to-the-mountains",
     eyebrow: "Featured Journey",
     teaser: "A weekend hike and a view worth every step.",
   },
@@ -41,7 +41,7 @@ const FEATURED: FeaturedBook[] = [
     words: 210,
     coverSrc: "/covers/the-clever-crow.webp",
     category: "fables",
-    href: "/read/the-clever-crow",
+    href: "/story/the-clever-crow",
     eyebrow: "Featured Fable",
     teaser: "A thirsty crow and a few clever stones.",
   },
@@ -54,7 +54,7 @@ const FEATURED: FeaturedBook[] = [
     words: 312,
     coverSrc: "/covers/the-ant-grasshopper.webp",
     category: "fables",
-    href: "/read/the-ant-and-the-grasshopper",
+    href: "/story/the-ant-and-the-grasshopper",
     eyebrow: "Featured Fable",
     badgeLabel: "Editor's pick",
     teaser: "The grasshopper sings while the ants store grain.",
@@ -68,7 +68,7 @@ const FEATURED: FeaturedBook[] = [
     words: 300,
     coverSrc: "/covers/The-boy-who-cried-wolf.webp",
     category: "fables",
-    href: "/read/the-boy-who-cried-wolf",
+    href: "/story/the-boy-who-cried-wolf",
     eyebrow: "Featured Fable",
     teaser: "One false alarm too many.",
   },
@@ -81,7 +81,7 @@ const FEATURED: FeaturedBook[] = [
     words: 520,
     coverSrc: "/covers/My-first-Smartphone.webp",
     category: "technology",
-    href: "/read/my-first-smartphone",
+    href: "/story/my-first-smartphone",
     eyebrow: "Featured Technology",
     teaser: "Unboxing, set-up, and a few funny mistakes.",
   },
@@ -149,7 +149,7 @@ describe("FeaturedHero", () => {
       expect(
         screen.getByRole("heading", { level: 1, name: "A Trip to the Mountains" }),
       ).toBeInTheDocument();
-      expect(cta()).toHaveAttribute("href", "/read/a-trip-to-the-mountains");
+      expect(cta()).toHaveAttribute("href", "/story/a-trip-to-the-mountains");
       // A user change IS announced.
       expect(live.textContent).toContain("A Trip to the Mountains");
 

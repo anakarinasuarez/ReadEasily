@@ -29,6 +29,8 @@ import type { ReaderSpeech } from "@/lib/audio/speechController";
 import { ReadingCard } from "./ReadingCard";
 import { ReaderToggles } from "./ReaderToggles";
 import { ReaderError, ReaderSkeleton } from "./ReaderStates";
+import { ReaderProse } from "./ReaderProse";
+import type { StoryProse } from "../server/getStoryProse";
 import { AudioWaveIcon, ChevronLeftIcon, SparkleIcon } from "./icons";
 
 /**
@@ -55,6 +57,13 @@ import { AudioWaveIcon, ChevronLeftIcon, SparkleIcon } from "./icons";
 export interface ReaderScreenProps {
   /** The story id from the route param. */
   storyId: string;
+  /**
+   * Server-rendered story prose (English body + title). When present, the
+   * pending/SSR pass renders it instead of the skeleton, so the full readable
+   * story is in the prerendered HTML (SEO + no-JS); the interactive Reader takes
+   * over once the client `/api/story/:id` query resolves. Omitted in tests.
+   */
+  initialProse?: StoryProse;
   /**
    * Test seam: inject a fake TTS controller (+ force support) so the audio
    * transport — and the auto-scroll-follow that rides on it — can be exercised
@@ -102,6 +111,7 @@ interface SelectedWord {
 
 export function ReaderScreen({
   storyId,
+  initialProse,
   audioController,
   audioSupported,
 }: ReaderScreenProps) {
@@ -399,7 +409,14 @@ export function ReaderScreen({
           {isError ? (
             <ReaderError onRetry={() => void refetch()} />
           ) : isPending || !story || !currentPage ? (
-            <ReaderSkeleton />
+            // SSR / pending: render the real prose when the server provided it
+            // (crawlable, no-JS readable), else the shimmer. The interactive
+            // Reader replaces this once the client query resolves.
+            initialProse ? (
+              <ReaderProse prose={initialProse} />
+            ) : (
+              <ReaderSkeleton />
+            )
           ) : (
             <>
               {/* Title row (Figma 125:159): title text + a decorative 18px

@@ -355,8 +355,17 @@ export const BookShowcase = forwardRef<HTMLElement, BookShowcaseProps>(
               // Differential elevation — centre raised hardest (see token note).
               boxShadow: dist === 0 ? CENTER_SHADOW : SIDE_SHADOW,
             };
-            // Decorative tile — the real cover info lives in the host copy.
-            const tile = <BookCover size="small" src={item.coverSrc} alt="" />;
+            // Decorative tile — the real cover info lives in the host copy. The
+            // centred cover is the showcase's LCP candidate, so it eager-loads
+            // (priority) for a faster largest-contentful paint.
+            const tile = (
+              <BookCover
+                size="small"
+                src={item.coverSrc}
+                alt=""
+                priority={dist === 0}
+              />
+            );
 
             if (decorative) {
               return (

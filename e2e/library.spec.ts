@@ -23,13 +23,13 @@ test("library landing renders the catalog and filters by category", async ({
   const nav = page.getByRole("navigation", { name: "Primary" });
   await expect(nav.getByRole("link", { name: "Library" })).toBeVisible();
 
-  // Featured hero — centre story title + CTA into the reader.
+  // Featured hero — centre story title + CTA into Story Detail.
   await expect(
     page.getByRole("heading", { level: 1, name: "The Ant and the Grasshopper" }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: /Read & Listen/ })).toHaveAttribute(
     "href",
-    "/read/the-ant-and-the-grasshopper",
+    "/story/the-ant-and-the-grasshopper",
   );
 
   // The hero fan is interactive: selecting another story by its named dot swaps
@@ -41,7 +41,7 @@ test("library landing renders the catalog and filters by category", async ({
   ).toBeVisible();
   await expect(page.getByRole("link", { name: /Read & Listen/ })).toHaveAttribute(
     "href",
-    "/read/a-trip-to-the-mountains",
+    "/story/a-trip-to-the-mountains",
   );
 
   // At least one BookCard from the rails is visible.
