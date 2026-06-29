@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse, passthrough } from "msw";
 import type { LibraryData } from "@/features/library/types";
 import type {
   SearchCategory,
@@ -19,7 +19,10 @@ import {
   type NewSavedWord,
 } from "@/features/reader/types";
 import type { StoryDetail, StoryKeyWord } from "@/features/story/types";
-import { resolvePracticeSet } from "@/features/practice/content";
+import {
+  resolvePracticeSet,
+  templatePracticeSet,
+} from "@/features/practice/content";
 import {
   isValidPracticeWord,
   parsePracticeNonce,
@@ -465,12 +468,16 @@ const searchData: SearchData = {
 };
 
 /**
- * User-confirmed flow: catalog CARDS (Library rails + Search results) now route
- * to STORY DETAIL first (`/story/${id}`); Story Detail's "Read & Listen" CTA is
- * the single hop onward into the reader. The Library FEATURED HERO keeps its
- * direct `/read` CTA (its CTA is the read action, not a card), so only the
- * section + search card hrefs are repointed here — featured hrefs stay `/read`.
+ * User-confirmed flow: EVERY path into the reader routes through STORY DETAIL
+ * first (`/story/${id}`); Story Detail's "Read & Listen" CTA is the single hop
+ * onward into the reader. That now includes the Library FEATURED HERO — its
+ * "Read & Listen" CTA opens Story Detail like a card, not the reader directly.
+ * So all catalog hrefs (featured fan + rails + search results) point at
+ * `/story/${id}`; only Story Detail itself hands off to `/read/${id}`.
  */
+for (const book of libraryData.featured) {
+  book.href = `/story/${book.id}`;
+}
 for (const section of libraryData.sections) {
   for (const book of section.books) {
     book.href = `/story/${book.id}`;
@@ -1032,27 +1039,32 @@ export const handlers = [
     // than process it. The real `/api/practice/:word` route MUST apply the same
     // `isValidPracticeWord` guard plus a per-IP/-user rate limit + provider cap.
     if (!isValidPracticeWord(decoded)) {
-      return HttpResponse.json(
-        { error: "Invalid word" },
-        { status: 400 },
-      );
+      return HttpResponse.json({ error: "Invalid word" }, { status: 400 });
     }
-    const nonce = parsePracticeNonce(
-      new URL(request.url).searchParams.get("nonce"),
-    );
+    const url = new URL(request.url);
+    const nonce = parsePracticeNonce(url.searchParams.get("nonce"));
+    const translation = url.searchParams.get("t") ?? undefined;
+
+    // Precomputed sample → serve instantly (free).
     const set = resolvePracticeSet(decoded);
-    if (!set) {
-      const miss: PracticeResponse = {
-        word: decoded,
-        found: false,
-        sentences: [],
-      };
-      return HttpResponse.json(miss);
+    if (set) {
+      const sentences =
+        nonce > 0 ? seededShuffle(set.sentences, nonce) : set.sentences;
+      const hit: PracticeResponse = { word: set.word, found: true, sentences };
+      return HttpResponse.json(hit);
     }
-    const sentences =
-      nonce > 0 ? seededShuffle(set.sentences, nonce) : set.sentences;
-    const hit: PracticeResponse = { word: set.word, found: true, sentences };
-    return HttpResponse.json(hit);
+
+    // Miss: tests stay deterministic (offline templates, no network); the
+    // browser passes through to the REAL `/api/practice/[word]` route, which
+    // generates with Gemini (free tier) and falls back to templates itself.
+    if (process.env.NODE_ENV === "test") {
+      const t = templatePracticeSet(decoded, translation);
+      const sentences =
+        nonce > 0 ? seededShuffle(t.sentences, nonce) : t.sentences;
+      const hit: PracticeResponse = { word: t.word, found: true, sentences };
+      return HttpResponse.json(hit);
+    }
+    return passthrough();
   }),
 
   // Save a word — the write seam behind the Reader popover's Save button.

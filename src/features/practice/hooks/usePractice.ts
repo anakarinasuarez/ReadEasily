@@ -12,14 +12,22 @@ import type { PracticeResponse } from "../types";
  * `enabled` gates the fetch on an actually-open overlay with a word — closing
  * the overlay (or no word) means no request.
  *
- * A word with no precomputed sample still resolves successfully with
- * `found: false` + `sentences: []` (HTTP 200), so the overlay shows its graceful
- * empty state instead of an error.
+ * Every word resolves successfully (HTTP 200) with `found: true`: a precomputed
+ * sample when one exists, otherwise template-generated sentences. `translation`
+ * (the word's gloss in the active language) is forwarded so the template
+ * fallback can render a real translation line; it doesn't affect a precomputed
+ * hit. It is intentionally NOT part of the cache key — the gloss is stable per
+ * word, so it never needs to drive a refetch.
  */
-export function usePractice(word: string, nonce = 0, enabled = true) {
+export function usePractice(
+  word: string,
+  nonce = 0,
+  enabled = true,
+  translation?: string,
+) {
   return useQuery<PracticeResponse>({
     queryKey: practiceQueryKey(word, nonce),
-    queryFn: () => getPracticeSentences(word, nonce),
+    queryFn: () => getPracticeSentences(word, nonce, translation),
     enabled: enabled && word.trim() !== "",
   });
 }

@@ -13,7 +13,7 @@ import { HeadphonesIcon, StarIcon, VolumeIcon, WordsIcon } from "./icons";
  * 1272:4575). A circular, auto-rotating cover-flow of SEVERAL distinct featured
  * stories over a copy block that always describes the CENTERED story: per-story
  * eyebrow + optional editor's-pick badge, title, teaser, a meta row (level ·
- * listen-time · word count), and the "Read & Listen" CTA into the reader.
+ * listen-time · word count), and the "Read & Listen" CTA into Story Detail.
  *
  * Motion + a11y (WCAG 2.2.2): the fan auto-rotates step-and-rest, but this host
  * owns `playing` and pauses rotation while the WHOLE hero is hovered or holds
@@ -22,7 +22,7 @@ import { HeadphonesIcon, StarIcon, VolumeIcon, WordsIcon } from "./icons";
  * arrow / side-cover) hard-stops auto and flips the toggle to "Play". The polite
  * live region announces ONLY user-initiated selections — never an auto step.
  *
- * The centred story drives all copy + the CTA href; title/teaser reserve two-line
+ * The centred story drives all copy + the CTA destination; title/teaser reserve two-line
  * min-heights so an auto-step never reflows the CTA or changes the hero height.
  */
 export function FeaturedHero({ featured }: { featured: FeaturedBook[] }) {
@@ -44,13 +44,13 @@ export function FeaturedHero({ featured }: { featured: FeaturedBook[] }) {
   // Clamp defensively so a shrunk array never indexes out of range.
   const current = featured[Math.min(active, featured.length - 1)];
 
-  // The fanned covers behave like catalog cards → they open Story Detail
-  // (/story/[id]). The "Read & Listen" CTA below is the read action → /read/[id]
-  // (current.href). So a cover previews, the CTA starts reading.
+  // Every path into the reader goes through Story Detail first, so both the
+  // fanned covers AND the "Read & Listen" CTA below open `/story/[id]`
+  // (book.href). A cover previews; the CTA opens the centred story's detail.
   const items = featured.map((book) => ({
     coverSrc: book.coverSrc,
     alt: book.title,
-    href: `/story/${book.id}`,
+    href: book.href,
   }));
 
   const handleActiveChange = (index: number, source: ActiveChangeSource) => {
@@ -173,7 +173,7 @@ export function FeaturedHero({ featured }: { featured: FeaturedBook[] }) {
         </div>
 
         {/* CTA — every CTA carries an icon (brand law). asChild renders the
-            anchor so it is a real link into the reader for the CENTERED story;
+            anchor so it is a real link into Story Detail for the CENTERED story;
             we compose the icon + label ourselves since asChild bypasses
             leftIcon. */}
         <Button asChild variant="primary" size="lg" className="mt-sm">

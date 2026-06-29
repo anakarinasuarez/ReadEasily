@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
 import { LibraryScreen } from "@/features/library/components";
+
+export const metadata: Metadata = {
+  title: "Library",
+  description:
+    "Browse short illustrated English stories graded A1–C1 — fables, travel, daily life, and technology. Read, listen, and learn at your level.",
+  alternates: { canonical: "/library" },
+  openGraph: { url: "/library", title: "Library · ReadEasily" },
+};
 
 /**
  * Library route `/library` — the reading home (catalog landing). Stays a Server

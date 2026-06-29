@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { SavedScreen } from "@/features/saved/components";
+
+export const metadata: Metadata = {
+  title: "Saved words",
+  // Private account surface — keep out of the index.
+  robots: { index: false, follow: false },
+};
 
 /**
  * Saved route `/saved` — the reader's saved-word collection. This stays a Server

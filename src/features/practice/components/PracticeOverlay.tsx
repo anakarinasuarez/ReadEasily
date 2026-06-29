@@ -241,7 +241,7 @@ export function PracticeOverlay({
     setNonce(0);
   }
 
-  const practice = usePractice(word, nonce, open);
+  const practice = usePractice(word, nonce, open, translation);
   const save = useSavePractice();
 
   const found = practice.data?.found ?? false;

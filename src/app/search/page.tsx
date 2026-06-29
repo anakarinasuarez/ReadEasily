@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
 import { SearchScreen } from "@/features/search/components";
+
+export const metadata: Metadata = {
+  title: "Browse stories",
+  description:
+    "Find English stories by category and CEFR level. Browse fables, travel tales, daily-life and technology stories tuned for learners.",
+  alternates: { canonical: "/search" },
+  openGraph: { url: "/search", title: "Browse stories · ReadEasily" },
+};
 
 /**
  * Search route `/search` — browse stories by category. This stays a Server

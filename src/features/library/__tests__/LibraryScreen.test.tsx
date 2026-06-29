@@ -73,13 +73,13 @@ describe("LibraryScreen", () => {
     expect(pushMock).toHaveBeenCalledWith("/profile");
   });
 
-  it("links the featured CTA to the reader for the featured book", async () => {
+  it("links the featured CTA to Story Detail for the featured book", async () => {
     renderWithQuery(<LibraryScreen />);
     await waitForLoaded();
 
     expect(
       screen.getByRole("link", { name: /Read & Listen/ }),
-    ).toHaveAttribute("href", "/read/the-ant-and-the-grasshopper");
+    ).toHaveAttribute("href", "/story/the-ant-and-the-grasshopper");
   });
 
   it("filters the visible rails when a category chip is selected", async () => {
@@ -161,13 +161,13 @@ describe("LibraryScreen", () => {
       screen.queryByRole("button", { name: /Featured story/ }),
     ).not.toBeInTheDocument();
 
-    // The centre story drives the hero; its CTA links into its reader.
+    // The centre story drives the hero; its CTA opens that story's detail.
     expect(
       screen.getByRole("heading", { level: 1, name: "The Ant and the Grasshopper" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /Read & Listen/ }),
-    ).toHaveAttribute("href", "/read/the-ant-and-the-grasshopper");
+    ).toHaveAttribute("href", "/story/the-ant-and-the-grasshopper");
 
     // Select a different story by its named dot: the h1 + CTA href update together.
     await user.click(
@@ -178,7 +178,7 @@ describe("LibraryScreen", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /Read & Listen/ }),
-    ).toHaveAttribute("href", "/read/a-trip-to-the-mountains");
+    ).toHaveAttribute("href", "/story/a-trip-to-the-mountains");
   });
 
   it("links the featured fan's centre cover to Story Detail (not straight to the reader)", async () => {

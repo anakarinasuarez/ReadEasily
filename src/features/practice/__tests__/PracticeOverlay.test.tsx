@@ -178,16 +178,17 @@ describe("PracticeOverlay", () => {
     expect(speech.calls.some((c) => c.text === "Path")).toBe(true);
   });
 
-  it("shows a friendly empty state for a word with no sample", async () => {
+  it("generates fallback sentences for a word with no precomputed sample", async () => {
     renderOverlay({ word: "Xyzzy", translation: "" });
 
+    // Every word now gets sentences (template fallback) — no "coming soon".
+    const cards = await findCards("Xyzzy");
+    expect(cards).toHaveLength(8);
+    // The word is rendered + highlighted in the generated sentences.
+    expect(screen.getAllByTestId("practice-highlight").length).toBeGreaterThan(0);
     expect(
-      await screen.findByText(
-        "Practice sentences for this word are coming soon.",
-      ),
-    ).toBeInTheDocument();
-    // No sentence list (and so no controls) in the empty state.
-    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+      screen.queryByText("Practice sentences for this word are coming soon."),
+    ).not.toBeInTheDocument();
   });
 
   it("has no axe violations in the loaded state", async () => {
@@ -197,13 +198,9 @@ describe("PracticeOverlay", () => {
     expect(results).toHaveNoViolations();
   });
 
-  it("has no axe violations in the empty state", async () => {
+  it("has no axe violations in the generated fallback state", async () => {
     renderOverlay({ word: "Xyzzy", translation: "" });
-    expect(
-      await screen.findByText(
-        "Practice sentences for this word are coming soon.",
-      ),
-    ).toBeInTheDocument();
+    await findCards("Xyzzy");
     const results = await axe(document.body);
     expect(results).toHaveNoViolations();
   });

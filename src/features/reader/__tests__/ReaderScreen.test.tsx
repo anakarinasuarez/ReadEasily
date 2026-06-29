@@ -276,19 +276,24 @@ describe("ReaderScreen", () => {
       );
       await waitForStory();
 
-      // Start playback → the fake records sentence 0's utterance.
+      // Start playback → the fake records the title utterance first (it carries
+      // no card word, so it doesn't scroll), then the body sentences.
       await user.click(screen.getByRole("button", { name: "Play" }));
-      // Begin voicing sentence 0 → the active sentence highlights → follow.
+
+      // Title (calls[0]) → no word range → no scroll. Advance to the first BODY
+      // sentence (calls[1], word 0) → the active sentence highlights → follow.
       act(() => calls[0].options?.onStart?.());
+      act(() => calls[0].options?.onEnd?.());
+      act(() => calls[1].options?.onStart?.());
 
       await waitFor(() => expect(scrolled).toHaveLength(1));
       expect((scrolled[0] as HTMLElement).getAttribute("data-word-index")).toBe(
         "0",
       );
 
-      // Advance to sentence 1 → the scroll target updates to a later word.
-      act(() => calls[0].options?.onEnd?.());
-      act(() => calls[1].options?.onStart?.());
+      // Advance to the next body sentence → the scroll target moves to a later word.
+      act(() => calls[1].options?.onEnd?.());
+      act(() => calls[2].options?.onStart?.());
 
       await waitFor(() => expect(scrolled).toHaveLength(2));
       expect(

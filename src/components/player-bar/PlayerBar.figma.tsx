@@ -41,7 +41,7 @@ figma.connect(
         onRestart={() => {}}
         onSkipEnd={() => {}}
         onCycleSpeed={() => {}}
-        onOpenSettings={() => {}}
+        onToggleFullscreen={() => {}}
       />
     ),
   },

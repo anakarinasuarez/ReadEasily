@@ -51,8 +51,10 @@ export interface PlayerBarProps
   onSkipEnd?: () => void;
   /** Cycle the playback speed (0.75 → 1 → 1.25 → 1.5 → 0.75). */
   onCycleSpeed?: () => void;
-  /** Open the reader settings panel (font size, etc.). */
-  onOpenSettings?: () => void;
+  /** Toggle immersive full-screen reading (the ⛶ expand control). */
+  onToggleFullscreen?: () => void;
+  /** Whether the reader is currently full-screen (drives the control's label). */
+  isFullscreen?: boolean;
 }
 
 /** Join class fragments, dropping falsy ones. */
@@ -188,15 +190,15 @@ function SkipEndGlyph() {
   );
 }
 
-function SettingsGlyph() {
+function ExpandGlyph() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
       <path
-        d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9 5.3 5.3"
+        d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -266,7 +268,8 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
       onRestart,
       onSkipEnd,
       onCycleSpeed,
-      onOpenSettings,
+      onToggleFullscreen,
+      isFullscreen = false,
       className,
       ...rest
     },
@@ -450,6 +453,9 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
             className={cn(
               chipBaseClasses,
               "px-[18px] py-sm text-[var(--text-primary)]", // px-18 off-scale literal; py-sm (8) Figma pill padding
+              // Fixed width + tabular figures so cycling 1×→1.25×→0.75× never
+              // changes the pill's size and shifts the whole transport row.
+              "min-w-[74px] tabular-nums",
               "transition-opacity hover:opacity-100",
               focusRing,
               "disabled:cursor-not-allowed disabled:text-[var(--text-muted)]",
@@ -490,7 +496,8 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
             className={cn(
               "relative inline-flex size-[56px] shrink-0 items-center justify-center", // 56px = Figma primary footprint
               "rounded-[var(--radius-pill)] bg-[var(--bg-accent)] text-[var(--text-on-accent)]",
-              "shadow-[var(--shadow-accent-glow)] transition-colors",
+              // Figma renders the play button flat (no glow) — matches the design.
+              "transition-colors",
               "hover:bg-[var(--bg-accent-hover)]",
               focusRing,
               "disabled:cursor-not-allowed disabled:opacity-60",
@@ -549,14 +556,16 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
             </span>
           )}
 
-          {/* Settings — also desktop-only on the Figma mobile transport. */}
+          {/* Full-screen reading toggle (Figma ⛶ expand) — desktop-only, as the
+              Figma mobile transport drops it. */}
           <span className="hidden md:flex">
             <IconButton
               size="md"
-              icon={<SettingsGlyph />}
-              aria-label="Settings"
+              icon={<ExpandGlyph />}
+              aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+              aria-pressed={isFullscreen || undefined}
               disabled={isDisabled}
-              onClick={onOpenSettings}
+              onClick={onToggleFullscreen}
               className={roundBtnClasses}
             />
           </span>

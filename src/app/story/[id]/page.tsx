@@ -1,22 +1,50 @@
-import { StoryDetailScreen } from "@/features/story/components";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { STORY_IDS } from "@/content/catalog";
+import { StoryDetailContent } from "@/features/story/components";
+import { getStoryContent } from "@/features/story/server/getStoryContent";
+import { buildStoryJsonLd, buildStoryMetadata } from "@/lib/story-metadata";
 
 /**
  * Story Detail route `/story/[id]` — the bridge between the catalog cards
- * (which now land here) and the reader. This stays a Server Component; the
- * interactive, data-bound screen is the client boundary (StoryDetailScreen
- * reads the detail via TanStack Query against the MSW-mocked
- * `/api/story/:id/detail`). The app-wide QueryClient provider lives in
- * `src/app/providers.tsx` (wrapped in the root layout), so no provider is
- * duplicated here. The route's only job is to read the `[id]` param and mount
- * the screen.
+ * (which land HERE) and the reader: card → `/story/${id}` → "Read & Listen" →
+ * `/read/${id}`.
+ *
+ * Server-first: the static content (cover, title, level, teaser, moral, CTA)
+ * renders on the server from the catalog-derived `getStoryContent`, so it is in
+ * the prerendered HTML — indexable and shipping no client JS. Only the navbar
+ * and the glossary-fed "key words" chips are client islands (inside
+ * StoryDetailContent). The page also owns the SEO: per-story `generateMetadata`,
+ * `generateStaticParams` (SSG), and a JSON-LD `LearningResource` block.
  */
-export default async function StoryDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+type Props = { params: Promise<{ id: string }> };
+
+/** Prerender every catalog story at build (others fall back to on-demand SSR). */
+export function generateStaticParams() {
+  return STORY_IDS.map((id) => ({ id }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  // Key by id so navigating between stories remounts the screen — a fresh mount
-  // resets any local state with no reset effect.
-  return <StoryDetailScreen key={id} storyId={id} />;
+  return buildStoryMetadata(id, "detail");
+}
+
+export default async function StoryDetailPage({ params }: Props) {
+  const { id } = await params;
+  const content = getStoryContent(id);
+  if (!content) notFound();
+
+  const jsonLd = buildStoryJsonLd(id);
+
+  return (
+    <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <StoryDetailContent content={content} storyId={id} />
+    </>
+  );
 }
