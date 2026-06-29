@@ -50,6 +50,29 @@ jobs:
           # Deterministic canonical origin for the SSG/metadata build.
           NEXT_PUBLIC_SITE_URL: https://readeasily.app
 
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Fail the build only on high/critical CVEs. Moderate/low are reported but
+      # don't block — today the only advisories are moderate and live in a
+      # transitive dep pinned by Next (postcss via next), unfixable without a
+      # breaking Next downgrade. Dependabot (.github/dependabot.yml) raises the
+      # upgrade PRs; this gate stops a genuinely exploitable CVE from landing.
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high
+
   e2e:
     name: E2E (Playwright)
     runs-on: ubuntu-latest
