@@ -11,23 +11,60 @@ A warm, cozy reading app built 1:1 from a Figma design system into a fully teste
 ![React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-619%20passing-3fb950)
+![Tests](https://img.shields.io/badge/tests-674%20passing-3fb950)
+![Accessibility](https://img.shields.io/badge/a11y-WCAG%20AA-7c4dff)
+
+<br />
+
+<img src="docs/screenshots/home.png" alt="ReadEasily landing — Learn English, one fable at a time" width="820" />
 
 </div>
 
 ---
 
+## Contents
+
+- [What it does](#-what-it-does)
+- [Preview](#-preview)
+- [Stack](#-stack)
+- [Getting started](#-getting-started)
+- [Scripts](#-scripts)
+- [Architecture](#-architecture)
+- [Testing & quality](#-testing--quality)
+- [Accessibility](#-accessibility)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+
 ## ✨ What it does
 
-- **Read** short stories graded by CEFR level (A1–C1), with cozy illustrations.
-- **Listen** to each story read aloud, with a synchronized, accessible player.
-- **Translate** and **save** unfamiliar words as you go.
-- **Practice** saved words with example sentences generated on the fly.
+ReadEasily turns short, illustrated stories into a gentle English-learning loop:
+
+- **📚 Read** — short stories graded by CEFR level (A1–C1), each with cozy, hand-drawn illustrations.
+- **🎧 Listen** — every story read aloud with a synchronized, fully accessible player; the words light up as you hear them.
+- **🌍 Translate** — tap any word for an instant translation (Spanish · Français · Português) without leaving the page.
+- **🔖 Save** — keep the words you want to remember, gathered in one place.
+- **✍️ Practice** — review saved words with example sentences generated on the fly (Google Gemini Flash, with a zero-cost template fallback so it works offline).
+
+## 🖼️ Preview
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/library.png" alt="Library — browse the illustrated catalog by category" /><br /><sub><b>Library</b> — browse the illustrated catalog</sub></td>
+    <td width="50%"><img src="docs/screenshots/story.png" alt="Story detail — level, moral, and the key words you'll learn" /><br /><sub><b>Story detail</b> — level, moral &amp; key words</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/reader.png" alt="Reader — read along with synchronized narration and a player bar" /><br /><sub><b>Reader</b> — read + listen, immersive full-screen</sub></td>
+    <td width="50%"><img src="docs/screenshots/saved.png" alt="Saved words ready to practice" /><br /><sub><b>Saved words</b> — your review list</sub></td>
+  </tr>
+</table>
+
+> Screenshots are the real app running against mocked data. Regenerate them with
+> `npm run dev` + `node scripts/capture-screenshots.mjs`.
 
 ## 🧱 Stack
 
 - **Next.js 16** (App Router · React Server Components) · **React 19** · **TypeScript** (strict)
-- **Tailwind CSS v4** with design tokens generated from Figma
+- **Tailwind CSS v4** with design tokens generated from Figma (the source of truth)
 - **Radix UI** primitives · **Storybook** for the component library
 - **Vitest + React Testing Library** (unit/behavior) · **Playwright** (e2e) · **jest-axe** (a11y)
 - **MSW** for deterministic, mock-backed data in dev, tests and e2e
@@ -82,17 +119,28 @@ tests/           # setup + MSW mocks
 ```
 
 Build order is never skipped: `tokens → ui → composites → features → flows → e2e`.
+The app is built by a roster of specialist agents (see [`.claude/agents/`](.claude/agents) and [CONTRIBUTING.md](CONTRIBUTING.md)).
 
-## ✅ Quality gates (Definition of Done)
+## ✅ Testing & quality
 
 Every change must pass, locally and in CI:
 
+- **674 unit/component tests** (Vitest + RTL) — behavior, not implementation
+- **Playwright e2e** for the critical journeys (browse → read → save → practice)
+- **jest-axe** accessibility checks + keyboard operability + visible focus on every interactive component
 - TypeScript strict (no `any`) · matches Figma · uses tokens, never hardcoded values
-- Storybook story for all variants/states · behavior test (RTL) · a11y test (jest-axe) + keyboard + visible focus (AA)
 - `lint`, `typecheck`, `test`, `build` green
 
-CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs all of these
-plus the Playwright journeys on every pull request and on `main`.
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs all of these plus
+a dependency-vulnerability audit on every pull request and on `main`.
+
+## ♿ Accessibility
+
+Accessibility is treated as craft, to **WCAG AA**: semantic markup, labelled
+controls, managed focus across routes, visible focus rings, full keyboard
+operability, `prefers-reduced-motion` honored, and AA-contrast color tokens
+(muted text, interactive terracotta, info, success). Every component ships an
+automated axe check.
 
 ## 🚢 Deployment
 
@@ -102,5 +150,5 @@ required environment variables, and how to roll back.
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch/PR workflow and the
-specialist-agent roster that builds this app.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch/PR workflow, the Definition
+of Done, and the specialist-agent roster that builds this app.
