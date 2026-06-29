@@ -21,9 +21,16 @@ export default defineConfig({
   // serial cost is a few seconds. Locally, parallel stays on for speed.
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? "github" : "list",
+  // CI runs against a COLD `next dev`: the first navigation to each route waits
+  // on an on-demand Turbopack compile, which is far slower than a warm local
+  // run. Give navigations and assertions generous headroom in CI so a slow
+  // first compile reads as "slow", not "failed". Local stays tight for fast feedback.
+  expect: { timeout: process.env.CI ? 15_000 : 5_000 },
   use: {
     baseURL,
     trace: "on-first-retry",
+    navigationTimeout: process.env.CI ? 60_000 : 30_000,
+    actionTimeout: process.env.CI ? 15_000 : 0,
     // Honor reduced-motion so motion-driven components are deterministic in e2e
     // (the auto-rotating BookShowcase hero pauses) — removes timing flakes.
     contextOptions: { reducedMotion: "reduce" },
