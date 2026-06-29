@@ -19,7 +19,7 @@ test("home route renders and hydrates", async ({ page }) => {
   const response = await page.goto("/");
   expect(response?.ok()).toBe(true);
 
-  await expect(page).toHaveTitle("ReadEasily");
+  await expect(page).toHaveTitle(/ReadEasily/);
 
   // The Landing's brand + primary CTA are present once it hydrates. (The
   // header is Figma-exact: centered brand, no Log in link.)

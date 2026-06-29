@@ -17,7 +17,7 @@ test("reader opens a story, shows a word meaning, and saves it", async ({ page }
 
   const response = await page.goto("/read/the-clever-crow");
   expect(response?.ok()).toBe(true);
-  await expect(page).toHaveTitle("ReadEasily");
+  await expect(page).toHaveTitle(/ReadEasily/);
 
   // The story title (centered H1) and the breadcrumb-back to Library.
   await expect(

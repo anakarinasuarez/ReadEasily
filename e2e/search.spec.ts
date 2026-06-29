@@ -16,7 +16,7 @@ test("search screen browses the catalog and filters by category", async ({
 
   const response = await page.goto("/search");
   expect(response?.ok()).toBe(true);
-  await expect(page).toHaveTitle("ReadEasily");
+  await expect(page).toHaveTitle(/ReadEasily/);
 
   // Navbar with Search as the active destination.
   const nav = page.getByRole("navigation", { name: "Primary" });

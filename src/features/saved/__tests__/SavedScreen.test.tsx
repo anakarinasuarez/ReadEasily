@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse, delay } from "msw";
 import { axe } from "jest-axe";
 import { server } from "../../../../tests/mocks/server";
 import { renderWithQuery } from "../../../../tests/utils/query";
@@ -215,10 +215,15 @@ describe("SavedScreen", () => {
   });
 
   it("restores the word if the remove request fails (rollback)", async () => {
+    // `delay` widens the optimistically-removed window so the test can observe
+    // the card actually leave before the failed DELETE rolls it back — without
+    // that, asserting "Path is present" would pass on the initial, un-removed
+    // state and never exercise the rollback at all.
     server.use(
-      http.delete("/api/saved/:id", () =>
-        HttpResponse.json({ error: "boom" }, { status: 500 }),
-      ),
+      http.delete("/api/saved/:id", async () => {
+        await delay(50);
+        return HttpResponse.json({ error: "boom" }, { status: 500 });
+      }),
     );
 
     const user = userEvent.setup();
@@ -229,10 +234,19 @@ describe("SavedScreen", () => {
       screen.getByRole("button", { name: "Remove Path from saved" }),
     );
 
-    // Optimistically removed, then the failed DELETE rolls it back into place.
+    // 1) It really leaves: the optimistic remove drops the card and the
+    //    words-to-review count falls 8 → 7.
     await waitFor(() => {
-      expect(screen.getByRole("link", { name: "Path" })).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Path" }),
+      ).not.toBeInTheDocument();
     });
+    expect(screen.getByText("7")).toBeInTheDocument();
+
+    // 2) The failed DELETE rolls it back into place and the count returns to 8.
+    expect(
+      await screen.findByRole("link", { name: "Path" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("8")).toBeInTheDocument();
   });
 

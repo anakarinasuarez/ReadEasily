@@ -19,7 +19,14 @@ import {
   type NewSavedWord,
 } from "@/features/reader/types";
 import type { StoryDetail, StoryKeyWord } from "@/features/story/types";
-import { resolvePracticeSet, templatePracticeSet } from "@/features/practice/content";
+import {
+  resolvePracticeSet,
+  templatePracticeSet,
+} from "@/features/practice/content";
+import {
+  isValidPracticeWord,
+  parsePracticeNonce,
+} from "@/features/practice/validateWord";
 import type {
   PracticeResponse,
   PracticeSentence,
@@ -1027,8 +1034,15 @@ export const handlers = [
   http.get("/api/practice/:word", ({ params, request }) => {
     const { word } = params as { word: string };
     const decoded = decodeURIComponent(word);
+    // Validate at the boundary before any lookup (and, in the real route, before
+    // forwarding to a paid generator): reject oversized / non-word input rather
+    // than process it. The real `/api/practice/:word` route MUST apply the same
+    // `isValidPracticeWord` guard plus a per-IP/-user rate limit + provider cap.
+    if (!isValidPracticeWord(decoded)) {
+      return HttpResponse.json({ error: "Invalid word" }, { status: 400 });
+    }
     const url = new URL(request.url);
-    const nonce = Number(url.searchParams.get("nonce") ?? "0");
+    const nonce = parsePracticeNonce(url.searchParams.get("nonce"));
     const translation = url.searchParams.get("t") ?? undefined;
 
     // Precomputed sample → serve instantly (free).
