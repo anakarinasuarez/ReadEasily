@@ -9,16 +9,16 @@
  * Lookups go through `resolvePracticeSet`, which reuses the Reader's lemma
  * matching (`normalizeLemma` + `candidateLemmas`) so a tap on an inflected
  * surface ("paths", "running") still resolves to the base-word sample
- * ("path", "run"). A word with no sample resolves to `null` — the caller (the
- * MSW handler) turns that into a graceful `found: false` response.
- *
- * TODO(practice-generation): real "generate sentences for ANY word" plugs in
- * here — when `resolvePracticeSet` misses, call the generator instead of
- * returning null. The network seam (`GET /api/practice/:word`) and the entire
- * overlay stay unchanged; only this resolver gains a fallback branch.
+ * ("path", "run"). A word with no precomputed sample resolves to `null`; the
+ * caller (the MSW handler) then falls back to `templatePracticeSet` (see
+ * `./templates`) so EVERY word gets sentences — Practice never shows the
+ * "coming soon" empty state. A higher-fidelity per-word generator (an LLM) can
+ * replace that fallback behind the same `GET /api/practice/:word` seam.
  */
 import { candidateLemmas, normalizeLemma } from "@/features/reader/content/lemma";
 import type { PracticeSet } from "../types";
+
+export { templatePracticeSet } from "./templates";
 
 import city from "@/content/practice/city.json";
 import friend from "@/content/practice/friend.json";

@@ -14,7 +14,7 @@ import { useStory } from "../hooks/useStory";
 import { useSaveWord } from "../hooks/useSaveWord";
 import { useReaderAudio } from "../hooks/useReaderAudio";
 import { useFollowReadingScroll } from "../hooks/useFollowReadingScroll";
-import { buildSentences } from "../audio/sentences";
+import { buildSentences, type ReaderSentence } from "../audio/sentences";
 import { lookupWord } from "../content/lemma";
 import {
   LANGUAGE_LABELS,
@@ -29,6 +29,8 @@ import type { ReaderSpeech } from "@/lib/audio/speechController";
 import { ReadingCard } from "./ReadingCard";
 import { ReaderToggles } from "./ReaderToggles";
 import { ReaderError, ReaderSkeleton } from "./ReaderStates";
+import { ReaderProse } from "./ReaderProse";
+import type { StoryProse } from "../server/getStoryProse";
 import { AudioWaveIcon, ChevronLeftIcon, SparkleIcon } from "./icons";
 
 /**
@@ -55,6 +57,13 @@ import { AudioWaveIcon, ChevronLeftIcon, SparkleIcon } from "./icons";
 export interface ReaderScreenProps {
   /** The story id from the route param. */
   storyId: string;
+  /**
+   * Server-rendered story prose (English body + title). When present, the
+   * pending/SSR pass renders it instead of the skeleton, so the full readable
+   * story is in the prerendered HTML (SEO + no-JS); the interactive Reader takes
+   * over once the client `/api/story/:id` query resolves. Omitted in tests.
+   */
+  initialProse?: StoryProse;
   /**
    * Test seam: inject a fake TTS controller (+ force support) so the audio
    * transport — and the auto-scroll-follow that rides on it — can be exercised
@@ -102,6 +111,7 @@ interface SelectedWord {
 
 export function ReaderScreen({
   storyId,
+  initialProse,
   audioController,
   audioSupported,
 }: ReaderScreenProps) {
@@ -146,6 +156,43 @@ export function ReaderScreen({
     phonetic?: string;
     wordId: string;
   } | null>(null);
+
+  // Immersive full-screen reading — the PlayerBar ⛶ expand control toggles the
+  // browser Fullscreen API; `fullscreenchange` keeps the label/state in sync
+  // (incl. when the user exits with Esc).
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [barRevealed, setBarRevealed] = useState(false);
+  useEffect(() => {
+    const sync = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+      // Reset on any enter/exit so the bar starts hidden in full-screen.
+      setBarRevealed(false);
+    };
+    document.addEventListener("fullscreenchange", sync);
+    return () => document.removeEventListener("fullscreenchange", sync);
+  }, []);
+  const toggleFullscreen = useCallback(() => {
+    if (typeof document === "undefined") return;
+    if (document.fullscreenElement) {
+      void document.exitFullscreen?.();
+    } else {
+      const req = document.documentElement.requestFullscreen?.();
+      if (req) void req.catch(() => {});
+    }
+  }, []);
+
+  // In full-screen the bar auto-hides; it slides back up while the pointer is
+  // in the bottom bar area, and hides again when it leaves (no overlay, so the
+  // reading text stays fully interactive). Keyboard focus also reveals it.
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const REVEAL_ZONE_PX = 160;
+    const onMove = (e: PointerEvent) => {
+      setBarRevealed(e.clientY >= window.innerHeight - REVEAL_ZONE_PX);
+    };
+    window.addEventListener("pointermove", onMove);
+    return () => window.removeEventListener("pointermove", onMove);
+  }, [isFullscreen]);
 
   // Track the mobile breakpoint so the popover renders anchored (desktop) or as
   // a centered panel (mobile). matchMedia keeps it in sync on resize/rotate.
@@ -197,10 +244,30 @@ export function ReaderScreen({
   // Audio (Web Speech). Derive the current page's sentences (same tokenizer the
   // passage uses, so word indices align), then drive playback via the hook. It
   // resets + cancels on page turn (resetKey) and on unmount — no audio bleed.
-  const sentences = useMemo(
-    () => (currentPage ? buildSentences(currentPage) : []),
-    [currentPage],
-  );
+  const storyTitle = story?.title;
+  const sentences = useMemo<ReaderSentence[]>(() => {
+    if (!currentPage) return [];
+    const pageSentences = buildSentences(currentPage);
+    // Speak the story title first — but only at the very start (page 1). It
+    // carries no word range, so it isn't highlighted on the card (the title
+    // isn't part of the passage).
+    if (pageIndex === 0 && storyTitle) {
+      const titleSentence: ReaderSentence = {
+        index: 0,
+        // A trailing period makes the TTS land the title as a full sentence —
+        // a small natural pause before the story body begins.
+        text: /[.!?]$/.test(storyTitle) ? storyTitle : `${storyTitle}.`,
+        firstWordIndex: -1,
+        lastWordIndex: -1,
+        wordIndices: [],
+      };
+      return [
+        titleSentence,
+        ...pageSentences.map((s) => ({ ...s, index: s.index + 1 })),
+      ];
+    }
+    return pageSentences;
+  }, [currentPage, pageIndex, storyTitle]);
   const audio = useReaderAudio({
     sentences,
     resetKey: pageIndex,
@@ -399,7 +466,14 @@ export function ReaderScreen({
           {isError ? (
             <ReaderError onRetry={() => void refetch()} />
           ) : isPending || !story || !currentPage ? (
-            <ReaderSkeleton />
+            // SSR / pending: render the real prose when the server provided it
+            // (crawlable, no-JS readable), else the shimmer. The interactive
+            // Reader replaces this once the client query resolves.
+            initialProse ? (
+              <ReaderProse prose={initialProse} />
+            ) : (
+              <ReaderSkeleton />
+            )
           ) : (
             <>
               {/* Title row (Figma 125:159): title text + a decorative 18px
@@ -451,8 +525,16 @@ export function ReaderScreen({
       </div>
 
       {/* Fixed-bottom PlayerBar — live when Web Speech is supported, else it
-          keeps its inert "Audio is unavailable" state (hook reports status). */}
-      <div className="fixed inset-x-0 bottom-0 z-40">
+          keeps its inert "Audio is unavailable" state (hook reports status).
+          In full-screen it auto-hides for distraction-free reading and slides
+          back up while the pointer is in the bottom bar area (or the bar holds
+          focus); its ⛶ control then exits full-screen. */}
+      <div
+        onFocusCapture={isFullscreen ? () => setBarRevealed(true) : undefined}
+        className={`fixed inset-x-0 bottom-0 z-40 transition-transform duration-200 ease-out motion-reduce:transition-none ${
+          isFullscreen && !barRevealed ? "translate-y-full" : "translate-y-0"
+        }`}
+      >
         <PlayerBar
           // Don't show an enabled-looking "ready" bar before content exists:
           // while the story is loading/errored (no current page) the supported
@@ -478,6 +560,8 @@ export function ReaderScreen({
           onRestart={audio.restart}
           onSkipEnd={audio.skipEnd}
           onCycleSpeed={audio.cycleSpeed}
+          onToggleFullscreen={toggleFullscreen}
+          isFullscreen={isFullscreen}
         />
       </div>
 
@@ -551,6 +635,7 @@ export function ReaderScreen({
           audioSupported={audioSupported}
         />
       )}
+
     </main>
   );
 }

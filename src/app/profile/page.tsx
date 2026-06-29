@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { ProfileScreen } from "@/features/profile/components";
+
+export const metadata: Metadata = {
+  title: "Profile",
+  // Private account surface — keep out of the index.
+  robots: { index: false, follow: false },
+};
 
 /**
  * Profile route `/profile` — the reader's account + reading-preferences screen.

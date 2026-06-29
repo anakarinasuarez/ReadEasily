@@ -65,7 +65,7 @@ function PlayerDemo({
           onCycleSpeed={() =>
             setSpeedIndex((i) => (i + 1) % SPEEDS.length)
           }
-          onOpenSettings={() => {}}
+          onToggleFullscreen={() => {}}
         />
       </div>
     </div>

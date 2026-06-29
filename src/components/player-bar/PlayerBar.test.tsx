@@ -41,7 +41,7 @@ describe("PlayerBar", () => {
       onPrevSentence: vi.fn(),
       onNextSentence: vi.fn(),
       onSkipEnd: vi.fn(),
-      onOpenSettings: vi.fn(),
+      onToggleFullscreen: vi.fn(),
     };
     render(<PlayerBar {...handlers} />);
 
@@ -49,13 +49,13 @@ describe("PlayerBar", () => {
     await user.click(screen.getByRole("button", { name: "Previous sentence" }));
     await user.click(screen.getByRole("button", { name: "Next sentence" }));
     await user.click(screen.getByRole("button", { name: "Skip to end" }));
-    await user.click(screen.getByRole("button", { name: "Settings" }));
+    await user.click(screen.getByRole("button", { name: "Enter full screen" }));
 
     expect(handlers.onRestart).toHaveBeenCalledTimes(1);
     expect(handlers.onPrevSentence).toHaveBeenCalledTimes(1);
     expect(handlers.onNextSentence).toHaveBeenCalledTimes(1);
     expect(handlers.onSkipEnd).toHaveBeenCalledTimes(1);
-    expect(handlers.onOpenSettings).toHaveBeenCalledTimes(1);
+    expect(handlers.onToggleFullscreen).toHaveBeenCalledTimes(1);
   });
 
   it("renders the speed pill with the passed speed and cycles on click", async () => {
@@ -178,7 +178,7 @@ describe("PlayerBar", () => {
       "Previous sentence",
       "Next sentence",
       "Skip to end",
-      "Settings",
+      "Enter full screen",
       "Playback speed, 1×",
     ]) {
       expect(screen.getByRole("button", { name })).toBeDisabled();
