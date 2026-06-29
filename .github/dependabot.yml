@@ -1,0 +1,30 @@
+version: 2
+updates:
+  # Application dependencies — grouped so related bumps land in one PR.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      next:
+        patterns: ["next", "@next/*", "eslint-config-next"]
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      radix:
+        patterns: ["@radix-ui/*"]
+      testing:
+        patterns: ["vitest", "@vitest/*", "@testing-library/*", "@playwright/*", "jest-axe"]
+      storybook:
+        patterns: ["storybook", "@storybook/*"]
+      dev-minor-patch:
+        dependency-type: development
+        update-types: ["minor", "patch"]
+
+  # Keep the GitHub Actions used in workflows current (and pinned).
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
