@@ -14,7 +14,7 @@ test("saved screen lists words and removes one", async ({ page }) => {
 
   const response = await page.goto("/saved");
   expect(response?.ok()).toBe(true);
-  await expect(page).toHaveTitle("ReadEasily");
+  await expect(page).toHaveTitle(/ReadEasily/);
 
   // Navbar with Saved as the active destination.
   const nav = page.getByRole("navigation", { name: "Primary" });

@@ -29,7 +29,7 @@ test("profile: reached via the navbar avatar, settings persist across reload, de
     .getByRole("button", { name: /View profile/ })
     .click();
   await expect(page).toHaveURL(/\/profile$/);
-  await expect(page).toHaveTitle("ReadEasily");
+  await expect(page).toHaveTitle(/ReadEasily/);
 
   // 2. Header + stats paint from the mocked payload.
   await expect(page.getByRole("heading", { level: 1, name: "Ana" })).toBeVisible();

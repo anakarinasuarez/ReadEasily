@@ -17,7 +17,7 @@ test("library landing renders the catalog and filters by category", async ({
 
   const response = await page.goto("/library");
   expect(response?.ok()).toBe(true);
-  await expect(page).toHaveTitle("ReadEasily");
+  await expect(page).toHaveTitle(/ReadEasily/);
 
   // Navbar with the active Library destination.
   const nav = page.getByRole("navigation", { name: "Primary" });

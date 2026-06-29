@@ -14,6 +14,12 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  // In CI, run serially: the e2e webServer is `next dev`, which compiles each
+  // route on-demand. Multiple parallel workers hammering it at once makes the
+  // first navigation to a route exceed the action timeout (flaky empty pages).
+  // One worker keeps the dev server from thrashing; the suite is small so the
+  // serial cost is a few seconds. Locally, parallel stays on for speed.
+  workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL,
