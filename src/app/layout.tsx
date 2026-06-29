@@ -102,7 +102,10 @@ export default function RootLayout({
       lang="en"
       className={`${baloo2.variable} ${lora.variable} ${nunito.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      {/* suppressHydrationWarning: browser extensions (e.g. Grammarly) inject
+          attributes onto <body> before React hydrates; this silences that
+          benign one-level mismatch without masking real app hydration bugs. */}
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>
