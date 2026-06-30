@@ -1,0 +1,42 @@
+name: Lighthouse
+
+# Audits the (static) home page on every PR — Performance, Accessibility,
+# Best Practices and SEO — against a real production build. a11y/SEO are gated
+# (they must stay green); Performance/Best-Practices are reported as warnings
+# since CI-runner timing is noisier than real hardware. Each run uploads a public
+# report whose URL is printed in the job log.
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    name: Lighthouse audit (home)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Production build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: https://readeasily.app
+
+      - name: Lighthouse CI
+        run: npx -y @lhci/cli@0.14.x autorun
