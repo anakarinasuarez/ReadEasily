@@ -87,7 +87,9 @@ const rootClasses = cn(
   "flex w-full flex-col gap-[var(--space-lg)]", // 16px gap (Figma) = --space-lg
   "rounded-t-[var(--radius-xl)] bg-[var(--bg-elevated)]",
   "overflow-hidden",
-  "pt-[var(--space-lg)] pb-lg-plus px-[30px]", // 16 / 22 (pb-lg-plus) / 30 — px-30 off-scale literal (Figma)
+  // Tighter side padding on mobile so the transport row (speed pill + 5 round
+  // controls) fits a ~360px Android viewport; restores the Figma px-30 at md.
+  "pt-[var(--space-lg)] pb-lg-plus px-[var(--space-sm)] md:px-[30px]", // 16 / 22 (pb-lg-plus) / 8→30
 );
 
 /** Elapsed / total time — Heading/H4 (Baloo 2 SemiBold 16/26), secondary ink. */
@@ -372,7 +374,7 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
         )}
 
         {/* Row 1 — progress */}
-        <div className="flex w-full items-center gap-[var(--space-md-plus)]">
+        <div className="flex w-full items-center gap-[var(--space-sm)] md:gap-[var(--space-md-plus)]">
           <span className={timeClasses}>{elapsedLabel ?? "0:00"}</span>
 
           <div
@@ -440,7 +442,7 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
         <div
           role="group"
           aria-label="Playback controls"
-          className="flex w-full items-center gap-[var(--space-md-plus)]"
+          className="flex w-full items-center gap-[var(--space-sm)] md:gap-[var(--space-md-plus)]"
         >
           {/* Speed pill */}
           <button
@@ -452,10 +454,11 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
             aria-label={`Playback speed, ${speedLabel}`}
             className={cn(
               chipBaseClasses,
-              "px-[18px] py-sm text-[var(--text-primary)]", // px-18 off-scale literal; py-sm (8) Figma pill padding
+              // Narrower pill on mobile to claw back row width; Figma px-18 at md.
+              "px-[var(--space-md)] py-sm text-[var(--text-primary)] md:px-[18px]", // 12→18; py-sm (8) Figma pill padding
               // Fixed width + tabular figures so cycling 1×→1.25×→0.75× never
               // changes the pill's size and shifts the whole transport row.
-              "min-w-[74px] tabular-nums",
+              "min-w-[60px] tabular-nums md:min-w-[74px]",
               "transition-opacity hover:opacity-100",
               focusRing,
               "disabled:cursor-not-allowed disabled:text-[var(--text-muted)]",

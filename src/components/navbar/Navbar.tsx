@@ -283,20 +283,23 @@ export const Navbar = forwardRef<HTMLElement, NavbarProps>(function Navbar(
       ref={ref}
       aria-label="Primary"
       className={cx(
-        "flex h-[64px] w-full items-center justify-between gap-[var(--space-md)] md:h-[57px]",
+        // Tighter zone gap + left pad on mobile so the three zones (logo · nav ·
+        // avatar) never exceed a narrow ~360px Android viewport; both step back
+        // up at md. Without this the min-content overflowed the pill.
+        "flex h-[64px] w-full items-center justify-between gap-[var(--space-sm)] md:h-[57px] md:gap-[var(--space-md)]",
         "rounded-pill border border-[var(--surface-glass-border)]",
         "bg-[linear-gradient(var(--surface-glass-from),var(--surface-glass-to))]",
         "backdrop-blur-[var(--surface-glass-blur)] shadow-glass",
         // Off-scale pad (pr 10 / py 7) — geometry the ramp doesn't tokenize,
         // matching the established Avatar/IconButton arbitrary-px pattern.
-        "pl-[var(--space-lg)] pr-[10px] py-[7px]",
+        "pl-[var(--space-md)] pr-[10px] py-[7px] md:pl-[var(--space-lg)]",
         className,
       )}
       {...rest}
     >
       <NavbarLogo homeHref={homeHref} />
 
-      <ul className="flex items-center gap-[var(--space-md)] md:gap-[var(--space-xl)] list-none p-0 m-0">
+      <ul className="flex items-center gap-[var(--space-xs)] md:gap-[var(--space-xl)] list-none p-0 m-0">
         {items.map((item) => (
           <li key={item.key} className="flex">
             <NavItem

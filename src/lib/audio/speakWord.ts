@@ -8,9 +8,11 @@
  * injectable `ReaderSpeech` controller:
  *
  *  • **One utterance.** Speaks `word` once, in the requested accent's voice.
- *  • **Accent → voice.** Picks a voice matching the BCP-47 accent with the same
- *    graceful fallback chain the Reader uses (exact lang → same prefix → any
- *    English → platform default), so a missing en-AU/en-CA voice never breaks it.
+ *  • **Accent → voice + lang.** Picks a voice matching the BCP-47 accent (exact
+ *    lang → same accent prefix), and always passes the requested accent as
+ *    `lang`. A missing en-AU/en-CA (or, on Android, en-US) voice never breaks it
+ *    or flips the accent: it speaks via the platform default voice but keeps the
+ *    requested `lang`, instead of being force-locked to a wrong-accent voice.
  *  • **Feature-detected.** Guards on `isSpeechSupported()`; a no-op in jsdom and
  *    any environment without `speechSynthesis` (the Saved card stays inert).
  *  • **Injectable.** The controller + support flag can be supplied (tests pass a
@@ -25,9 +27,16 @@ import {
 } from "./speechController";
 
 /**
- * Pick a voice for the accent from the controller's voice list. Mirrors the
- * Reader's chain: exact lang (`en-us`) → same prefix → any English → null
- * (platform default). Returns `null` when no English voice is installed.
+ * Pick a voice for the accent from the controller's voice list — matching ONLY
+ * the requested accent: exact lang (`en-us`) → same accent prefix (`en-us-…`).
+ * Returns `null` when no voice for that exact accent is installed.
+ *
+ * It deliberately does NOT fall back to "any English voice": assigning, say, an
+ * en-GB voice object when the user asked for en-US would force the wrong accent
+ * (on Android Chrome `utterance.voice` overrides `utterance.lang`). When no
+ * accent-matching voice exists we return `null` and let the caller steer the
+ * engine with `utterance.lang` instead — which keeps the requested accent and
+ * still speaks via the platform default voice.
  */
 export function pickVoiceForAccent(
   controller: ReaderSpeech,
@@ -38,7 +47,6 @@ export function pickVoiceForAccent(
   return (
     voices.find((v) => v.lang?.toLowerCase() === want) ??
     voices.find((v) => v.lang?.toLowerCase().startsWith(want)) ??
-    voices.find((v) => v.lang?.toLowerCase().startsWith("en")) ??
     null
   );
 }
@@ -64,7 +72,11 @@ export function speakWord(word: string, options: SpeakWordOptions = {}): void {
   const trimmed = word.trim();
   if (!trimmed) return;
   const controller = options.controller ?? createWebSpeechController();
+  const accent = options.voiceAccent ?? DEFAULT_VOICE;
   controller.speak(trimmed, {
-    voice: pickVoiceForAccent(controller, options.voiceAccent ?? DEFAULT_VOICE),
+    // Always pass the requested accent as `lang` so the engine honors it even
+    // when no exact-accent voice object is installed (Android Chrome).
+    lang: accent,
+    voice: pickVoiceForAccent(controller, accent),
   });
 }

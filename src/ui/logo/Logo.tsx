@@ -87,6 +87,10 @@ export function Logo({ size = "md", className }: LogoProps) {
       </span>
       <span
         aria-hidden="true"
+        // translate="no" keeps the brand name intact: on-device translators
+        // (Chrome on Android) would otherwise render "ReadEasily" as e.g. "Leer
+        // fácilmente", widening the wordmark and overflowing the navbar pill.
+        translate="no"
         className={cx(
           "font-display font-extrabold whitespace-nowrap",
           WORDMARK_SIZE[size],
