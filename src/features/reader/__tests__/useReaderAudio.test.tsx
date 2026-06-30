@@ -223,32 +223,39 @@ describe("useReaderAudio", () => {
       { initialProps: { accent: "en-US" as VoiceAccent } },
     );
 
+    // Each accent picks its matching voice AND passes the accent as `lang`.
     act(() => result.current.play());
     expect(last(calls).options?.voice?.lang).toBe("en-US");
+    expect(last(calls).options?.lang).toBe("en-US");
 
     rerender({ accent: "en-GB" });
     act(() => result.current.restart());
     expect(last(calls).options?.voice?.lang).toBe("en-GB");
+    expect(last(calls).options?.lang).toBe("en-GB");
 
     rerender({ accent: "en-AU" });
     act(() => result.current.restart());
     expect(last(calls).options?.voice?.lang).toBe("en-AU");
+    expect(last(calls).options?.lang).toBe("en-AU");
 
     rerender({ accent: "en-CA" });
     act(() => result.current.restart());
     expect(last(calls).options?.voice?.lang).toBe("en-CA");
+    expect(last(calls).options?.lang).toBe("en-CA");
   });
 
-  it("falls back to any English voice when the requested accent (e.g. en-AU) is missing", () => {
-    const enUS = { lang: "en-US", name: "US voice" } as SpeechSynthesisVoice;
+  it("keeps the requested accent via lang (not a wrong-accent voice) when no matching voice is installed", () => {
+    const enGB = { lang: "en-GB", name: "UK voice" } as SpeechSynthesisVoice;
     const calls: { text: string; options?: SpeakOptions }[] = [];
     const controller: ReaderSpeech = {
       speak: (text, options) => calls.push({ text, options }),
       cancel: vi.fn(),
       pause: vi.fn(),
       resume: vi.fn(),
-      // No en-AU installed (common) → AU should gracefully fall back to en-US.
-      getVoices: () => [enUS],
+      // Only a UK voice installed (the Android case) → asking for US must NOT
+      // grab the UK voice object (that would force UK); it leaves voice null and
+      // steers the engine to US with `lang`.
+      getVoices: () => [enGB],
       onVoicesChanged: () => () => {},
     };
 
@@ -258,12 +265,13 @@ describe("useReaderAudio", () => {
         controller,
         supported: true,
         resetKey: 0,
-        voiceAccent: "en-AU",
+        voiceAccent: "en-US",
       }),
     );
 
     act(() => result.current.play());
-    expect(last(calls).options?.voice?.lang).toBe("en-US");
+    expect(last(calls).options?.voice ?? null).toBeNull();
+    expect(last(calls).options?.lang).toBe("en-US");
   });
 
   it("cancels speech on page turn and on unmount", () => {

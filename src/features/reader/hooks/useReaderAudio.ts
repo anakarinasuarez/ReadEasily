@@ -180,6 +180,9 @@ export function useReaderAudio({
   const indexRef = useRef(0);
   const speedRef = useRef(1);
   const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
+  // The requested accent as a BCP-47 lang, passed on every utterance so the
+  // engine honors it even when no exact-accent voice object exists (Android).
+  const langRef = useRef<string>(voiceAccent);
   const genRef = useRef(0);
   // Indirection so the recursive queue (onEnd → next sentence) calls the latest
   // `speakFrom` without referencing it before declaration.
@@ -188,21 +191,22 @@ export function useReaderAudio({
   const total = sentences.length;
 
   // Pick a voice matching the chosen accent once voices are available (they
-  // arrive async via `voiceschanged` on first use). Graceful fallback chain:
-  // exact lang (en-US / en-GB / en-AU / en-CA) → same-prefix → any English →
-  // platform default (null). Re-runs when the accent changes, so the header voice
-  // pill switches the voice used for subsequent utterances; if the browser has no
-  // en-AU/en-CA voice (common), it simply falls back to an available English
-  // voice rather than breaking.
+  // arrive async via `voiceschanged` on first use). Matches ONLY the requested
+  // accent: exact lang (en-US / en-GB / en-AU / en-CA) → same accent prefix; if
+  // none is installed it stays null and the utterance steers the engine with
+  // `lang` instead. It does NOT grab a different English voice — assigning, say,
+  // an en-GB voice when en-US was asked for would override `lang` on Android
+  // Chrome and play the wrong accent (the "US speaks as UK" bug). Re-runs when
+  // the accent changes so the header voice pill switches subsequent utterances.
   useEffect(() => {
     if (!supported) return;
+    langRef.current = voiceAccent;
     const want = voiceAccent.toLowerCase();
     const pick = () => {
       const voices = controller.getVoices();
       voiceRef.current =
         voices.find((v) => v.lang?.toLowerCase() === want) ??
         voices.find((v) => v.lang?.toLowerCase().startsWith(want)) ??
-        voices.find((v) => v.lang?.toLowerCase().startsWith("en")) ??
         null;
     };
     pick();
@@ -232,6 +236,7 @@ export function useReaderAudio({
       controller.speak(sentence.text, {
         rate: speedRef.current,
         voice: voiceRef.current,
+        lang: langRef.current,
         onStart: () => {
           if (gen !== genRef.current) return;
           setPlaying(true);
@@ -351,7 +356,11 @@ export function useReaderAudio({
       setHighlight(null);
       const w = word.trim();
       if (!w) return;
-      controller.speak(w, { rate: speedRef.current, voice: voiceRef.current });
+      controller.speak(w, {
+        rate: speedRef.current,
+        voice: voiceRef.current,
+        lang: langRef.current,
+      });
     },
     [supported, controller, hardStop],
   );

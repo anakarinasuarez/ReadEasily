@@ -109,6 +109,19 @@ describe("createWebSpeechController.speak", () => {
     expect(lastSpoken().voice).toBe(voice);
   });
 
+  it("honors an explicit lang even with no voice (Android accent steering)", () => {
+    createWebSpeechController().speak("hi", { lang: "en-US" });
+    expect(lastSpoken().lang).toBe("en-US");
+    expect(lastSpoken().voice).toBeNull();
+  });
+
+  it("prefers an explicit lang over the supplied voice's lang", () => {
+    const voice = { lang: "en-GB", name: "UK" } as SpeechSynthesisVoice;
+    createWebSpeechController().speak("hi", { lang: "en-US", voice });
+    expect(lastSpoken().lang).toBe("en-US");
+    expect(lastSpoken().voice).toBe(voice);
+  });
+
   it("clamps the rate into the Web Speech [0.1, 10] range", () => {
     const controller = createWebSpeechController();
     controller.speak("a", { rate: 20 });

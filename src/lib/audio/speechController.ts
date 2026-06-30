@@ -41,6 +41,15 @@ export interface SpeakOptions {
   rate?: number;
   /** Voice to use; `null`/omitted → the platform default voice. */
   voice?: SpeechSynthesisVoice | null;
+  /**
+   * BCP-47 language/accent hint for the utterance (e.g. `"en-US"`). Set this to
+   * the *requested* accent independently of `voice`: on Android Chrome the device
+   * often ships no exact-accent voice object, so `voice` stays null — but
+   * `utterance.lang` still steers Google TTS to the right accent. When omitted it
+   * falls back to the supplied voice's lang, then `"en-US"`. Always honoring the
+   * requested accent here is what stops US selections speaking in UK on Android.
+   */
+  lang?: string;
   /** Fired when the utterance actually begins speaking. */
   onStart?: () => void;
   /** Fired on a word/sentence boundary (charIndex into the text). Unreliable
@@ -103,7 +112,11 @@ export function createWebSpeechController(): ReaderSpeech {
       s.cancel();
       const utter = new window.SpeechSynthesisUtterance(text);
       utter.rate = clampRate(options.rate);
-      utter.lang = options.voice?.lang ?? "en-US";
+      // Prefer the explicit accent hint, then the chosen voice's lang, then US.
+      // The voice is assigned only when one was actually matched — never a
+      // wrong-accent fallback voice, which on Android would override `lang` and
+      // force the wrong accent (the "US plays as UK" bug).
+      utter.lang = options.lang ?? options.voice?.lang ?? "en-US";
       if (options.voice) utter.voice = options.voice;
       if (options.onStart) utter.onstart = () => options.onStart?.();
       if (options.onEnd) utter.onend = () => options.onEnd?.();
