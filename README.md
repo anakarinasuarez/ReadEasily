@@ -6,10 +6,10 @@
 
 A warm, cozy reading app built 1:1 from a Figma design system into a fully tested Next.js app.
 
-### [▶️ Live Demo](https://read-easily.vercel.app) &nbsp;·&nbsp; [🎨 Figma Design System](https://www.figma.com/design/sc9DIhX0wvFgrvmL8NVBf5/ReadEasily?node-id=1324-4301)
+### [▶️ Live Demo](https://read-easily.vercel.app) &nbsp;·&nbsp; [🎨 Figma Design System](https://www.figma.com/design/sc9DIhX0wvFgrvmL8NVBf5/ReadEasily?node-id=0-1)
 
 [![Live Demo](https://img.shields.io/badge/▶_live_demo-read--easily.vercel.app-D97757)](https://read-easily.vercel.app)
-[![Figma](https://img.shields.io/badge/Figma-design_system-F24E1E?logo=figma&logoColor=white)](https://www.figma.com/design/sc9DIhX0wvFgrvmL8NVBf5/ReadEasily?node-id=1324-4301)
+[![Figma](https://img.shields.io/badge/Figma-design_system-F24E1E?logo=figma&logoColor=white)](https://www.figma.com/design/sc9DIhX0wvFgrvmL8NVBf5/ReadEasily?node-id=0-1)
 [![CI](https://github.com/anakarinasuarez/ReadEasily/actions/workflows/ci.yml/badge.svg)](https://github.com/anakarinasuarez/ReadEasily/actions/workflows/ci.yml)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs)
 ![React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)
