@@ -889,10 +889,18 @@ function persistSaved(): void {
   }
 }
 
+/** The starting list when nothing is persisted yet. The deployed DEMO
+ *  (production) starts EMPTY so each visitor builds their own saved collection
+ *  from zero and it persists per browser; dev, e2e and the unit runner keep the
+ *  seed so there's sample data to develop against and the tests stay green. */
+function initialSavedWords(): SavedWord[] {
+  return process.env.NODE_ENV === "production" ? [] : [...savedWordsSeed];
+}
+
 /** Live, mutable working copy the handlers read/mutate. Seeded from the persisted
- *  list when one exists (browser reload), else from the module seed. */
+ *  list when one exists (browser reload), else from the initial list above. */
 let savedWords: SavedWord[] =
-  readPersistedSaved(activeStorage()) ?? [...savedWordsSeed];
+  readPersistedSaved(activeStorage()) ?? initialSavedWords();
 
 /**
  * Restore the list as a fresh module load would — from the persisted storage if
@@ -901,7 +909,7 @@ let savedWords: SavedWord[] =
  * default under the runner) this always restores the seed.
  */
 export function resetSavedWords(): void {
-  savedWords = readPersistedSaved(activeStorage()) ?? [...savedWordsSeed];
+  savedWords = readPersistedSaved(activeStorage()) ?? initialSavedWords();
 }
 
 /** Shape the current words into the `SavedData` contract (stats derived). */
