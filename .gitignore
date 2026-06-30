@@ -55,3 +55,6 @@ storybook-static
 
 # agent git worktrees (transient)
 .claude/worktrees/
+
+# lighthouse ci local reports
+.lighthouseci/
