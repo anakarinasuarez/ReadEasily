@@ -76,7 +76,7 @@ ReadEasily turns short, illustrated stories into a gentle English-learning loop:
 Requires the Node version in [`.nvmrc`](.nvmrc) and npm 10.
 
 ```bash
-nvm use                       # Node 20.20.2
+nvm use                       # Node 24 (see .nvmrc)
 npm ci                        # install exact, locked dependencies
 cp .env.example .env.local    # then fill in values (all optional for dev)
 npm run dev                   # → http://localhost:3000
