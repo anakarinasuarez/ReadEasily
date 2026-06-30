@@ -62,6 +62,16 @@ export interface UseReaderAudioParams {
    * breaks playback.
    */
   voiceAccent?: VoiceAccent;
+  /**
+   * Fired once when the queue reaches its end NATURALLY — i.e. the last
+   * sentence's `onEnd` fires while playing. It is deliberately NOT fired by
+   * `pause`, `skipEnd`, a page reset, or any cancel (those bump the generation
+   * guard), so a consumer can use it to auto-advance pages on genuine completion
+   * without ever firing on a user stop. Note this is keyed off completion, not
+   * off "the user never paused": pause → resume → run to the end DOES fire it
+   * (resuming re-speaks from the saved index, whose terminal `onEnd` is natural).
+   */
+  onComplete?: () => void;
 }
 
 export interface UseReaderAudio {
@@ -75,6 +85,8 @@ export interface UseReaderAudio {
   currentSentence: number;
   /** Total sentences on the page. */
   totalSentences: number;
+  /** True once the queue has played through its last sentence (natural end). */
+  finished: boolean;
   /** Inclusive word-index range of the sentence being voiced, or null. */
   currentWordRange: { start: number; end: number } | null;
   /** Playback position as a fraction 0..1 (currentSentence / total). */
@@ -136,7 +148,14 @@ export function useReaderAudio({
   supported: supportedOverride,
   resetKey,
   voiceAccent = DEFAULT_VOICE,
+  onComplete,
 }: UseReaderAudioParams): UseReaderAudio {
+  // Keep the latest `onComplete` in a ref so the recursive speak queue can fire
+  // it without `speakFrom` depending on (and re-creating itself for) the callback.
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
   // One controller for the hook's lifetime (the real one is SSR-safe to build).
   const controller = useMemo(
     () => providedController ?? createWebSpeechController(),
@@ -224,9 +243,13 @@ export function useReaderAudio({
           if (nextIndex < sentences.length) {
             speakFromRef.current(nextIndex);
           } else {
+            // Natural end of the queue → flip to finished and signal the consumer
+            // (auto-advance). The generation guard above guarantees this only runs
+            // for an utterance that wasn't cancelled/paused/jumped.
             setPlaying(false);
             setHighlight(null);
             setFinished(true);
+            onCompleteRef.current?.();
           }
         },
       });
@@ -386,6 +409,7 @@ export function useReaderAudio({
     playing,
     currentSentence: index,
     totalSentences: total,
+    finished,
     currentWordRange,
     progress,
     elapsedLabel,

@@ -133,6 +133,61 @@ describe("useReaderAudio", () => {
     expect(result.current.currentWordRange).toBeNull();
   });
 
+  it("exposes finished and fires onComplete once on natural end of the queue", () => {
+    const fake = makeFake();
+    const onComplete = vi.fn();
+    const { result } = renderHook(() =>
+      useReaderAudio({
+        sentences: SENTENCES,
+        controller: fake.controller,
+        supported: true,
+        resetKey: 0,
+        onComplete,
+      }),
+    );
+    const { calls } = fake;
+
+    act(() => result.current.play());
+    expect(result.current.finished).toBe(false);
+
+    // Sentence 0 → advances to 1 on end.
+    act(() => calls[0].options?.onStart?.());
+    act(() => calls[0].options?.onEnd?.());
+    expect(onComplete).not.toHaveBeenCalled();
+
+    // Last sentence ends → natural completion: finished flips, onComplete fires.
+    act(() => calls[1].options?.onStart?.());
+    act(() => calls[1].options?.onEnd?.());
+
+    expect(result.current.finished).toBe(true);
+    expect(result.current.playing).toBe(false);
+    expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it("does NOT fire onComplete on a user pause or skipEnd (stop, not completion)", () => {
+    const fake = makeFake();
+    const onComplete = vi.fn();
+    const { result } = renderHook(() =>
+      useReaderAudio({
+        sentences: SENTENCES,
+        controller: fake.controller,
+        supported: true,
+        resetKey: 0,
+        onComplete,
+      }),
+    );
+
+    act(() => result.current.play());
+    act(() => fake.calls[0].options?.onStart?.());
+
+    // skipEnd jumps to the last sentence but is a manual stop, not completion.
+    act(() => result.current.skipEnd());
+    expect(onComplete).not.toHaveBeenCalled();
+
+    act(() => result.current.pause());
+    expect(onComplete).not.toHaveBeenCalled();
+  });
+
   it("is disabled and inert when speech is unsupported", () => {
     const { result, calls } = setup(false);
 

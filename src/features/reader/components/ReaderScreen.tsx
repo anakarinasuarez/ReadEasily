@@ -23,6 +23,7 @@ import {
   STORE_LANG_TO_READER,
   VOICE_TO_STORE_ACCENT,
   type Language,
+  type TranslationSelection,
   type VoiceAccent,
 } from "../types";
 import type { ReaderSpeech } from "@/lib/audio/speechController";
@@ -30,6 +31,7 @@ import { ReadingCard } from "./ReadingCard";
 import { ReaderToggles } from "./ReaderToggles";
 import { ReaderError, ReaderSkeleton } from "./ReaderStates";
 import { ReaderProse } from "./ReaderProse";
+import { EndOfStory } from "./EndOfStory";
 import type { StoryProse } from "../server/getStoryProse";
 import { AudioWaveIcon, ChevronLeftIcon, SparkleIcon } from "./icons";
 
@@ -127,10 +129,20 @@ export function ReaderScreen({
   const pronounceOnTap = usePreferences((s) => s.pronounceOnTap);
   const setPreference = usePreferences((s) => s.setPreference);
 
+  // `OFF` suppresses translation entirely: the English body still loads (under
+  // the default sidecar language, since the body is language-independent), but the
+  // translation block + the popover's foreign sense are hidden, and saving stores
+  // no foreign translation. `translationSelection` is what the header pill shows.
+  const translationOff = translationLang === "OFF";
   const language: Language = STORE_LANG_TO_READER[translationLang];
+  const translationSelection: TranslationSelection = translationOff ? "off" : language;
   const voice: VoiceAccent = STORE_ACCENT_TO_VOICE[readingAccent];
   const setLanguage = useCallback(
-    (next: Language) => setPreference("translationLang", READER_LANG_TO_STORE[next]),
+    (next: TranslationSelection) =>
+      setPreference(
+        "translationLang",
+        next === "off" ? "OFF" : READER_LANG_TO_STORE[next],
+      ),
     [setPreference],
   );
   const setVoice = useCallback(
@@ -144,6 +156,8 @@ export function ReaderScreen({
 
   // Local UI state.
   const [pageIndex, setPageIndex] = useState(0);
+  // The "The End" card — shown when the LAST page's narration finishes naturally.
+  const [storyEnded, setStoryEnded] = useState(false);
   const [hintDismissed, setHintDismissed] = useState(false);
   const [selectedWord, setSelectedWord] = useState<SelectedWord | null>(null);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
@@ -241,6 +255,45 @@ export function ReaderScreen({
       ? story.pages[Math.min(pageIndex, story.pages.length - 1)]
       : null;
 
+  // Set when an auto-advance (natural page completion, or "Read again") should
+  // start narration on the page we're turning TO — read by the autostart effect
+  // below so it plays even when the autoplay PREFERENCE is off.
+  const continuePlayRef = useRef(false);
+
+  const goToPage = useCallback(
+    (next: number) => {
+      if (!story) return;
+      const clamped = Math.min(Math.max(next, 0), story.pages.length - 1);
+      // Page change = same-screen state change: close the popover, keep scroll,
+      // and dismiss the end-of-story card (the reader moved off the ending).
+      setSelectedWord(null);
+      setAnchorRect(null);
+      setStoryEnded(false);
+      setPageIndex(clamped);
+    },
+    [story],
+  );
+
+  // Fired by the audio hook the moment a page's narration reaches its NATURAL
+  // END while playing. With more pages → turn to the next page and continue
+  // narrating (continuePlayRef drives the autostart effect). On the last page →
+  // surface the "The End" card.
+  //
+  // The rule is keyed purely off natural completion-while-playing, NOT off "the
+  // user never paused": pause → resume → the page finishes → it still
+  // auto-advances (resuming re-speaks from the saved index, and its terminal
+  // `onEnd` fires this normally). It only stays put when playback is currently
+  // paused/stopped at the end (paused and not resumed) or audio is unsupported —
+  // both of which simply never produce a natural `onEnd`.
+  const handlePlaybackComplete = useCallback(() => {
+    if (pageCount > 0 && pageIndex < pageCount - 1) {
+      continuePlayRef.current = true;
+      goToPage(pageIndex + 1);
+    } else {
+      setStoryEnded(true);
+    }
+  }, [pageCount, pageIndex, goToPage]);
+
   // Audio (Web Speech). Derive the current page's sentences (same tokenizer the
   // passage uses, so word indices align), then drive playback via the hook. It
   // resets + cancels on page turn (resetKey) and on unmount — no audio bleed.
@@ -274,29 +327,48 @@ export function ReaderScreen({
     voiceAccent: voice,
     controller: audioController,
     supported: audioSupported,
+    onComplete: handlePlaybackComplete,
   });
   // Stable refs for the callbacks below (the hook memoizes these).
   const pauseAudio = audio.pause;
   const playAudio = audio.play;
+  const restartAudio = audio.restart;
   const pronounceWord = audio.pronounceWord;
   const audioReady = audio.supported;
 
-  // Autoplay (store preference). When the user has opted into "Autoplay
-  // narration" AND audio is supported, start playback automatically once the
-  // story page is ready — once per page load, not on every state change (the ref
-  // is keyed by story + page index). It deliberately does NOT re-fire when the
-  // user pauses or taps a word: the key is already marked, so we never fight the
-  // user. A page turn marks a new key → narration starts on the new page.
+  // Autostart narration once per ready page (the ref is keyed by story + page
+  // index, so it fires once and never fights a user who pauses or taps a word).
+  // It starts when EITHER the user opted into "Autoplay narration" OR we're
+  // continuing an auto-advance (continuePlayRef) from the previous page's natural
+  // completion — so auto-advance keeps reading aloud even with autoplay off.
   const autoStartedKeyRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!autoplay || !audioReady || !currentPage || sentences.length === 0) {
-      return;
-    }
+    if (!audioReady || !currentPage || sentences.length === 0) return;
     const key = `${storyId}:${pageIndex}`;
     if (autoStartedKeyRef.current === key) return;
+    if (!autoplay && !continuePlayRef.current) return;
     autoStartedKeyRef.current = key;
+    continuePlayRef.current = false;
     playAudio();
   }, [autoplay, audioReady, currentPage, sentences.length, storyId, pageIndex, playAudio]);
+
+  // "Read again" from the end-of-story card: hide the card and restart narration
+  // from page 0. If already on page 0 (single-page story, or paged back), restart
+  // the queue in place; otherwise turn to page 0 and let the autostart effect
+  // begin narration (continuePlayRef forces it regardless of the autoplay pref).
+  const handleReadAgain = useCallback(() => {
+    setStoryEnded(false);
+    setSelectedWord(null);
+    setAnchorRect(null);
+    if (pageIndex === 0) {
+      autoStartedKeyRef.current = `${storyId}:0`;
+      restartAudio();
+    } else {
+      autoStartedKeyRef.current = null;
+      continuePlayRef.current = true;
+      setPageIndex(0);
+    }
+  }, [pageIndex, storyId, restartAudio]);
 
   // Auto-scroll follow: while playing, keep the spoken sentence in view. Driven
   // by the active sentence's first word index; pauses with the audio and honors
@@ -354,18 +426,6 @@ export function ReaderScreen({
     });
   }, [practiceTarget]);
 
-  const goToPage = useCallback(
-    (next: number) => {
-      if (!story) return;
-      const clamped = Math.min(Math.max(next, 0), story.pages.length - 1);
-      // Page change = same-screen state change: close the popover, keep scroll.
-      setSelectedWord(null);
-      setAnchorRect(null);
-      setPageIndex(clamped);
-    },
-    [story],
-  );
-
   // The tapped word's meaning (instant — local glossary). Always "ready".
   const meaning = selectedWord
     ? lookupWord(story?.glossary ?? {}, selectedWord.surface)
@@ -386,7 +446,9 @@ export function ReaderScreen({
     save.mutate({
       word: wordLabel,
       phonetic: meaning.phonetic,
-      translation: meaning.translation,
+      // Translation OFF → store NO foreign translation (the reader saved the word
+      // for later without picking a language). ES/FR/PT store the real sense.
+      translation: translationOff ? "" : meaning.translation,
       sourceStoryId: story.id,
       sourceStoryTitle: story.title,
       sentencesReady: 0,
@@ -402,7 +464,8 @@ export function ReaderScreen({
     pauseAudio();
     setPracticeTarget({
       word: wordLabel,
-      translation: meaning.translation,
+      // OFF → no foreign translation carried into Practice (mirrors Save).
+      translation: translationOff ? "" : meaning.translation,
       phonetic: meaning.phonetic,
       wordId: selectedWord.id,
     });
@@ -450,7 +513,7 @@ export function ReaderScreen({
           <Breadcrumb storyId={storyId} />
           {story && (
             <ReaderToggles
-              language={language}
+              language={translationSelection}
               onLanguageChange={setLanguage}
               voice={voice}
               onVoiceChange={setVoice}
@@ -497,7 +560,7 @@ export function ReaderScreen({
                 <ReadingCard
                   page={currentPage}
                   pageCount={pageCount}
-                  translationVisible={story.hasTranslation}
+                  translationVisible={story.hasTranslation && !translationOff}
                   translationLabel={LANGUAGE_LABELS[language]}
                   translationLang={language}
                   selectedWordId={selectedWord?.id ?? null}
@@ -523,6 +586,17 @@ export function ReaderScreen({
           )}
         </div>
       </div>
+
+      {/* End-of-story card (Figma 1058:1829) — floats over the reading area just
+          above the PlayerBar when the last page's narration finishes. "Read
+          again" restarts from page 0. Below the popover (z-50) + bar (z-40). */}
+      {story && currentPage && storyEnded && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-[116px] z-30 mx-auto flex w-full max-w-7xl justify-center px-lg">
+          <div className="pointer-events-auto w-full max-w-[745px]">
+            <EndOfStory storyTitle={story.title} onReadAgain={handleReadAgain} />
+          </div>
+        </div>
+      )}
 
       {/* Fixed-bottom PlayerBar — live when Web Speech is supported, else it
           keeps its inert "Audio is unavailable" state (hook reports status).
@@ -591,7 +665,9 @@ export function ReaderScreen({
             <WordPopover
               word={wordLabel}
               pos={meaning.pos}
-              translation={meaning.translation}
+              // Translation OFF → no foreign sense line (the popover still shows
+              // the word, pronounce + Save/Practice). ES/FR/PT show the sense.
+              translation={translationOff ? undefined : meaning.translation}
               status="ready"
               saved={isWordSaved}
               // Only dictionary hits are savable — a miss shows the placeholder

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Language, VoiceAccent } from "../types";
+import type { TranslationSelection, VoiceAccent } from "../types";
 import { LanguageDropdown } from "./LanguageDropdown";
 import { VoiceDropdown } from "./VoiceDropdown";
 
@@ -17,10 +17,10 @@ import { VoiceDropdown } from "./VoiceDropdown";
  * roving focus, Esc, click-outside); this just lays them out and threads state.
  */
 export interface ReaderTogglesProps {
-  /** The active translation language. */
-  language: Language;
-  /** Commit a new translation language. */
-  onLanguageChange: (language: Language) => void;
+  /** The active translation selection (a language, or `"off"`). */
+  language: TranslationSelection;
+  /** Commit a new translation selection. */
+  onLanguageChange: (value: TranslationSelection) => void;
   /** The active audio voice accent. */
   voice: VoiceAccent;
   /** Commit a new audio voice accent. */

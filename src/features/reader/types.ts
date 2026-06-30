@@ -51,6 +51,18 @@ export const LANGUAGE_LABELS: Record<Language, string> = {
 /** The default translation language (Spanish), matching the original behaviour. */
 export const DEFAULT_LANGUAGE: Language = "es";
 
+/**
+ * What the header's translation pill can be set to: one of the sidecar languages
+ * OR `"off"` (translation suppressed). The Reader maps this to/from the store's
+ * `translationLang` (ES/FR/PT/OFF). Kept distinct from `Language` because `off`
+ * carries no sidecar — the English body still loads (see `STORE_LANG_TO_READER`),
+ * but the translation block + the popover's foreign sense are hidden.
+ */
+export type TranslationSelection = Language | "off";
+
+/** Human label for the "translation off" option in the language dropdown. */
+export const TRANSLATION_OFF_LABEL = "Off";
+
 /** The supported voice accents, in display order. */
 export const VOICE_ACCENTS: readonly VoiceAccent[] = [
   "en-US",
@@ -91,6 +103,9 @@ export const STORE_LANG_TO_READER: Record<StoreLang, Language> = {
   ES: "es",
   FR: "fr",
   PT: "pt",
+  // OFF carries no sidecar; the English body is language-independent, so we fetch
+  // it under the default language and suppress the translation surfaces instead.
+  OFF: "es",
 };
 
 export const READER_LANG_TO_STORE: Record<Language, StoreLang> = {
