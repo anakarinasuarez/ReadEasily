@@ -30,8 +30,9 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 /** The five persisted reading preferences. */
 export interface Preferences {
-  /** Word-meaning language shown while reading. */
-  translationLang: "ES" | "FR" | "PT";
+  /** Word-meaning language shown while reading. `OFF` disables translation
+   *  entirely — no translation block, and a tapped word shows no foreign sense. */
+  translationLang: "ES" | "FR" | "PT" | "OFF";
   /** Voice/accent used to narrate stories. */
   readingAccent: "US" | "UK" | "AU" | "CA";
   /** Start reading aloud automatically on open. */

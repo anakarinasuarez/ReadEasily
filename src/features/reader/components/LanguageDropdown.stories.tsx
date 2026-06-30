@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, userEvent, within } from "storybook/test";
-import type { Language } from "../types";
+import type { TranslationSelection } from "../types";
 import { LanguageDropdown } from "./LanguageDropdown";
 
 /**
@@ -21,8 +21,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-function Controlled({ initial }: { initial: Language }) {
-  const [value, setValue] = useState<Language>(initial);
+function Controlled({ initial }: { initial: TranslationSelection }) {
+  const [value, setValue] = useState<TranslationSelection>(initial);
   return <LanguageDropdown value={value} onChange={setValue} />;
 }
 

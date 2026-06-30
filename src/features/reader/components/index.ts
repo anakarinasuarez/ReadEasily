@@ -18,3 +18,5 @@ export type {
   ReaderSelectOption,
 } from "./ReaderSelectMenu";
 export { ReaderSkeleton, ReaderError } from "./ReaderStates";
+export { EndOfStory } from "./EndOfStory";
+export type { EndOfStoryProps } from "./EndOfStory";

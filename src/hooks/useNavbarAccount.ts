@@ -101,7 +101,10 @@ export function useNavbarAccount(base: NavbarUser): NavbarAccountWiring {
       email: sessionEmail,
       wordsSaved,
       finished: 0,
-      translationLang,
+      // The navbar quick-switch is an ES/FR/PT picker; the reader's "translation
+      // OFF" isn't one of its options, so it reads as "no active language" here
+      // (the Reader header owns turning translation off/on).
+      translationLang: translationLang === "OFF" ? undefined : translationLang,
       onTranslationLangChange,
       onSignOut: isGuest ? undefined : handleSignOut,
     },

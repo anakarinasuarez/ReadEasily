@@ -229,6 +229,24 @@ export function CheckIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Skip-to-start (⏮) — the "Read again" button glyph on the end-of-story card
+ *  (Figma node 1058:1838). A left bar + a left-pointing solid triangle: restart
+ *  the story from the top. Decorative; the button carries the label. */
+export function RewindIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <rect x="5" y="5.5" width="2.4" height="13" rx="1" />
+      <path d="M19 6.2v11.6a1 1 0 0 1-1.53.85l-8.5-5.8a1 1 0 0 1 0-1.7l8.5-5.8A1 1 0 0 1 19 6.2Z" />
+    </svg>
+  );
+}
+
 /** Circular-arrow refresh — the error-state retry affordance. */
 export function RefreshIcon(props: SVGProps<SVGSVGElement>) {
   return (

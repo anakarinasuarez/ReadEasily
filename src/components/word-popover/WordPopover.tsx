@@ -406,7 +406,10 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
             <span className={posPillClasses}>{pos}</span>
           )}
 
-          {showContent && (
+          {/* The foreign sense. Omitted when no `translation` is supplied (e.g.
+              the reader has translation turned OFF), so the row doesn't render an
+              empty globe line — the word, pronounce + actions still show. */}
+          {showContent && translation != null && translation !== "" && (
             <div className="flex items-center gap-[10px]">
               <span
                 aria-hidden="true"

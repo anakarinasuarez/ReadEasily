@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
@@ -449,5 +449,171 @@ describe("ReaderScreen — driven by the global preferences store", () => {
     await user.click(within(readingGroup()).getByRole("button", { name: "sun" }));
     await screen.findByRole("dialog", { name: "Sun" });
     expect(calls.length).toBe(0);
+  });
+});
+
+describe("ReaderScreen — auto-advance + end-of-story", () => {
+  // Narration here actually voices sentences (real word ranges), so the
+  // follow-scroll calls scrollIntoView — absent in jsdom. Stub it for this block.
+  const originalScrollIntoView = Element.prototype.scrollIntoView;
+  beforeEach(() => {
+    Element.prototype.scrollIntoView = function scrollIntoView() {};
+  });
+  afterEach(() => {
+    Element.prototype.scrollIntoView = originalScrollIntoView;
+  });
+
+  /** Drive the fake TTS by firing onStart/onEnd on the latest queued utterance
+   *  until `done()` holds (or a guard trips). Each terminal onEnd auto-advances
+   *  the page (and continues narrating), so the latest call tracks the new page. */
+  async function drivePlaybackUntil(
+    calls: { options?: { onStart?: () => void; onEnd?: () => void } }[],
+    done: () => boolean,
+  ) {
+    for (let guard = 0; guard < 80 && !done(); guard++) {
+      const i = calls.length - 1;
+      act(() => calls[i].options?.onStart?.());
+      act(() => calls[i].options?.onEnd?.());
+    }
+    if (!done()) throw new Error("playback never reached the expected state");
+  }
+
+  it("auto-advances to the next page on natural completion and keeps narrating (autoplay OFF)", async () => {
+    const user = userEvent.setup();
+    const { controller, calls } = makeFakeSpeech();
+    renderWithQuery(
+      <ReaderScreen storyId={STORY} audioController={controller} audioSupported />,
+    );
+    await waitForStory();
+
+    expect(screen.getByText("Page 1 of 2")).toBeInTheDocument();
+
+    // Manual play (autoplay preference is OFF) — proves auto-advance is driven by
+    // natural COMPLETION, not by the autoplay-on-open preference.
+    await user.click(screen.getByRole("button", { name: "Play" }));
+
+    await drivePlaybackUntil(calls, () =>
+      Boolean(screen.queryByText("Page 2 of 2")),
+    );
+
+    // The page turned on its own AND narration continued (transport still playing
+    // on the new page → the bar shows Pause, not Play).
+    expect(screen.getByText("Page 2 of 2")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Pause" })).toBeInTheDocument();
+  });
+
+  it("still auto-advances after a pause+resume — pausing does not make paging manual", async () => {
+    const user = userEvent.setup();
+    const { controller, calls } = makeFakeSpeech();
+    renderWithQuery(
+      <ReaderScreen storyId={STORY} audioController={controller} audioSupported />,
+    );
+    await waitForStory();
+    expect(screen.getByText("Page 1 of 2")).toBeInTheDocument();
+
+    // Play, voice the title + first body sentence, then PAUSE mid-page.
+    await user.click(screen.getByRole("button", { name: "Play" }));
+    act(() => calls[0].options?.onStart?.());
+    act(() => calls[0].options?.onEnd?.()); // → next sentence queued
+    act(() => calls[1].options?.onStart?.());
+    await user.click(screen.getByRole("button", { name: "Pause" }));
+
+    // Paused mid-page: transport idle, still on page 1.
+    expect(screen.getByRole("button", { name: "Play" })).toBeInTheDocument();
+    expect(screen.getByText("Page 1 of 2")).toBeInTheDocument();
+
+    // RESUME and run the page to its natural end → it STILL auto-advances and
+    // keeps narrating. Pausing earlier did NOT turn paging into a manual action.
+    await user.click(screen.getByRole("button", { name: "Play" }));
+    await drivePlaybackUntil(calls, () =>
+      Boolean(screen.queryByText("Page 2 of 2")),
+    );
+
+    expect(screen.getByText("Page 2 of 2")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Pause" })).toBeInTheDocument();
+  });
+
+  it("shows the 'The End' card when the last page finishes, and 'Read again' restarts from page 1", async () => {
+    const user = userEvent.setup();
+    const { controller, calls } = makeFakeSpeech();
+    renderWithQuery(
+      <ReaderScreen storyId={STORY} audioController={controller} audioSupported />,
+    );
+    await waitForStory();
+
+    await user.click(screen.getByRole("button", { name: "Play" }));
+
+    // Drive through both pages to the natural end of the whole story.
+    await drivePlaybackUntil(calls, () => Boolean(screen.queryByText("The End")));
+
+    // The end-of-story card (Figma 1058:1829): announced status, the title in the
+    // subtitle, and a focused "Read again" action.
+    const endCard = screen.getByRole("status");
+    expect(within(endCard).getByText("The End")).toBeInTheDocument();
+    expect(
+      within(endCard).getByText(/You finished/),
+    ).toHaveTextContent("The Clever Crow");
+    const readAgain = within(endCard).getByRole("button", { name: "Read again" });
+    expect(readAgain).toHaveFocus();
+
+    // Read again → back to page 1, the card is gone, narration restarts (playing).
+    await user.click(readAgain);
+    expect(await screen.findByText("Page 1 of 2")).toBeInTheDocument();
+    expect(screen.queryByText("The End")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Pause" })).toBeInTheDocument();
+  });
+
+  it("does NOT auto-narrate when the user pages manually (autoplay OFF)", async () => {
+    const user = userEvent.setup();
+    const { controller, calls } = makeFakeSpeech();
+    renderWithQuery(
+      <ReaderScreen storyId={STORY} audioController={controller} audioSupported />,
+    );
+    await waitForStory();
+
+    // A manual page turn is not a completion → narration stays inert.
+    await user.click(screen.getByRole("button", { name: "Next page" }));
+    expect(await screen.findByText("Page 2 of 2")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Play" })).toBeInTheDocument();
+    expect(calls.length).toBe(0);
+  });
+});
+
+describe("ReaderScreen — translation Off", () => {
+  it("turns translation off: hides the block, drops the popover sense, still saves the word", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ReaderScreen storyId={STORY} />);
+    await waitForStory();
+
+    // Default Spanish block is present.
+    expect(screen.getByText(/Un cuervo tiene mucha sed/)).toBeInTheDocument();
+
+    // Pick "Off" from the language menu.
+    await user.click(
+      screen.getByRole("button", { name: "Translation language" }),
+    );
+    await user.click(await screen.findByRole("menuitemradio", { name: "Off" }));
+    expect(usePreferences.getState().translationLang).toBe("OFF");
+
+    // The translation block disappears.
+    await waitFor(() =>
+      expect(
+        screen.queryByText(/Un cuervo tiene mucha sed/),
+      ).not.toBeInTheDocument(),
+    );
+
+    // Tapping a word still opens the popover, but WITHOUT a foreign sense line
+    // ("sol"). The English POS pill stays, and Save still works.
+    await user.click(within(readingGroup()).getByRole("button", { name: "sun" }));
+    const dialog = await screen.findByRole("dialog", { name: "Sun" });
+    expect(within(dialog).queryByText("sol")).not.toBeInTheDocument();
+    expect(within(dialog).getByText("noun")).toBeInTheDocument();
+
+    const save = within(dialog).getByRole("button", { name: "Save word" });
+    expect(save).toBeEnabled();
+    await user.click(save);
+    expect(
+      await within(dialog).findByRole("button", { name: "Saved" }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
 });
