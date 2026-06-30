@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { PreferencesEffects } from "./PreferencesEffects";
+import { mockingEnabled, startMocking } from "../lib/msw/browser-mocking";
 
 /**
  * App-wide client providers. Only this subtree is a Client Component — the
@@ -41,6 +46,27 @@ function makeQueryClient(): QueryClient {
   });
 }
 
+/**
+ * When request mocking is on (dev or the demo deployment), the MSW service
+ * worker may not yet control the page when the first queries fire — those race
+ * and 404. Once the worker is ready, refetch everything so the UI recovers
+ * without a manual reload. Inert (and tree-shaken to a no-op) in real production.
+ */
+function MockingSync() {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!mockingEnabled) return;
+    let cancelled = false;
+    void startMocking().then(() => {
+      if (!cancelled) void queryClient.invalidateQueries();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [queryClient]);
+  return null;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   // Keep one client per browser session; useState's initializer runs once so a
   // re-render never throws the cache away.
@@ -51,6 +77,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {/* App-root preference effects: hydrate the persisted store once + reflect
           reduceMotion onto <html> for the global reduced-motion reset. */}
       <PreferencesEffects />
+      <MockingSync />
       {children}
     </QueryClientProvider>
   );
