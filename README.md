@@ -6,6 +6,10 @@
 
 A warm, cozy reading app built 1:1 from a Figma design system into a fully tested Next.js app.
 
+### [▶️ Live Demo](https://read-easily.vercel.app) &nbsp;·&nbsp; [🎨 Figma Design System](https://www.figma.com/design/sc9DIhX0wvFgrvmL8NVBf5/ReadEasily?node-id=1324-4301)
+
+[![Live Demo](https://img.shields.io/badge/▶_live_demo-read--easily.vercel.app-D97757)](https://read-easily.vercel.app)
+[![Figma](https://img.shields.io/badge/Figma-design_system-F24E1E?logo=figma&logoColor=white)](https://www.figma.com/design/sc9DIhX0wvFgrvmL8NVBf5/ReadEasily?node-id=1324-4301)
 [![CI](https://github.com/anakarinasuarez/ReadEasily/actions/workflows/ci.yml/badge.svg)](https://github.com/anakarinasuarez/ReadEasily/actions/workflows/ci.yml)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs)
 ![React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)
@@ -13,6 +17,8 @@ A warm, cozy reading app built 1:1 from a Figma design system into a fully teste
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-674%20passing-3fb950)
 ![Accessibility](https://img.shields.io/badge/a11y-WCAG%20AA-7c4dff)
+
+<sub>The live demo runs on mock data (no sign-in needed) — save words and practice with AI-generated sentences; your list persists per browser.</sub>
 
 <br />
 
@@ -144,8 +150,10 @@ automated axe check.
 
 ## 🚢 Deployment
 
-Hosted on **Vercel** — every PR gets a preview deploy, `main` is production. See
-the **[deployment & rollback runbook](docs/RUNBOOK.md)** for the full procedure,
+Live at **[read-easily.vercel.app](https://read-easily.vercel.app)**, hosted on
+**Vercel** — every PR gets a preview deploy, `main` is production. The live demo
+runs on mock data (MSW) so it's fully clickable without a backend. See the
+**[deployment & rollback runbook](docs/RUNBOOK.md)** for the full procedure,
 required environment variables, and how to roll back.
 
 ## 🤝 Contributing
