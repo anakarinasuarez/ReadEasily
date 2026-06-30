@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "lighthouse": "npm run build && npx -y @lhci/cli@0.14.x autorun",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
