@@ -151,7 +151,7 @@ automated axe check.
 ## 🚢 Deployment
 
 Live at **[read-easily.vercel.app](https://read-easily.vercel.app)**, hosted on
-**Vercel** — every PR gets a preview deploy, `main` is production. The live demo
+**Vercel** every PR gets a preview deploy, `main` is production. The live demo
 runs on mock data (MSW) so it's fully clickable without a backend. See the
 **[deployment & rollback runbook](docs/RUNBOOK.md)** for the full procedure,
 required environment variables, and how to roll back.
