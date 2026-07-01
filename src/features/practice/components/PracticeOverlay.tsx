@@ -163,7 +163,10 @@ const labelMClasses = cn(
 // "Hide <Language>" toggle — Figma feedback-info-subtle pill (not a Button
 // variant), text in feedback-info (AA: info → sky/700). H4 ramp, 44px target.
 const hideToggleClasses = cn(
-  "inline-flex min-h-[44px] items-center justify-center gap-[var(--space-sm)]",
+  // whitespace-nowrap: keep "Hide español" on ONE line — without it the label
+  // wraps ("Hide" / "español") on a narrow mobile column, growing past min-h-44
+  // so this pill no longer matches the single-line "New sentences" Button height.
+  "inline-flex min-h-[44px] items-center justify-center gap-[var(--space-sm)] whitespace-nowrap",
   "rounded-[var(--radius-pill)] bg-[var(--feedback-info-subtle)] text-[color:var(--feedback-info)]",
   "px-[var(--space-lg)] py-[var(--space-md)] transition-colors",
   "[font-family:var(--text-heading-h4-family)] [font-size:var(--text-heading-h4-size)]",
@@ -387,8 +390,11 @@ export function PracticeOverlay({
               the utility actions collapse to header-style icon-buttons and the
               body keeps a single full-width CTA (mobile toolbar pattern). */}
           {found && (
-            <div className="flex shrink-0 flex-col gap-[var(--space-md)] px-[var(--space-2xl)] py-[20px] md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-[var(--space-md)]">
+            <div className="flex shrink-0 flex-col gap-[var(--space-md)] px-[var(--space-lg)] py-[20px] md:flex-row md:items-center md:justify-between md:px-[var(--space-2xl)]">
+              {/* flex-wrap so on a narrow phone the two single-line pills drop to
+                  their own rows (each grows full-width via flex-1) instead of
+                  overflowing — both stay min-h-44, so heights always match. */}
+              <div className="flex flex-wrap items-center gap-[var(--space-sm)] md:gap-[var(--space-md)]">
                 <button
                   type="button"
                   aria-pressed={!translationsVisible}

@@ -442,7 +442,7 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
         <div
           role="group"
           aria-label="Playback controls"
-          className="flex w-full items-center gap-[var(--space-sm)] md:gap-[var(--space-md-plus)]"
+          className="flex w-full items-center gap-[var(--space-xs)] md:gap-[var(--space-md-plus)]"
         >
           {/* Speed pill */}
           <button
@@ -455,10 +455,10 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
             className={cn(
               chipBaseClasses,
               // Narrower pill on mobile to claw back row width; Figma px-18 at md.
-              "px-[var(--space-md)] py-sm text-[var(--text-primary)] md:px-[18px]", // 12→18; py-sm (8) Figma pill padding
+              "px-[var(--space-sm)] py-sm text-[var(--text-primary)] md:px-[18px]", // 8→18; py-sm (8) Figma pill padding
               // Fixed width + tabular figures so cycling 1×→1.25×→0.75× never
               // changes the pill's size and shifts the whole transport row.
-              "min-w-[60px] tabular-nums md:min-w-[74px]",
+              "min-w-[52px] tabular-nums md:min-w-[74px]",
               "transition-opacity hover:opacity-100",
               focusRing,
               "disabled:cursor-not-allowed disabled:text-[var(--text-muted)]",
@@ -497,7 +497,7 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
             aria-describedby={isDisabled ? hintId : undefined}
             aria-label={isLoading ? "Loading audio" : playing ? "Pause" : "Play"}
             className={cn(
-              "relative inline-flex size-[56px] shrink-0 items-center justify-center", // 56px = Figma primary footprint
+              "relative inline-flex size-[48px] shrink-0 items-center justify-center md:size-[56px]", // 48 mobile → 56px Figma primary at md
               "rounded-[var(--radius-pill)] bg-[var(--bg-accent)] text-[var(--text-on-accent)]",
               // Figma renders the play button flat (no glow) — matches the design.
               "transition-colors",
