@@ -19,7 +19,7 @@
 
 Aprender inglés con apps suele sentirse frío: listas de vocabulario, tarjetas
 sin alma, gamificación agresiva. Quise lo contrario: **un espacio cálido y
-acogedor** donde aprendes leyendo cuentos cortos ilustrados —
+acogedor** donde aprendes leyendo cuentos cortos ilustrados
 leer · escuchar · traducir · guardar palabras · practicar.
 
 Pero el reto real no era solo diseñar pantallas bonitas. Era demostrar que un
@@ -27,7 +27,7 @@ diseño puede convertirse en un **producto de verdad, mantenible y accesible**,
 sin que se pierda una sola decisión de diseño por el camino.
 
 **Objetivo:** un design system en Figma tan riguroso que se pudiera portar
-1:1 a código — mismos tokens, mismos componentes, mismos estados — y que el
+1:1 a código mismos tokens, mismos componentes, mismos estados  y que el
 resultado en producción se viera y sintiera idéntico al diseño.
 
 ---
@@ -50,11 +50,11 @@ fidelidad diseño ↔ código.
 El design system arranca en las **variables de Figma** (~125 tokens de color,
 espaciado, radios, sombras; 22 estilos de texto). No son decoración: son el
 **contrato de valores** que el código consume tal cual, como CSS custom
-properties. Regla de oro del proyecto: **nunca un valor hardcodeado** — todo
+properties. Regla de oro del proyecto: **nunca un valor hardcodeado** todo
 resuelve a un token.
 
 Decisiones de foundations con intención:
-- **Terracota `#D97757`** como color de marca — un naranja cálido, no un rojo
+- **Terracota `#D97757`** como color de marca un naranja cálido, no un rojo
   apagado. Da la sensación acogedora que define el producto.
 - **Contraste AA real:** cuando un color de marca no pasaba AA sobre fondo claro,
   creé tokens específicos para uso interactivo (`bg/accent-strong`), texto info
@@ -71,10 +71,10 @@ BookShowcase, AccountMenu, WordPopover, Modal, SettingsRow…).
 
 Decisiones de componentes con criterio de sistema:
 - **Chip dedicado** para filtros de categoría (con propiedad `Selected`), en vez
-  de reusar Button o Badge — semántica correcta desde el diseño.
-- **Iconos de features en cuadrados redondeados**, no en círculos — coherencia
+  de reusar Button o Badge semántica correcta desde el diseño.
+- **Iconos de features en cuadrados redondeados**, no en círculos coherencia
   visual del lenguaje de iconografía.
-- **Logo:** un libro abierto detallado con curvas, no un ícono genérico —
+- **Logo:** un libro abierto detallado con curvas, no un ícono genérico 
   identidad reconocible.
 
 **La librería en Figma — cada primitiva como set de variantes** (estados ×
@@ -105,7 +105,7 @@ movimiento: navegación 300ms ease-out, overlays 200ms, y cambios de estado en l
 misma pantalla que preservan el scroll (morph, no salto).
 
 **Responsive con criterio de sistema:** el móvil son **variantes dentro de los
-componentes padre** y pantallas de escritorio redimensionadas — no rebuilds
+componentes padre** y pantallas de escritorio redimensionadas no rebuilds
 separados. Un solo sistema, dos tamaños. En móvil, las acciones de utilidad se
 vuelven icon-buttons en la cabecera y el cuerpo mantiene un único CTA a lo ancho.
 
@@ -117,13 +117,13 @@ Aquí es donde la mayoría de proyectos de portafolio se quedan en el mockup. Yo
 lo llevé hasta producción con **calidad de ingeniería senior**:
 
 - **TypeScript estricto**, sin `any`.
-- **Todo componente testeado** — comportamiento, no implementación
+- **Todo componente testeado** comportamiento, no implementación
   (**686 tests** pasando en Vitest + React Testing Library).
-- **Accesibilidad automatizada** — check de `jest-axe`, operabilidad por teclado
+- **Accesibilidad automatizada** check de `jest-axe`, operabilidad por teclado
   y foco visible en cada componente interactivo (WCAG **AA**).
 - **e2e con Playwright** para los recorridos críticos
   (explorar → leer → guardar → practicar).
-- **CI en cada PR** — lint, typecheck, tests, build y auditoría de dependencias.
+- **CI en cada PR** lint, typecheck, tests, build y auditoría de dependencias.
 - **Desplegado en Vercel** con preview por PR y `main` en producción.
 
 La app corre **sin secretos**: los datos usan mocks (MSW) para que sea
@@ -138,7 +138,7 @@ un **fallback de plantillas de coste cero** que funciona offline.
 
 El objetivo era que el resultado en producción se viera **idéntico al diseño**.
 A la izquierda, la pantalla en Figma (la fuente de verdad); a la derecha, la
-**app real** corriendo en el navegador — mismos tokens, misma composición, mismos
+**app real** corriendo en el navegador mismos tokens, misma composición, mismos
 estados:
 
 | 🎨 Diseño en Figma | 💻 App en producción |
@@ -178,7 +178,7 @@ en verde.
 - **El orden importa.** `tokens → primitivas → composites → features` evitó
   retrabajo una y otra vez.
 - **Terminado significa verificado.** Un componente "hecho" pero sin test ni
-  check de a11y no está hecho — solo lo parece.
+  check de a11y no está hecho  solo lo parece.
 
 ---
 
