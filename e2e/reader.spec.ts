@@ -101,3 +101,66 @@ test("reader switches the translation language from the header dropdown", async 
 
   expect(pageErrors).toEqual([]);
 });
+
+/**
+ * E2E (mobile regression) — the PlayerBar transport row at a narrow 360×800
+ * Android viewport. Guards a change we just shipped: the full-screen / expand
+ * (⛶) control is now exposed on mobile (previously desktop-only), and the five
+ * transport controls (restart · prev · play/pause · next · skip-to-end) must
+ * stay centred and NOT overflow or clip off the right edge on narrow widths.
+ *
+ * The viewport override is scoped to this describe block via `test.use`, so the
+ * two journeys above keep the project's default (desktop) viewport. This test is
+ * deliberately audio-independent — it never touches the play control's
+ * enabled/disabled state (Web Speech availability varies in headless), it only
+ * asserts layout containment — so it can't flake on engine availability.
+ */
+test.describe("mobile PlayerBar at 360px", () => {
+  test.use({ viewport: { width: 360, height: 800 } });
+
+  test("exposes the full-screen toggle and keeps the transport row within the viewport", async ({
+    page,
+  }) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", (err) => pageErrors.push(err.message));
+
+    await page.goto("/read/the-clever-crow");
+
+    // Reader hydrated: the centered story H1 is painted.
+    await expect(
+      page.getByRole("heading", { level: 1, name: "The Clever Crow" }),
+    ).toBeVisible();
+
+    // The PlayerBar region and — the point of this regression — the expand
+    // control, which is now visible on mobile (label flips to "Exit full
+    // screen" once active).
+    const player = page.getByRole("region", { name: "Audio player" });
+    await expect(player).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Enter full screen" }),
+    ).toBeVisible();
+
+    // No horizontal overflow / clipping at 360px: every button in the bar and
+    // the bar itself must sit fully inside [0, 360] on the x-axis (sub-pixel
+    // tolerance for fractional layout rounding).
+    const VIEWPORT_W = 360;
+    const TOLERANCE = 0.5;
+
+    const regionBox = await player.boundingBox();
+    expect(regionBox).not.toBeNull();
+    expect(regionBox!.x).toBeGreaterThanOrEqual(-TOLERANCE);
+    expect(regionBox!.width).toBeLessThanOrEqual(VIEWPORT_W + TOLERANCE);
+
+    const buttons = player.getByRole("button");
+    const count = await buttons.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      const box = await buttons.nth(i).boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(-TOLERANCE);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(VIEWPORT_W + TOLERANCE);
+    }
+
+    expect(pageErrors).toEqual([]);
+  });
+});
