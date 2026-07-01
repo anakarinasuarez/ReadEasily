@@ -114,7 +114,25 @@ un **fallback de plantillas de coste cero** que funciona offline.
 
 ## 4. El resultado
 
-Estas son capturas de la **app real** corriendo — no mockups de Figma:
+### 4.1 Fidelidad diseño ↔ código
+
+El objetivo era que el resultado en producción se viera **idéntico al diseño**.
+A la izquierda, la pantalla en Figma (la fuente de verdad); a la derecha, la
+**app real** corriendo en el navegador — mismos tokens, misma composición, mismos
+estados:
+
+| 🎨 Diseño en Figma | 💻 App en producción |
+|---|---|
+| ![Landing en Figma](screenshots/figma/landing.png) | ![Landing en la app](screenshots/home.png) |
+| ![Reader en Figma](screenshots/figma/reader.png) | ![Reader en la app](screenshots/reader.png) |
+| ![Story Detail en Figma](screenshots/figma/story.png) | ![Story Detail en la app](screenshots/story.png) |
+| ![Saved en Figma](screenshots/figma/saved.png) | ![Saved en la app](screenshots/saved.png) |
+
+De arriba a abajo: **Landing** (Learn English, one fable at a time) · **Reader**
+(leer + escuchar con narración sincronizada) · **Story Detail** (nivel, moraleja
+y palabras clave) · **Saved** (tu lista de palabras para practicar).
+
+### 4.2 Más de la app real
 
 | | |
 |---|---|
