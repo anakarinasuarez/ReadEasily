@@ -442,7 +442,7 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
         <div
           role="group"
           aria-label="Playback controls"
-          className="flex w-full items-center gap-[var(--space-xs)] md:gap-[var(--space-md-plus)]"
+          className="relative flex w-full items-center gap-[var(--space-xs)] md:gap-[var(--space-md-plus)]"
         >
           {/* Speed pill */}
           <button
@@ -454,6 +454,11 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
             aria-label={`Playback speed, ${speedLabel}`}
             className={cn(
               chipBaseClasses,
+              // On mobile the level chip + expand button (the right-side balance)
+              // are hidden, so keeping the pill in-flow shoves the transport
+              // cluster off-centre. Pull it out of flow (pinned left) so the 5
+              // controls centre in the full row; back in-flow at md.
+              "max-md:absolute max-md:left-0 max-md:top-1/2 max-md:-translate-y-1/2",
               // Narrower pill on mobile to claw back row width; Figma px-18 at md.
               "px-[var(--space-sm)] py-sm text-[var(--text-primary)] md:px-[18px]", // 8→18; py-sm (8) Figma pill padding
               // Fixed width + tabular figures so cycling 1×→1.25×→0.75× never
