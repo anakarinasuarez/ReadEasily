@@ -77,6 +77,26 @@ Decisiones de componentes con criterio de sistema:
 - **Logo:** un libro abierto detallado con curvas, no un ícono genérico —
   identidad reconocible.
 
+**La librería en Figma — cada primitiva como set de variantes** (estados ×
+tamaños × selección), la fuente de verdad que el código replica 1:1:
+
+![Button — variantes de estilo, tamaño y estado](screenshots/figma/components/button.png)
+*Button — primary · secondary · ghost · outline · danger, en tres tamaños y con estados hover/disabled.*
+
+![Input — estados del campo de texto](screenshots/figma/components/input.png)
+*Input — default · focus · filled · error · disabled.*
+
+| Chip | Toggle | Badge |
+|---|---|---|
+| ![Chip](screenshots/figma/components/chip.png) | ![Toggle](screenshots/figma/components/toggle.png) | ![Badge](screenshots/figma/components/badge.png) |
+| Filtro con propiedad `Selected` | On/off en verde forest | Etiquetas de estado/categoría |
+
+> Estos 32 componentes están además **mapeados a su código con Figma Code
+> Connect** (`*.figma.tsx`, validados con `figma connect parse`): cada componente
+> de Figma declara explícitamente su contraparte React. La publicación en vivo en
+> Dev Mode requiere plan Organization/Enterprise; los mapeos quedan versionados y
+> validados en el repo como contrato diseño↔código.
+
 ### 2.3 Screens & Prototype — 48 pantallas, un flujo real
 
 **48 pantallas y overlays** en 4 secciones (Onboarding · Browse & Read ·
