@@ -15,7 +15,7 @@ A warm, cozy reading app built 1:1 from a Figma design system into a fully teste
 ![React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-674%20passing-3fb950)
+![Tests](https://img.shields.io/badge/tests-686%20passing-3fb950)
 ![Accessibility](https://img.shields.io/badge/a11y-WCAG%20AA-7c4dff)
 
 <sub>The live demo runs on mock data (no sign-in needed) — save words and practice with AI-generated sentences; your list persists per browser.</sub>
@@ -131,7 +131,7 @@ The app is built by a roster of specialist agents (see [`.claude/agents/`](.clau
 
 Every change must pass, locally and in CI:
 
-- **674 unit/component tests** (Vitest + RTL) — behavior, not implementation
+- **686 unit/component tests** (Vitest + RTL) — behavior, not implementation
 - **Playwright e2e** for the critical journeys (browse → read → save → practice)
 - **jest-axe** accessibility checks + keyboard operability + visible focus on every interactive component
 - TypeScript strict (no `any`) · matches Figma · uses tokens, never hardcoded values
