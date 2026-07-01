@@ -86,10 +86,14 @@ tamaños × selección), la fuente de verdad que el código replica 1:1:
 ![Input — estados del campo de texto](screenshots/figma/components/input.png)
 *Input — default · focus · filled · error · disabled.*
 
-| Chip | Toggle | Badge |
-|---|---|---|
-| ![Chip](screenshots/figma/components/chip.png) | ![Toggle](screenshots/figma/components/toggle.png) | ![Badge](screenshots/figma/components/badge.png) |
-| Filtro con propiedad `Selected` | On/off en verde forest | Etiquetas de estado/categoría |
+![Chip — filtro de categoría con propiedad Selected](screenshots/figma/components/chip.png)
+*Chip — filtro de categoría con propiedad `Selected` (seleccionado / no seleccionado).*
+
+![Toggle — on/off](screenshots/figma/components/toggle.png)
+*Toggle — estados on/off en verde forest.*
+
+![Badge — etiquetas de estado y categoría](screenshots/figma/components/badge.png)
+*Badge — etiquetas de estado/categoría.*
 
 > Estos 32 componentes están además **mapeados a su código con Figma Code
 > Connect** (`*.figma.tsx`, validados con `figma connect parse`): cada componente
