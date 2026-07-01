@@ -3,11 +3,11 @@
  * (file sc9DIhX0wvFgrvmL8NVBf5, "Saved Word Card", badge variant; the
  * phonetic variant is 1136:3177).
  *
- * NOTE: `@figma/code-connect` is not yet a project dependency and these files
- * are compiled by the Figma `code-connect` CLI, not the app `tsc` build (they
- * are excluded in tsconfig.json). Publishing also needs a paid Dev/Full seat
- * (read-figma skill) — commit this local mapping; do not attempt server
- * publish.
+ * NOTE: `@figma/code-connect` (^1.4.8) + `figma.config.json` are now in place, so
+ * these files are parsed and published by the Figma `code-connect` CLI
+ * (`npm run figma:parse` / `figma:publish`), not the app `tsc` build (they stay
+ * excluded in tsconfig.json). Server-publish also needs FIGMA_ACCESS_TOKEN + a
+ * paid Dev/Full seat (read-figma skill) — `figma:parse` validates locally first.
  *
  * Figma models the whole card as one <a> wrapping the buttons. The code does
  * NOT (it would nest interactive elements). The mapping therefore exposes the

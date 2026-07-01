@@ -2,10 +2,11 @@
  * Figma Code Connect mapping for BookCard → Figma node 267:24
  * (file sc9DIhX0wvFgrvmL8NVBf5, page "Components").
  *
- * NOTE: `@figma/code-connect` is not yet a project dependency and these files
- * are compiled by the Figma `code-connect` CLI, not the app `tsc` build (they
- * are excluded in tsconfig.json). Add the devDependency + `figma.config.json`
- * to publish this mapping.
+ * NOTE: `@figma/code-connect` (^1.4.8) is now installed and `figma.config.json`
+ * is at the repo root, so these files are parsed and published by the Figma
+ * `code-connect` CLI (`npm run figma:parse` / `figma:publish`), not the app
+ * `tsc` build (they stay excluded in tsconfig.json). Publishing needs
+ * FIGMA_ACCESS_TOKEN + a paid seat.
  *
  * The Figma "Book Card" exposes a `state` variant (Default | Hover) plus the
  * `title`, `level` and `duration` text props. Hover is a CSS-only state in

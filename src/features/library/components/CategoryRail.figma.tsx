@@ -2,10 +2,10 @@
  * Figma Code Connect mapping for CategoryRail → Figma node 1272:4623
  * (a Library catalog shelf, file sc9DIhX0wvFgrvmL8NVBf5, page "Screens").
  *
- * NOTE: `@figma/code-connect` is not yet a project dependency and these files
- * are compiled by the Figma `code-connect` CLI, not the app `tsc` build (they
- * are excluded in tsconfig.json). Add the devDependency + `figma.config.json`
- * to publish this mapping.
+ * NOTE: `@figma/code-connect` (^1.4.8) + `figma.config.json` are now set up, so
+ * these files are parsed and published by the Figma `code-connect` CLI
+ * (`npm run figma:parse` / `figma:publish`), not the app `tsc` build (they stay
+ * excluded in tsconfig.json); publishing needs FIGMA_ACCESS_TOKEN + a paid seat.
  *
  * The Figma shelf is a header (full-height accent marker + title + subtitle)
  * over a horizontal row of Book Cards. In code that is one data-driven

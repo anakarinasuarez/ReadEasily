@@ -10,10 +10,11 @@
  *   image fill         -> src
  *   name / initials    -> name
  *
- * `@figma/code-connect` is not yet a project dependency and these files are
- * compiled by the Figma `code-connect` CLI, not the app `tsc` build (they are
- * excluded in tsconfig.json). Add the devDependency + `figma.config.json`, then
- * re-point the URL to publish this mapping.
+ * `@figma/code-connect` (^1.4.8) + `figma.config.json` are now in place, so
+ * these files are parsed and published by the Figma `code-connect` CLI
+ * (`npm run figma:parse` / `figma:publish`), not the app `tsc` build (they stay
+ * excluded in tsconfig.json). Re-point the URL off the placeholder, then publish
+ * (needs FIGMA_ACCESS_TOKEN + a paid seat) to ship this mapping.
  */
 import figma from "@figma/code-connect";
 import { Avatar } from "./Avatar";

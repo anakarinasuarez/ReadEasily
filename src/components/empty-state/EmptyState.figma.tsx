@@ -2,10 +2,11 @@
  * Figma Code Connect mapping for EmptyState → Figma node 144:213
  * ("Saved — empty", file sc9DIhX0wvFgrvmL8NVBf5).
  *
- * NOTE: `@figma/code-connect` is not yet a project dependency; this file is
- * compiled by the Figma `code-connect` CLI, not the app `tsc` build (it is
- * excluded in tsconfig.json). Add the devDependency + `figma.config.json` to
- * publish the mapping.
+ * NOTE: `@figma/code-connect` (^1.4.8) + `figma.config.json` are now set up, so
+ * this file is parsed and published by the Figma `code-connect` CLI
+ * (`npm run figma:parse` / `figma:publish`), not the app `tsc` build (it stays
+ * excluded in tsconfig.json). Publishing the mapping needs FIGMA_ACCESS_TOKEN +
+ * a paid seat.
  *
  * The Figma node is a static frame (no variant properties): a rounded-square
  * icon tile + title + Lora-italic body + a primary Button CTA. The mapping

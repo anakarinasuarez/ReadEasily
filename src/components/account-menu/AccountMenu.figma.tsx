@@ -2,9 +2,11 @@
  * Figma Code Connect mapping for AccountMenu → Figma node 357:629
  * ("Overlay / UserCard", card 340:620, file sc9DIhX0wvFgrvmL8NVBf5).
  *
- * NOTE: `@figma/code-connect` is not yet a project dependency and this file is
- * compiled by the Figma `code-connect` CLI, not the app `tsc` build (excluded in
- * tsconfig.json). Add the devDependency + `figma.config.json` to publish.
+ * NOTE: `@figma/code-connect` (^1.4.8) is now a devDependency and
+ * `figma.config.json` configures the parser, so this file is parsed and
+ * published by the Figma `code-connect` CLI (`npm run figma:parse` /
+ * `figma:publish`), not the app `tsc` build (still excluded in tsconfig.json).
+ * Publishing needs FIGMA_ACCESS_TOKEN + a paid seat.
  *
  * The Figma overlay is a static composition (no exposed variant props): a fixed
  * identity header, a two-tile stats row, the ES/FR/PT language pills, and a

@@ -2,9 +2,10 @@
  * Figma Code Connect mapping for BgDecorations → Figma node 254:2
  * ("Bg Decorations", file sc9DIhX0wvFgrvmL8NVBf5).
  *
- * NOTE: `@figma/code-connect` is not yet a project dependency; this file is
- * compiled by the Figma `code-connect` CLI, not the app `tsc` build (excluded
- * in tsconfig.json). Add the devDependency + `figma.config.json` to publish.
+ * NOTE: `@figma/code-connect` (^1.4.8) + `figma.config.json` are now set up, so
+ * this file is parsed and published by the Figma `code-connect` CLI
+ * (`npm run figma:parse` / `figma:publish`), not the app `tsc` build (still
+ * excluded in tsconfig.json). Publishing needs FIGMA_ACCESS_TOKEN + a paid seat.
  *
  * The Figma node has no variant properties — it is a fixed atmospheric frame of
  * three blurred ellipses. In code the three raster ellipses are reproduced with

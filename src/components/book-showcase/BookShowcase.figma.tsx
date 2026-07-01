@@ -2,10 +2,11 @@
  * Figma Code Connect mapping for BookShowcase → Figma node 1272:4611
  * (the "Book Carousel" fan, file sc9DIhX0wvFgrvmL8NVBf5, page "Components").
  *
- * NOTE: `@figma/code-connect` is not yet a project dependency and these files
- * are compiled by the Figma `code-connect` CLI, not the app `tsc` build (they
- * are excluded in tsconfig.json). Add the devDependency + `figma.config.json`
- * to publish this mapping.
+ * NOTE: `@figma/code-connect` (^1.4.8) + a repo-root `figma.config.json` are now
+ * in place, so these files are parsed and published by the Figma `code-connect`
+ * CLI (`npm run figma:parse` / `figma:publish`), not the app `tsc` build (they
+ * stay excluded in tsconfig.json). Publishing needs FIGMA_ACCESS_TOKEN + a paid
+ * seat.
  *
  * The Figma fan is a static arrangement of 7 cover slots (center + 3 per side)
  * with the synced dot rail (node 1272:4600) as a sibling. In code those collapse

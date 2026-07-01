@@ -2,10 +2,11 @@
  * Figma Code Connect mapping for FeaturedHero → Figma node 1272:4575
  * (the Library "Featured" hero, file sc9DIhX0wvFgrvmL8NVBf5, page "Screens").
  *
- * NOTE: `@figma/code-connect` is not yet a project dependency and these files
- * are compiled by the Figma `code-connect` CLI, not the app `tsc` build (they
- * are excluded in tsconfig.json). Add the devDependency + `figma.config.json`
- * to publish this mapping.
+ * NOTE: with `@figma/code-connect` (^1.4.8) installed and `figma.config.json` at
+ * the repo root, these files are validated and published by the Figma
+ * `code-connect` CLI (`npm run figma:parse` / `figma:publish`) — not the app
+ * `tsc` build, which still excludes them (tsconfig.json). Publishing writes into
+ * the Figma file and needs FIGMA_ACCESS_TOKEN + a paid seat.
  *
  * The Figma hero is an interactive composition (cover fan + per-story eyebrow +
  * optional editor's-pick badge + title + teaser + meta row + CTA). In code those

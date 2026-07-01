@@ -2,9 +2,11 @@
  * Figma Code Connect mapping for StatTile → Figma node 151:28
  * (component set "Card", file sc9DIhX0wvFgrvmL8NVBf5, page "Components").
  *
- * NOTE: `@figma/code-connect` is not yet a project dependency and this file is
- * compiled by the Figma `code-connect` CLI, not the app `tsc` build (excluded
- * in tsconfig.json). Add the devDependency + `figma.config.json` to publish.
+ * NOTE: `@figma/code-connect` (^1.4.8) is installed and `figma.config.json` sits
+ * at the repo root, so this file is parsed and published by the Figma
+ * `code-connect` CLI (`npm run figma:parse` / `figma:publish`), not the app `tsc`
+ * build (still excluded in tsconfig.json). Publishing needs FIGMA_ACCESS_TOKEN +
+ * a paid seat.
  *
  * The Figma "Card" exposes a `tone` variant (Accent | Warning | Info | Success)
  * plus `number` and `label` text props, and an instance-swap icon. `tone` maps

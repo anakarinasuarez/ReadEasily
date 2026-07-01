@@ -2,9 +2,10 @@
  * Figma Code Connect mapping for SettingsRow → Figma node 159:235
  * (component set "Settings Row" 158:62, file sc9DIhX0wvFgrvmL8NVBf5).
  *
- * NOTE: `@figma/code-connect` is not yet a project dependency and this file is
- * compiled by the Figma `code-connect` CLI, not the app `tsc` build (excluded
- * in tsconfig.json). Add the devDependency + `figma.config.json` to publish.
+ * NOTE: `@figma/code-connect` (^1.4.8) + `figma.config.json` are now in place, so
+ * this file is parsed and published by the Figma `code-connect` CLI
+ * (`npm run figma:parse` / `figma:publish`), not the app `tsc` build (still
+ * excluded in tsconfig.json). Publishing needs FIGMA_ACCESS_TOKEN + a paid seat.
  *
  * Variant-model reconciliation (important):
  *   Figma's `variant` property is the SETTING TYPE — it bundles a control

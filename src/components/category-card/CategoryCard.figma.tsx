@@ -12,10 +12,11 @@
  * counterpart (navigation lives in the prototype), so the example supplies a
  * placeholder.
  *
- * NOTE: `@figma/code-connect` is not yet a project dependency and these files
- * are compiled by the Figma `code-connect` CLI, not the app `tsc` build (they
- * are excluded in tsconfig.json). Per the read-figma skill, publishing needs a
- * paid Dev/Full seat — commit this local mapping; do not server-publish.
+ * NOTE: `@figma/code-connect` (^1.4.8) + `figma.config.json` are now in place, so
+ * these files are parsed and published by the Figma `code-connect` CLI
+ * (`npm run figma:parse` / `figma:publish`), not the app `tsc` build (they stay
+ * excluded in tsconfig.json). Per the read-figma skill, server-publish needs
+ * FIGMA_ACCESS_TOKEN + a paid Dev/Full seat — `figma:parse` validates it locally.
  */
 import figma from "@figma/code-connect";
 import { CategoryCard } from "./CategoryCard";
