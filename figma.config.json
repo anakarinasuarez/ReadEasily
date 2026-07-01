@@ -2,6 +2,7 @@
   "codeConnect": {
     "parser": "react",
     "include": ["src/**/*.tsx", "src/**/*.ts"],
+    "exclude": ["src/ui/avatar/Avatar.figma.tsx"],
     "paths": {
       "@/*": ["src/*"]
     }
