@@ -2,7 +2,7 @@
 
 # 📖 ReadEasily
 
-**Learn English through short, illustrated stories — read · listen · translate · save words · practice.**
+**Learn English through short, illustrated stories  read · listen · translate · save words · practice.**
 
 A warm, cozy reading app built 1:1 from a Figma design system into a fully tested Next.js app.
 
@@ -18,11 +18,11 @@ A warm, cozy reading app built 1:1 from a Figma design system into a fully teste
 ![Tests](https://img.shields.io/badge/tests-686%20passing-3fb950)
 ![Accessibility](https://img.shields.io/badge/a11y-WCAG%20AA-7c4dff)
 
-<sub>The live demo runs on mock data (no sign-in needed) — save words and practice with AI-generated sentences; your list persists per browser.</sub>
+<sub>The live demo runs on mock data (no sign-in needed)  save words and practice with AI-generated sentences; your list persists per browser.</sub>
 
 <br />
 
-<img src="docs/screenshots/home.png" alt="ReadEasily landing — Learn English, one fable at a time" width="820" />
+<img src="docs/screenshots/home.png" alt="ReadEasily landing  Learn English, one fable at a time" width="820" />
 
 </div>
 
@@ -56,7 +56,7 @@ ReadEasily turns short, illustrated stories into a gentle English-learning loop:
 <table>
   <tr>
     <td width="50%"><img src="docs/screenshots/library.png" alt="Library — browse the illustrated catalog by category" /><br /><sub><b>Library</b> — browse the illustrated catalog</sub></td>
-    <td width="50%"><img src="docs/screenshots/story.png" alt="Story detail — level, moral, and the key words you'll learn" /><br /><sub><b>Story detail</b> — level, moral &amp; key words</sub></td>
+    <td width="50%"><img src="docs/screenshots/story.png" alt="Story detail  level, moral, and the key words you'll learn" /><br /><sub><b>Story detail</b> — level, moral &amp; key words</sub></td>
   </tr>
   <tr>
     <td width="50%"><img src="docs/screenshots/reader.png" alt="Reader — read along with synchronized narration and a player bar" /><br /><sub><b>Reader</b> — read + listen, immersive full-screen</sub></td>
@@ -108,12 +108,12 @@ npm run dev                   # → http://localhost:3000
 
 ## 🗂️ Architecture
 
-Feature-sliced with colocation — a component lives with everything it owns
+Feature-sliced with colocation  a component lives with everything it owns
 (`Component.tsx · .stories.tsx · .test.tsx · .figma.tsx · index.ts`).
 
 ```
 src/
-  tokens/        # generated from Figma — do not hand-edit
+  tokens/        # generated from Figma  do not hand-edit
   ui/            # primitives (button, input, toggle, chip …) — 1:1 with Figma
   components/    # composites (navbar, player-bar, book-cover …)
   features/      # vertical slices: auth, library, reader, search, saved, profile, practice
@@ -131,7 +131,7 @@ The app is built by a roster of specialist agents (see [`.claude/agents/`](.clau
 
 Every change must pass, locally and in CI:
 
-- **686 unit/component tests** (Vitest + RTL) — behavior, not implementation
+- **686 unit/component tests** (Vitest + RTL)  behavior, not implementation
 - **Playwright e2e** for the critical journeys (browse → read → save → practice)
 - **jest-axe** accessibility checks + keyboard operability + visible focus on every interactive component
 - TypeScript strict (no `any`) · matches Figma · uses tokens, never hardcoded values
