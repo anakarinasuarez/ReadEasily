@@ -564,9 +564,13 @@ export const PlayerBar = forwardRef<HTMLDivElement, PlayerBarProps>(
             </span>
           )}
 
-          {/* Full-screen reading toggle (Figma ⛶ expand) — desktop-only, as the
-              Figma mobile transport drops it. */}
-          <span className="hidden md:flex">
+          {/* Full-screen reading toggle (Figma ⛶ expand). Available on EVERY
+              size — immersive reading matters most on a phone. On mobile it's
+              pinned out of flow at the right edge (mirroring the absolute speed
+              pill on the left) so the five transport controls stay centred and
+              the extra button never widens/overflows the row; back in-flow at
+              md, where it trails the level chip. */}
+          <span className="absolute right-0 top-1/2 flex -translate-y-1/2 md:static md:translate-y-0">
             <IconButton
               size="md"
               icon={<ExpandGlyph />}
