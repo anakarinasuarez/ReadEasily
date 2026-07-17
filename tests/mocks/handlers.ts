@@ -17,6 +17,7 @@ import {
   LANGUAGES,
   type Language,
   type NewSavedWord,
+  type TranslationResponse,
 } from "@/features/reader/types";
 import type { StoryDetail, StoryKeyWord } from "@/features/story/types";
 import {
@@ -1070,6 +1071,40 @@ export const handlers = [
       const sentences =
         nonce > 0 ? seededShuffle(t.sentences, nonce) : t.sentences;
       const hit: PracticeResponse = { word: t.word, found: true, sentences };
+      return HttpResponse.json(hit);
+    }
+    return passthrough();
+  }),
+
+  // Single-word translation FALLBACK for a word the story glossary missed — the
+  // payload `getWordTranslation()` consumes (the mirror of `/api/practice/:word`).
+  // Same word-contract guard at the boundary before any lookup/generation. There
+  // is no aggregate glossary at the mock layer, so tests can't resolve a "real"
+  // translation; instead they stay deterministic + offline with a stub, and the
+  // browser passes through to the REAL `/api/translate/[word]` route, which
+  // translates with Gemini (free tier) and answers `found:false` on any failure.
+  http.get("/api/translate/:word", ({ params, request }) => {
+    const { word } = params as { word: string };
+    const decoded = decodeURIComponent(word);
+    if (!isValidPracticeWord(decoded)) {
+      return HttpResponse.json({ error: "Invalid word" }, { status: 400 });
+    }
+    const raw = new URL(request.url).searchParams.get("lang");
+    const lang: Language = LANGUAGES.includes(raw as Language)
+      ? (raw as Language)
+      : DEFAULT_LANGUAGE;
+
+    // Tests: a deterministic stub so the Reader's glossary-miss → fetch → savable
+    // wiring can be asserted without a network/model. Browser: the real route.
+    if (process.env.NODE_ENV === "test") {
+      const hit: TranslationResponse = {
+        word: decoded.toLowerCase(),
+        lang,
+        found: true,
+        translation: `${decoded.toLowerCase()} (${lang})`,
+        pos: "noun",
+        phonetic: `/${decoded.toLowerCase()}/`,
+      };
       return HttpResponse.json(hit);
     }
     return passthrough();

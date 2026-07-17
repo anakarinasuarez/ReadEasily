@@ -53,15 +53,17 @@ export const Saved: Story = {
   render: (args) => <Interactive {...args} />,
 };
 
-/** Loading: skeletons replace POS + translation; header word still shows. */
+/** Loading: skeletons replace POS + translation; header word still shows. Save
+ *  and Practice are both disabled — there's no resolved meaning to act on yet. */
 export const Loading: Story = {
-  args: { status: "loading" },
+  args: { status: "loading", canSave: false, canPractice: false },
   render: (args) => <Interactive {...args} />,
 };
 
-/** Error: inline "Couldn't load — retry" affordance. */
+/** Error: inline "Couldn't load — retry" affordance. Save and Practice stay
+ *  disabled until a retry resolves a real meaning. */
 export const ErrorState: Story = {
-  args: { status: "error" },
+  args: { status: "error", canSave: false, canPractice: false },
   render: (args) => <Interactive {...args} />,
 };
 

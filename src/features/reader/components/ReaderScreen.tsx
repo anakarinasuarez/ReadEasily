@@ -6,12 +6,13 @@ import Link from "next/link";
 import { Button } from "@/ui/button";
 import { usePreferences } from "@/stores/preferences";
 import { PlayerBar } from "@/components/player-bar";
-import { WordPopover } from "@/components/word-popover";
+import { WordPopover, type WordPopoverStatus } from "@/components/word-popover";
 import { BgDecorations } from "@/components/bg-decorations";
 import { PracticeOverlay } from "@/features/practice/components";
 import { useSaved } from "@/features/saved/hooks/useSaved";
 import { useStory } from "../hooks/useStory";
 import { useSaveWord } from "../hooks/useSaveWord";
+import { useWordTranslation } from "../hooks/useWordTranslation";
 import { useReaderAudio } from "../hooks/useReaderAudio";
 import { useFollowReadingScroll } from "../hooks/useFollowReadingScroll";
 import { buildSentences, type ReaderSentence } from "../audio/sentences";
@@ -426,7 +427,8 @@ export function ReaderScreen({
     });
   }, [practiceTarget]);
 
-  // The tapped word's meaning (instant — local glossary). Always "ready".
+  // The tapped word's meaning. Cascade tier 1 — the story's curated glossary
+  // (instant, local). A HIT is always "ready"; a MISS falls through to Gemini.
   const meaning = selectedWord
     ? lookupWord(story?.glossary ?? {}, selectedWord.surface)
     : null;
@@ -436,19 +438,65 @@ export function ReaderScreen({
       (w) => w.word.toLowerCase() === wordLabel.toLowerCase(),
     );
 
+  // Cascade tier 2 — the Gemini FALLBACK. Enabled ONLY when a word is selected,
+  // translation is on, AND the glossary MISSED. A glossary hit (or OFF) leaves
+  // this disabled, so a curated word is never sent to Gemini. `enabled` is the
+  // whole cascade contract expressed as one flag.
+  const glossaryMissed = !!meaning && !meaning.found;
+  const translationEnabled = !!selectedWord && !translationOff && glossaryMissed;
+  const translationQuery = useWordTranslation(
+    wordLabel,
+    language,
+    translationEnabled,
+  );
+  const fetched = translationQuery.data;
+  const glossaryFound = !!meaning?.found;
+
+  // Popover data lifecycle. Glossary hit / OFF → always ready (no fetch). On a
+  // miss with translation on: loading until the fetch resolves, error when it
+  // fails (unless a retry is in flight → back to loading), then ready.
+  const popoverStatus: WordPopoverStatus =
+    !translationEnabled || fetched
+      ? "ready"
+      : translationQuery.isError && !translationQuery.isFetching
+        ? "error"
+        : "loading";
+
+  // The foreign sense shown: glossary hit → curated; miss → the fetched Gemini
+  // translation (undefined while loading, when OFF, or on a real `found:false`).
+  const popoverTranslation = translationOff
+    ? undefined
+    : glossaryFound
+      ? meaning?.translation
+      : fetched?.found
+        ? fetched.translation
+        : undefined;
+  // POS prefers the glossary, else the fetched translation's POS. (The popover
+  // has no IPA line; phonetic flows only to Save/Practice, read directly there.)
+  const popoverPos = meaning?.pos ?? fetched?.pos;
+  // A Gemini-translated word is savable exactly like a glossary word.
+  const canSaveWord = glossaryFound || !!fetched?.found;
+
   function handleToggleSave() {
-    // Only save real dictionary hits — never persist a "(traducción pendiente)"
-    // placeholder for a function word. The popover's Save is disabled in that
-    // case too (canSave below); this is the matching guard.
-    if (!selectedWord || !story || isWordSaved || !meaning || !meaning.found) {
-      return;
-    }
+    if (!selectedWord || !story || isWordSaved || !meaning) return;
+    // A word is savable when the glossary backed it OR Gemini returned a real
+    // translation. Never persist a placeholder / a still-loading meaning — the
+    // popover's Save is disabled in those cases too (`canSaveWord`); this is the
+    // matching guard.
+    const usingGemini = !meaning.found;
+    if (usingGemini && !fetched?.found) return;
+    // Translation OFF → store NO foreign translation (the reader saved the word
+    // for later without picking a language). ES/FR/PT store the real sense —
+    // curated for a glossary hit, the fetched Gemini sense on a miss.
+    const translation = translationOff
+      ? ""
+      : usingGemini
+        ? fetched?.translation ?? ""
+        : meaning.translation;
     save.mutate({
       word: wordLabel,
-      phonetic: meaning.phonetic,
-      // Translation OFF → store NO foreign translation (the reader saved the word
-      // for later without picking a language). ES/FR/PT store the real sense.
-      translation: translationOff ? "" : meaning.translation,
+      phonetic: usingGemini ? fetched?.phonetic : meaning.phonetic,
+      translation,
       sourceStoryId: story.id,
       sourceStoryTitle: story.title,
       sentencesReady: 0,
@@ -461,12 +509,21 @@ export function ReaderScreen({
   // over to the overlay, keeping the word id for focus-restore on close.
   function handleOpenPractice() {
     if (!selectedWord || !meaning || !story) return;
+    // Don't open Practice while translating or without a real meaning (mirrors
+    // Save): a Gemini-translated word is practice-able only once it resolved.
+    const usingGemini = !meaning.found;
+    if (usingGemini && !fetched?.found) return;
     pauseAudio();
     setPracticeTarget({
       word: wordLabel,
-      // OFF → no foreign translation carried into Practice (mirrors Save).
-      translation: translationOff ? "" : meaning.translation,
-      phonetic: meaning.phonetic,
+      // OFF → no foreign translation carried into Practice (mirrors Save). ES/FR/
+      // PT carry the curated sense on a hit, the fetched Gemini sense on a miss.
+      translation: translationOff
+        ? ""
+        : usingGemini
+          ? fetched?.translation ?? ""
+          : meaning.translation,
+      phonetic: usingGemini ? fetched?.phonetic : meaning.phonetic,
       wordId: selectedWord.id,
     });
     setSelectedWord(null);
@@ -664,15 +721,23 @@ export function ReaderScreen({
           >
             <WordPopover
               word={wordLabel}
-              pos={meaning.pos}
+              pos={popoverPos}
               // Translation OFF → no foreign sense line (the popover still shows
-              // the word, pronounce + Save/Practice). ES/FR/PT show the sense.
-              translation={translationOff ? undefined : meaning.translation}
-              status="ready"
+              // the word, pronounce + Save/Practice). ES/FR/PT show the sense —
+              // curated on a glossary hit, the Gemini fallback on a miss.
+              translation={popoverTranslation}
+              // Glossary hit / OFF → ready. Miss + on → loading while Gemini
+              // resolves, error (with Retry) on failure, then ready.
+              status={popoverStatus}
               saved={isWordSaved}
-              // Only dictionary hits are savable — a miss shows the placeholder
-              // translation (fine for reading) but the Save button stays disabled.
-              canSave={meaning.found}
+              // Savable when the glossary OR Gemini backed a real translation;
+              // a still-loading or truly-unresolved word keeps Save disabled.
+              canSave={canSaveWord}
+              // Practice needs a resolved, real meaning — disabled while loading
+              // and on an unresolved miss (mirrors Save), never a silent no-op.
+              canPractice={popoverStatus === "ready" && canSaveWord}
+              // Retry re-runs the Gemini fallback query from the error state.
+              onRetry={() => void translationQuery.refetch()}
               // Pronounce the word via Web Speech. Passing the handler flips the
               // popover's pronounce chip from inert to live. When audio is
               // unsupported the handler is omitted so the chip stays disabled and

@@ -37,6 +37,14 @@ export interface WordPopoverProps {
    */
   canSave?: boolean;
   /**
+   * Whether the word CAN be practiced. Defaults to `true`. When `false` (e.g.
+   * the meaning is still loading, or a fallback lookup produced no real
+   * translation), the Practice button renders disabled so the consumer never
+   * opens Practice for a placeholder / not-yet-resolved word — the visible
+   * mirror of `canSave`, instead of a silent no-op click.
+   */
+  canPractice?: boolean;
+  /**
    * Fired by the header pronounce chip. When omitted (e.g. audio not yet wired),
    * the chip renders disabled and initial focus skips it to the first enabled
    * control — so a keyboard user never lands on a dead button.
@@ -258,6 +266,7 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
       status = "ready",
       saved = false,
       canSave = true,
+      canPractice = true,
       onPronounce,
       onToggleSave,
       onPractice,
@@ -472,6 +481,10 @@ export const WordPopover = forwardRef<HTMLDivElement, WordPopoverProps>(
               size="md"
               className="flex-1"
               leftIcon={<SparkleIcon />}
+              // Can't practice a still-loading or unresolved word (no real
+              // meaning to carry in) → disabled, mirroring Save (never a silent
+              // no-op click).
+              disabled={!canPractice}
               onClick={onPractice}
             >
               Practice

@@ -207,3 +207,44 @@ export interface NewSavedWord {
   sentencesReady: number;
   savedAt: string;
 }
+
+/**
+ * A single-word translation resolved by the Gemini FALLBACK — the shape
+ * `translateWord()` returns and the `/api/translate/[word]` route wraps. It
+ * mirrors the fields a `GlossaryEntry` carries (a concise foreign sense, an
+ * English POS, an optional IPA) so a Gemini-backed word is savable and
+ * practice-able EXACTLY like a curated glossary word. `null` from the generator
+ * (no key / network / parse error) means "no translation" — the route then
+ * answers `found: false` rather than inventing one.
+ */
+export interface WordTranslation {
+  /** The concise meaning in the target language (comma-joined senses at most). */
+  translation: string;
+  /** Part of speech, English + lowercase (noun, verb, …), like the glossary POS. */
+  pos?: string;
+  /** Optional IPA pronunciation, e.g. "/kroʊ/". */
+  phonetic?: string;
+}
+
+/**
+ * The payload `getWordTranslation()` returns (and `GET /api/translate/:word`
+ * serves) — the Gemini fallback's typed seam, mirroring `PracticeResponse`.
+ * `found` is `false` (no translation fields) when the glossary missed AND the
+ * generator couldn't produce a meaning (no key, or an error/timeout); the
+ * popover then keeps its pending state and Save stays disabled. A real
+ * translation (`found: true`) makes the word savable and practice-able.
+ */
+export interface TranslationResponse {
+  /** The word the translation was resolved for (the normalized lemma). */
+  word: string;
+  /** The target language the meaning is in. */
+  lang: Language;
+  /** True when a real translation backed the response. */
+  found: boolean;
+  /** The concise meaning, present only when `found`. */
+  translation?: string;
+  /** Part of speech, when known. */
+  pos?: string;
+  /** IPA pronunciation, when known. */
+  phonetic?: string;
+}
