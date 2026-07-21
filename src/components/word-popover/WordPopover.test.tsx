@@ -69,6 +69,16 @@ describe("WordPopover", () => {
     expect(onPractice).toHaveBeenCalledTimes(1);
   });
 
+  it("disables the Practice button when canPractice is false", async () => {
+    const user = userEvent.setup();
+    const onPractice = vi.fn();
+    renderPopover({ onPractice, canPractice: false });
+    const practice = screen.getByRole("button", { name: "Practice" });
+    expect(practice).toBeDisabled();
+    await user.click(practice);
+    expect(onPractice).not.toHaveBeenCalled();
+  });
+
   it("fires onPronounce from the pronounce chip with a per-word name", async () => {
     const user = userEvent.setup();
     const onPronounce = vi.fn();
